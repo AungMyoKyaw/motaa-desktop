@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — MOTAA Desktop</title>
+  <meta name="description" content="Privacy policy for MOTAA Desktop, an offline-first Myanmar astrology workspace.">
+  <link rel="icon" type="image/png" href="assets/app-icon-256.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <div class="shell masthead-inner">
+      <a class="brand" href="./">
+        <img class="brand-icon" src="assets/app-icon-256.png" alt="" width="30" height="30">
+        <span class="brand-wordmark">MOTAA</span>
+        <span class="brand-version">v0.2.0</span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="./">Overview</a>
+        <a href="./#install">Install</a>
+        <a href="https://github.com/AungMyoKyaw/motaa-desktop" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main class="doc-page">
+    <div class="shell">
+      <article class="doc-paper">
+        <h1>Privacy Policy</h1>
+        <p><strong>Effective Date:</strong> November 25, 2026</p>
+        <p>MOTAA Desktop is an offline-first desktop application for Myanmar astrology calculations and chart visualization.</p>
+        <h2>Data Storage</h2>
+        <ul>
+          <li><strong>Local-Only Storage:</strong> Birth profiles, calculation settings, and revision history are stored locally on your device using SQLite (<code>~/Library/Application Support/MOTAA Desktop GPUI/profiles.sqlite3</code> on macOS, <code>$XDG_DATA_HOME/motaa-desktop</code> on Linux, and <code>%LOCALAPPDATA%\MOTAA Desktop</code> on Windows).</li>
+          <li><strong>No Accounts or Cloud Sync:</strong> MOTAA Desktop does not require an account and does not upload your saved profiles or charts to any developer server.</li>
+        </ul>
+        <h2>Calculations &amp; Offline Features</h2>
+        <p>Ephemeris calculations, Myanmar calendar conversions, the 534-town Myanmar directory, and coordinate-to-timezone resolution (<code>tzf-rs</code> and <code>chrono-tz</code>) execute entirely locally on your device.</p>
+        <h2>Optional Network Requests</h2>
+        <p>Network requests are made <strong>only</strong> when you explicitly invoke the following optional location tools inside the Profile or Reference Location editor:</p>
+        <ol>
+          <li><strong>Search OpenStreetMap:</strong> Sends your location search query to <code>https://nominatim.openstreetmap.org</code> to retrieve matching coordinates and place names.</li>
+          <li><strong>Pick on map:</strong> Downloads map tiles from <code>https://tile.openstreetmap.org</code> (cached locally on your device) and queries <code>nominatim.openstreetmap.org</code> for reverse geocoding when you drop a pin.</li>
+        </ol>
+        <p>These requests are governed by the <a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">OpenStreetMap Foundation Privacy Policy</a>.</p>
+        <h2>Telemetry &amp; Third-Party Tracking</h2>
+        <p>MOTAA Desktop contains no analytics, crash reporters, advertising SDKs, or telemetry.</p>
+        <h2>Contact</h2>
+        <p>For privacy questions or issues, open an issue at <a href="https://github.com/AungMyoKyaw/motaa-desktop/issues" target="_blank" rel="noopener noreferrer">github.com/AungMyoKyaw/motaa-desktop/issues</a>.</p>
+      </article>
+    </div>
+  </main>
+  <footer class="colophon">
+    <div class="shell colophon-inner">
+      <div><strong style="font-family:var(--font-wordmark);color:var(--ink);">MOTAA Desktop</strong> · MIT License</div>
+      <div class="colophon-links"><a href="./">Home</a><a href="https://github.com/AungMyoKyaw/motaa-desktop" target="_blank" rel="noopener noreferrer">GitHub</a></div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -19,7 +19,12 @@ MOTAA Desktop is an offline-first Myanmar astrology workspace built with Rust an
 
 Prebuilt archives with SHA-256 checksums are published on [GitHub Releases](https://github.com/AungMyoKyaw/motaa-desktop/releases):
 
-- **macOS (Apple Silicon & Intel)**: Extract the `.zip` and open `MOTAA Desktop.app`. Bundles are ad-hoc signed and not notarized; Gatekeeper may require approval in **System Settings → Privacy & Security**.
+- **macOS (Homebrew, recommended)**:
+  ```sh
+  brew install --cask AungMyoKyaw/homebrew-tap/motaa-desktop
+  ```
+  Installs `MOTAA Desktop.app` for Apple Silicon or Intel and clears macOS quarantine automatically.
+- **macOS (Direct ZIP)**: Extract the `.zip` and open `MOTAA Desktop.app`. Bundles are ad-hoc signed and not notarized; Gatekeeper may require approval in **System Settings → Privacy & Security**.
 - **Windows x64**: Extract the `.zip` and run `motaa-desktop.exe`. Windows SmartScreen may prompt for the unsigned portable executable.
 - **Linux (Ubuntu 24.04 x64)**: Extract the `.tar.gz` and run `./motaa-desktop` in a graphical session with Vulkan support.
 

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOTAA Desktop — Offline-First Myanmar Astrology Workspace</title>
+  <meta name="description" content="MOTAA Desktop is a native, offline-first Myanmar astrology workspace built with Rust and GPUI for macOS, Windows, and Linux.">
+  <meta property="og:title" content="MOTAA Desktop — Offline-First Myanmar Astrology Workspace">
+  <meta property="og:description" content="Traditional Burmese chart geometry, 12 chart modes, 16 advanced tools, and a 534-town offline Myanmar directory in a native Rust and GPUI app.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/png" href="assets/app-icon-256.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <div class="shell masthead-inner">
+      <a class="brand" href="./">
+        <img class="brand-icon" src="assets/app-icon-256.png" alt="" width="30" height="30">
+        <span class="brand-wordmark">MOTAA</span>
+        <span class="brand-version">v0.2.0</span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#workbook">Workbook</a>
+        <a href="#modes">Modes &amp; Tools</a>
+        <a href="#practice">Offline Design</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="https://github.com/AungMyoKyaw/motaa-desktop" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a class="nav-cta" href="#install">Install</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="shell hero-grid">
+        <div>
+          <h1>Burmese astrology, set on native paper.</h1>
+          <p class="hero-lead">
+            MOTAA Desktop is an offline-first Myanmar astrology workspace built in Rust and GPUI.
+            Cast natal and transit charts, preserve traditional Burmese square and circular chart geometry,
+            and manage local SQLite birth profiles with zero accounts or telemetry.
+          </p>
+        </div>
+
+        <div class="hero-install-box" aria-label="Quick install">
+          <div class="install-label">
+            <strong>Install on macOS via Homebrew</strong>
+            <span>Apple Silicon &amp; Intel</span>
+          </div>
+          <div class="brew-command-row">
+            <code id="hero-brew-cmd">brew install --cask AungMyoKyaw/homebrew-tap/motaa-desktop</code>
+            <button type="button" class="btn btn-copy" data-copy-target="hero-brew-cmd">Copy</button>
+          </div>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#install">Download v0.2.0</a>
+            <a class="btn btn-secondary" href="https://github.com/AungMyoKyaw/motaa-desktop/releases/tag/v0.2.0" target="_blank" rel="noopener noreferrer">Release Notes</a>
+          </div>
+          <div class="hero-meta-strip">
+            <span>macOS · Windows · Linux</span>
+            <span>MIT License</span>
+            <span>~11.3 MB native binary</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="workbook" class="workbook-section" aria-label="Interactive workspace preview">
+      <div class="shell">
+        <div class="workbook-frame">
+          <div class="workbook-toolbar">
+            <div class="workbook-tabs" role="tablist" aria-label="MOTAA Desktop workspaces">
+              <button type="button" class="workbook-tab" role="tab" aria-selected="true"
+                data-src="assets/01-rasi-chart.png"
+                data-alt="MOTAA Desktop showing the traditional Rasi square chart with Burmese planetary notation"
+                data-title="Rasi Chart"
+                data-desc="Traditional square Burmese chart geometry with active birth profile context, planetary longitudes, and 4 chart-only color palettes.">
+                Rasi <span class="kbd">⌘1</span>
+              </button>
+              <button type="button" class="workbook-tab" role="tab" aria-selected="false"
+                data-src="assets/02-tricakka-chart.png"
+                data-alt="MOTAA Desktop displaying the Tricakka chart layout and house divisions"
+                data-title="Tricakka &amp; Circular Geometry"
+                data-desc="Inspect Tricakka divisions, 27-nakshatra circular detail rings, and Rahu wheels without leaving the keyboard.">
+                Tricakka <span class="kbd">⌘1</span>
+              </button>
+              <button type="button" class="workbook-tab" role="tab" aria-selected="false"
+                data-src="assets/03-dasha-periods.png"
+                data-alt="MOTAA Desktop Dasha periods timeline view showing major and sub-periods"
+                data-title="Dasha Periods"
+                data-desc="Trace planetary period sequences alongside natal placements with quiet gold row selection and tabular date alignment.">
+                Dasha <span class="kbd">⌘1</span>
+              </button>
+              <button type="button" class="workbook-tab" role="tab" aria-selected="false"
+                data-src="assets/04-time-analysis.png"
+                data-alt="MOTAA Desktop Time and Analysis view with live transit scrubber"
+                data-title="Time &amp; Analysis"
+                data-desc="Independent transit and reference time navigator with live scrubbing controls (‹ / › / Now) and reference location override.">
+                Time &amp; Analysis <span class="kbd">⌘4</span>
+              </button>
+              <button type="button" class="workbook-tab" role="tab" aria-selected="false"
+                data-src="assets/05-profiles.png"
+                data-alt="MOTAA Desktop Birth Profiles library with local SQLite storage"
+                data-title="Birth Profiles"
+                data-desc="Local SQLite profile library with JSON backup/restore, Android MOTAA v31.1 import, 534-town offline Myanmar directory, and IANA timezone lookup.">
+                Profiles <span class="kbd">⌘2</span>
+              </button>
+              <button type="button" class="workbook-tab" role="tab" aria-selected="false"
+                data-src="assets/06-advanced-tools.png"
+                data-alt="MOTAA Desktop Advanced Tools workspace showing Ashtakavarga, KP, and ephemeris modules"
+                data-title="Advanced Tools"
+                data-desc="Sixteen specialized analytical modules including Ashtakavarga, KP subdivisions, Divisional charts, Ephemeris calendar, and Eclipses.">
+                Advanced <span class="kbd">⌘5</span>
+              </button>
+            </div>
+            <span class="kbd" title="Open Quick Jump command palette inside MOTAA Desktop">Quick Jump ⌘K</span>
+          </div>
+
+          <div class="workbook-stage">
+            <img id="workbook-image"
+              src="assets/01-rasi-chart.png"
+              alt="MOTAA Desktop showing the traditional Rasi square chart with Burmese planetary notation"
+              width="1440" height="900">
+          </div>
+
+          <div class="workbook-caption">
+            <span id="workbook-title" class="workbook-caption-title">Rasi Chart</span>
+            <p id="workbook-desc" class="workbook-caption-desc">
+              Traditional square Burmese chart geometry with active birth profile context, planetary longitudes, and 4 chart-only color palettes.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="modes" class="section">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Twelve chart modes and sixteen analytical tools, all local.</h2>
+          <p class="section-intro">
+            Every workflow from traditional Burmese square diagrams to KP subdivisions and ephemeris calendars runs directly on your machine with full keyboard navigation.
+          </p>
+        </div>
+
+        <div class="ledger-grid">
+          <div class="ledger">
+            <div class="ledger-header">
+              <h3>Chart Modes</h3>
+              <span class="ledger-count">12 views · ⌘1</span>
+            </div>
+            <ul class="ledger-list">
+              <li><span class="ledger-term">Rasi</span><span class="ledger-detail">Traditional Burmese square chart with house and planet notation</span></li>
+              <li><span class="ledger-term">Tricakka</span><span class="ledger-detail">Three-wheel relational chart geometry</span></li>
+              <li><span class="ledger-term">Traditional Aspects</span><span class="ledger-detail">Classical aspect table and sign relationships</span></li>
+              <li><span class="ledger-term">Nakshatra Traversal</span><span class="ledger-detail">Lunar mansion transit progression</span></li>
+              <li><span class="ledger-term">LatLon</span><span class="ledger-detail">Planetary longitudes, latitudes, and coordinate breakdown</span></li>
+              <li><span class="ledger-term">Western Aspects</span><span class="ledger-detail">Orb-based geometric aspect matrix</span></li>
+              <li><span class="ledger-term">Natal + Transit</span><span class="ledger-detail">Side-by-side natal baseline and live transit comparison</span></li>
+              <li><span class="ledger-term">Dasha Periods</span><span class="ledger-detail">Major and sub-period planetary timelines</span></li>
+              <li><span class="ledger-term">Circular Chart</span><span class="ledger-detail">27-nakshatra circular detail view with syllable ring</span></li>
+              <li><span class="ledger-term">Rahu Wheel</span><span class="ledger-detail">27 and 28 division Rahu wheel geometry</span></li>
+              <li><span class="ledger-term">Rasi Strengths</span><span class="ledger-detail">Sign and planetary strength ledger</span></li>
+              <li><span class="ledger-term">Rasi Aspects</span><span class="ledger-detail">Sign-level mutual aspect analysis</span></li>
+            </ul>
+          </div>
+
+          <div class="ledger">
+            <div class="ledger-header">
+              <h3>Advanced Tools</h3>
+              <span class="ledger-count">16 modules · ⌘5</span>
+            </div>
+            <ul class="ledger-list">
+              <li><span class="ledger-term">Strength Timeline</span><span class="ledger-detail">Track planetary strength shifts over time</span></li>
+              <li><span class="ledger-term">Ashtakavarga</span><span class="ledger-detail">Bindu totals and house-by-house scoring</span></li>
+              <li><span class="ledger-term">KP Subdivisions</span><span class="ledger-detail">Krishnamurti Paddhati star and sub-lord tables</span></li>
+              <li><span class="ledger-term">Heliocentric Model</span><span class="ledger-detail">Sun-centered planetary positions</span></li>
+              <li><span class="ledger-term">Divisional Charts</span><span class="ledger-detail">Harmonic and varga chart projections</span></li>
+              <li><span class="ledger-term">Electional Timing</span><span class="ledger-detail">Evaluate favorable windows for planned events</span></li>
+              <li><span class="ledger-term">Ephemeris Calendar</span><span class="ledger-detail">Daily astronomical positions offline</span></li>
+              <li><span class="ledger-term">Eclipses</span><span class="ledger-detail">Solar and lunar eclipse lookup</span></li>
+              <li><span class="ledger-term">Daily Tatkalika</span><span class="ledger-detail">Temporary daily planetary relationships</span></li>
+              <li><span class="ledger-term">Satapati Name Wheel</span><span class="ledger-detail">Traditional Burmese naming reference wheel</span></li>
+              <li><span class="ledger-term">Sarvatobhadra</span><span class="ledger-detail">Chakra grid for transit vedha analysis</span></li>
+              <li><span class="ledger-term">Yoga &amp; Candidates</span><span class="ledger-detail">Rule-based yoga detection and candidate times</span></li>
+              <li><span class="ledger-term">Interpretations</span><span class="ledger-detail">Structured reading reference alongside charts</span></li>
+              <li><span class="ledger-term">Transit Events</span><span class="ledger-detail">Ingress and exact transit event scanner</span></li>
+              <li><span class="ledger-term">Ten Pillars / Ayu Moon</span><span class="ledger-detail">Longevity and lunar pillar calculations</span></li>
+              <li><span class="ledger-term">Nakshatra Groups</span><span class="ledger-detail">Grouped lunar mansion classification</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="practice" class="section">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Built for offline astrological work.</h2>
+          <p class="section-intro">
+            Designed around fast native rendering, transparent calculation settings, and durable local data ownership.
+          </p>
+        </div>
+
+        <div class="practice-rows">
+          <div class="practice-row">
+            <h3>534-Town Offline Directory</h3>
+            <p>
+              Look up Myanmar towns, coordinates, and historical IANA timezone offsets completely offline via embedded
+              <code>tzf-rs</code> and <code>chrono-tz</code>. Network calls occur only when you explicitly open
+              Search OpenStreetMap or Pick on map.
+            </p>
+            <div class="practice-spec"><span class="spec-dot spec-dot--green"></span>534 towns · Offline IANA</div>
+          </div>
+
+          <div class="practice-row">
+            <h3>Local SQLite &amp; Android Import</h3>
+            <p>
+              Birth profiles, calculation overrides, and backups live in a local SQLite database on your machine.
+              Export or restore JSON backups anytime, or bring existing records directly from Android MOTAA v31.1.
+            </p>
+            <div class="practice-spec"><span class="spec-dot spec-dot--gold"></span>SQLite · JSON · v31.1</div>
+          </div>
+
+          <div class="practice-row">
+            <h3>Full Calculation Control</h3>
+            <p>
+              Switch between Tropical and Sidereal zodiacs, select from 9 ayanamshas and 8 house systems,
+              scrub transit time forward or backward with live controls, and jump anywhere with <code>⌘K</code>.
+            </p>
+            <div class="practice-spec"><span class="spec-dot spec-dot--blue"></span>9 Ayanamshas · 8 Houses</div>
+          </div>
+
+          <div class="practice-row">
+            <h3>Native Rust &amp; GPUI</h3>
+            <p>
+              Compiled to a single native executable with Metal on macOS, DirectX on Windows, and Vulkan on Linux.
+              No browser runtime, no account wall, and no analytics or crash telemetry.
+            </p>
+            <div class="practice-spec"><span class="spec-dot spec-dot--red"></span>Rust · GPUI 0.2.2</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="install" class="section">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Install MOTAA Desktop v0.2.0</h2>
+          <p class="section-intro">
+            Install on macOS through Homebrew for automatic quarantine removal and clean upgrades, or download verified release archives for macOS, Windows, and Linux.
+          </p>
+        </div>
+
+        <div class="install-panel">
+          <div class="os-tabs" role="tablist" aria-label="Operating system downloads">
+            <button type="button" class="os-tab" role="tab" id="tab-macos" aria-selected="true" aria-controls="panel-macos" data-os="macos">macOS</button>
+            <button type="button" class="os-tab" role="tab" id="tab-windows" aria-selected="false" aria-controls="panel-windows" data-os="windows">Windows</button>
+            <button type="button" class="os-tab" role="tab" id="tab-linux" aria-selected="false" aria-controls="panel-linux" data-os="linux">Linux</button>
+          </div>
+
+          <div class="os-panel" id="panel-macos" role="tabpanel" aria-labelledby="tab-macos">
+            <div class="os-grid">
+              <div>
+                <h3>Homebrew (Recommended)</h3>
+                <p>
+                  Installs <code>MOTAA Desktop.app</code> for Apple Silicon or Intel, verifies the release SHA-256 checksum,
+                  and clears the macOS quarantine attribute automatically during postflight.
+                </p>
+                <div class="brew-command-row">
+                  <code id="panel-brew-cmd">brew install --cask AungMyoKyaw/homebrew-tap/motaa-desktop</code>
+                  <button type="button" class="btn btn-copy" data-copy-target="panel-brew-cmd">Copy</button>
+                </div>
+                <p style="margin-top: 12px; font-size: 0.84rem;">
+                  Upgrade later with <code>brew upgrade --cask AungMyoKyaw/homebrew-tap/motaa-desktop</code>.
+                  Also listed on <a href="https://aungmyokyaw.github.io/homebrew-tap/" target="_blank" rel="noopener noreferrer">AungMyoKyaw/homebrew-tap</a>.
+                </p>
+              </div>
+
+              <div>
+                <h3>Direct Archives</h3>
+                <div class="asset-list">
+                  <div class="asset-row">
+                    <div class="asset-info">
+                      <span class="asset-name">macOS Apple Silicon (arm64)</span>
+                      <span class="asset-meta">motaa-desktop-v0.2.0-macos-arm64.zip · 11.3 MB</span>
+                    </div>
+                    <a class="btn btn-secondary" href="https://github.com/AungMyoKyaw/motaa-desktop/releases/download/v0.2.0/motaa-desktop-v0.2.0-macos-arm64.zip">Download</a>
+                  </div>
+                  <div class="asset-row">
+                    <div class="asset-info">
+                      <span class="asset-name">macOS Intel (x64)</span>
+                      <span class="asset-meta">motaa-desktop-v0.2.0-macos-x64.zip · 11.7 MB</span>
+                    </div>
+                    <a class="btn btn-secondary" href="https://github.com/AungMyoKyaw/motaa-desktop/releases/download/v0.2.0/motaa-desktop-v0.2.0-macos-x64.zip">Download</a>
+                  </div>
+                </div>
+                <div class="note-box" style="margin-top: 12px;">
+                  <strong>Ad-hoc signed builds:</strong> If you download a ZIP directly instead of using Homebrew,
+                  macOS Gatekeeper may require approval in <strong>System Settings → Privacy &amp; Security → Open Anyway</strong>.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="os-panel" id="panel-windows" role="tabpanel" aria-labelledby="tab-windows" hidden>
+            <div class="os-grid">
+              <div>
+                <h3>Windows x64</h3>
+                <p>
+                  Extract the portable ZIP and run <code>motaa-desktop.exe</code>, or install via the MSIX package.
+                  Local profiles are stored in <code>%LOCALAPPDATA%\MOTAA Desktop</code>.
+                </p>
+                <div class="note-box">
+                  <strong>SmartScreen note:</strong> Unsigned portable builds may prompt Windows SmartScreen on first launch.
+                  Choose <strong>More info → Run anyway</strong> after verifying the SHA-256 checksum below.
+                </div>
+              </div>
+
+              <div>
+                <h3>Direct Downloads</h3>
+                <div class="asset-list">
+                  <div class="asset-row">
+                    <div class="asset-info">
+                      <span class="asset-name">Windows x64 Portable ZIP</span>
+                      <span class="asset-meta">motaa-desktop-v0.2.0-windows-x64.zip · 12.1 MB</span>
+                    </div>
+                    <a class="btn btn-primary" href="https://github.com/AungMyoKyaw/motaa-desktop/releases/download/v0.2.0/motaa-desktop-v0.2.0-windows-x64.zip">Download</a>
+                  </div>
+                  <div class="asset-row">
+                    <div class="asset-info">
+                      <span class="asset-name">Windows x64 MSIX Package</span>
+                      <span class="asset-meta">motaa-desktop-v0.2.0-windows-x64.msix · 12.2 MB</span>
+                    </div>
+                    <a class="btn btn-secondary" href="https://github.com/AungMyoKyaw/motaa-desktop/releases/download/v0.2.0/motaa-desktop-v0.2.0-windows-x64.msix">Download</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="os-panel" id="panel-linux" role="tabpanel" aria-labelledby="tab-linux" hidden>
+            <div class="os-grid">
+              <div>
+                <h3>Linux (Ubuntu 24.04 x64)</h3>
+                <p>
+                  Extract the archive and run <code>./motaa-desktop</code> inside a graphical session with Vulkan support.
+                  Local data is stored at <code>$XDG_DATA_HOME/motaa-desktop</code> or <code>~/.local/share/motaa-desktop</code>.
+                </p>
+              </div>
+
+              <div>
+                <h3>Direct Download</h3>
+                <div class="asset-list">
+                  <div class="asset-row">
+                    <div class="asset-info">
+                      <span class="asset-name">Linux x64 Tarball</span>
+                      <span class="asset-meta">motaa-desktop-v0.2.0-linux-x64.tar.gz · 17.0 MB</span>
+                    </div>
+                    <a class="btn btn-primary" href="https://github.com/AungMyoKyaw/motaa-desktop/releases/download/v0.2.0/motaa-desktop-v0.2.0-linux-x64.tar.gz">Download</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding: 0 24px 20px;">
+            <details class="checksum-details">
+              <summary>Verify v0.2.0 SHA-256 Checksums</summary>
+              <pre class="checksum-pre">3d6e66aac412f4d4b8e61780b61dd217d8e90553f00c2dbfd68cd8252452b870  motaa-desktop-v0.2.0-macos-arm64.zip
+81d60bdaf6c725efa5a3256e40a90727ca1bb7e44327f8f98810f52f9bcac150  motaa-desktop-v0.2.0-macos-x64.zip
+9434c10c971d588457765ca9ede309fd4570d37bdb69b88cc7ac5bf2fdc9dfe6  motaa-desktop-v0.2.0-windows-x64.zip
+8c429da8f8c7c631980e578df3fe6354d46aff450fde118a2ea4f104a071a605  motaa-desktop-v0.2.0-windows-x64.msix
+eeba48a86d2161e7c3214bb5e9fef02394b1238e09f61f01e2ce0f6cace384b2  motaa-desktop-v0.2.0-linux-x64.tar.gz</pre>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="colophon">
+    <div class="shell colophon-inner">
+      <div>
+        <strong style="font-family: var(--font-wordmark); color: var(--ink);">MOTAA Desktop</strong>
+        · v0.2.0 · MIT License · Offline-first Myanmar astrology workspace
+      </div>
+      <div class="colophon-links">
+        <a href="https://github.com/AungMyoKyaw/motaa-desktop" target="_blank" rel="noopener noreferrer">Repository</a>
+        <a href="https://github.com/AungMyoKyaw/motaa-desktop/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+        <a href="https://aungmyokyaw.github.io/homebrew-tap/" target="_blank" rel="noopener noreferrer">Homebrew Tap</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="https://github.com/AungMyoKyaw/motaa-desktop/blob/master/SECURITY.md" target="_blank" rel="noopener noreferrer">Security</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
