@@ -1,0 +1,31 @@
+@startuml
+' Source: motaa-app/MASTER_REVERSE_ENGINEERING.md §7 + approved research priorities
+title How to prove an algorithm is correct
+caption TEST STRATEGY · Planned workflow, not completed parity testing
+skinparam backgroundColor #FAF8F0
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam ActivityBackgroundColor #FFFEF9
+skinparam ActivityBorderColor #756020
+skinparam ActivityDiamondBackgroundColor #E8DDAF
+skinparam ArrowColor #756020
+start
+:Identify source algorithm + confidence;
+:Choose fixed input / settings / ephemeris version;
+:Run original APK and capture reference output;
+:Run independent new implementation;
+:Normalize units, time zones\nand rounding for comparison;
+if (Within field-specific tolerance?) then (Yes)
+  :Store golden fixture and pass;
+else (No)
+  :Classify difference: source assumption,\nephemeris version, calendar, or formatting;
+  :Fix discrepancy and rerun;
+endif
+:Test boundaries: reform, era years,\nNakshatras, cusps, retrograde stations,\nhouse systems and Rahu variants;
+if (All mandatory test gates pass?) then (Yes)
+  :Eligible for verified-parity claim;
+else (No)
+  :Keep unsupported/unverified label;
+endif
+stop
+@enduml

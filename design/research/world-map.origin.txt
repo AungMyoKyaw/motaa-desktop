@@ -1,0 +1,3 @@
+Origin: MOTAA V31.1 packaged map asset.
+Source: <research-archive>/motaa-v31.1/decoded/res/drawable/p.png
+Use: LatLon geographic background with illustrative projected vector overlays. Not a screenshot of the app UI; not AI generated.

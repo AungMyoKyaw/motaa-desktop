@@ -1,0 +1,38 @@
+[package]
+name = "motaa-desktop"
+version = "0.2.0"
+edition = "2024"
+description = "Offline-first Myanmar astrology desktop workspace built with Rust and GPUI"
+license = "MIT"
+repository = "https://github.com/AungMyoKyaw/motaa-desktop"
+homepage = "https://github.com/AungMyoKyaw/motaa-desktop"
+readme = "README.md"
+keywords = ["astrology", "myanmar", "gpui", "desktop"]
+categories = ["gui"]
+
+[workspace]
+members = ["crates/motaa-engine", "crates/motaa-store"]
+resolver = "2"
+
+[dependencies]
+gpui = "=0.2.2"
+chrono = "0.4"
+motaa-engine = { path = "crates/motaa-engine" }
+motaa-store = { path = "crates/motaa-store" }
+rusqlite = "0.37"
+serde_json = { version = "1", features = ["float_roundtrip"] }
+unicode-segmentation = "1"
+serde = { version = "1", features = ["derive"] }
+chrono-tz = "0.10"
+tzf-rs = "2"
+ureq = { version = "3", features = ["json"] }
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[patch.crates-io]
+# GPUI 0.2.2 depends on xattr 0.2.3, which uses the removed Linux libc::ENOATTR alias.
+xattr = { path = "third_party/xattr" }

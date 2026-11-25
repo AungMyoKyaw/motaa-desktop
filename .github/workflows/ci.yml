@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check-and-test:
+    name: Check & test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            runner: macos-15
+          - os: ubuntu-24.04
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Rust
+        run: |
+          rustup update stable
+          rustup override set stable
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libfontconfig1-dev libwayland-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev libxcb1-dev libxcb-shape0-dev \
+            libxcb-xfixes0-dev libvulkan-dev libx11-xcb-dev libudev-dev libclang-dev \
+            libssl-dev pkg-config
+      - name: Ensure Metal toolchain
+        if: runner.os == 'macOS'
+        run: xcrun --find metal || xcodebuild -downloadComponent MetalToolchain
+      - name: Format & Clippy
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --locked --workspace --all-targets -- -D warnings
+      - name: Workspace tests
+        run: cargo test --locked --workspace

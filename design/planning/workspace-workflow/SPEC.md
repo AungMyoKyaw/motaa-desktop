@@ -1,0 +1,13 @@
+# MOTAA Desktop workspace workflow
+Approved by interpreting “do it now” as Q01–Q40=A and S01–S24=A with no overrides. S01 supersedes Q05; S07 refines Q13; S12 supersedes Q23; S14–S16 refine Q26–Q28; S19–S20 refine Q30/Q34. Q40 and S24 require integrated visual signoff before master promotion.
+
+- Keep five desktop workspaces and light Gold Heritage. Use a single selected route, contextual actions, a pale selection surface, and separate focus treatment. Time bar belongs to transit-capable charts.
+- Welcome offers creation, library, and original sample. Separate compatible calculation defaults from sample identity. Use offline Myanmar town lookup plus manual decimal/DMS coordinates; accept date-resolved zones and preserve imported fixed offsets. Preview legacy imports with warnings and duplicate resolution, and omit the password-like value.
+- Preserve native chart geometry, glyphs, order, chart palettes, and every original mode. Keep Rasi aspects free and distinct from strengths. Distinguish mode, view, and overlay controls. Use a collapsible result inspector.
+- Library single-click selects, double-click or Return opens. Provide search and creation, explicit row actions, a birth editor sheet, delete confirmation and Undo, validation, empty/no-match, import and unsaved states.
+- Stage a draft with workspace scope by default and one scope-specific Apply/Save action. Preserve draft when changing scope. Restore defaults into the draft. Include Gregorian/Julian/Hybrid and a reform boundary state. Surface the legacy aspect value as informational and preserve it.
+- Separate birth and reference inputs. Expose reference date/time/location and resolved offset; Now preserves reference location. Keep the last valid result visibly marked with its prior input context after errors. Explicit unknown birth time gates dependent results.
+- Group tools by task with search aliases. Keep research references labeled, including the separate iZarTarPro reference. Calendar includes month navigation, Today, selected-day details, leap months, multiple observances and distinct empty/unavailable states. Technical IDs belong in references.
+- Verify 1440 × 960 and 1024 × 768. Compact layout collapses inspector, toggles sidebar and uses overflow. Check font fit, Myanmar glyphs, contrast, focus order, keyboard actions and accessible names. Inspect touched views and run full regression checks.
+- Runtime parity requires fixtures for Myanmar era transitions, Gregorian reform, house systems/cusps, Rahu choice, all Nakshatra boundaries, retrograde, aspect thresholds, offset signs and real legacy import records.
+- Stage outside the repo after backup. Present one integrated review. Regenerate all master-derived exports after visual signoff and promotion.

@@ -1,0 +1,678 @@
+{
+  "scope": "MOTAA Android V31.1 reverse-engineered application; FigCraft visual design, not executable app",
+  "release_rule": "All eleven original modes and all designed tool entries are included for everyone. No account, license, password, activation, device binding, subscription, purchase or paywall is required for feature navigation. This covers UI access, not algorithmic correctness.",
+  "source_repository": "<source-research-repo>",
+  "canonical_figcraft_file": "design/motaa-desktop.figcraft",
+  "original_100_pages": {
+    "app_feature_state_pages": 90,
+    "educational_and_algorithm_pages": 10
+  },
+  "recovered_modes": {
+    "01 Natal chart": "Rasi",
+    "12 Tricakka": "Tricakka",
+    "03 Aspects": "Traditional aspects",
+    "14 Nakshatra traversal": "Nakshatra",
+    "15 LatLon": "LatLon",
+    "16 Western aspects": "Western",
+    "17 Natal transit": "Natal & transit",
+    "04 Periods": "Dasha",
+    "02 Circular chart": "Circular",
+    "18 Rahu wheel": "Rahu",
+    "64 Rasi aspects mode": "Rasi aspects — included for all desktop users; original Android mode 11 had a restricted menu"
+  },
+  "advertised_only_numbers": [
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "educational_pages": [
+    "91 Lesson - Anatomy of the wheel",
+    "92 Lesson - Degrees to positions",
+    "93 Lesson - Nakshatra and Pada",
+    "94 Lesson - Planet markers",
+    "95 Lesson - Houses and connectors",
+    "96 Lesson - Assemble the wheel",
+    "97 Lesson - Swiss Ephemeris to Moon",
+    "98 Lesson - Location affects houses",
+    "99 Lesson - Swiss house cusps",
+    "100 Lesson - Cusps to connectors"
+  ],
+  "routes": [
+    {
+      "slug": "charts",
+      "title": "Charts & modes",
+      "goal": "The original 11 chart presentations remain reachable without turning each mode or inspection state into a separate product.",
+      "source": "main.java S0() and m0(); L0/AbstractC0055z.java",
+      "behaviors": "Rasi · Circular · Tricakka · Relationships · Nakshatra · LatLon · Western · Transit · Dasha · Rahu · Gated mode 11",
+      "states": [
+        {
+          "number": 1,
+          "name": "01 Natal chart",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 2,
+          "name": "02 Circular chart",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 3,
+          "name": "03 Aspects",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 10,
+          "name": "10 Circular detail",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 12,
+          "name": "12 Tricakka",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 13,
+          "name": "13 House aspects",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 14,
+          "name": "14 Nakshatra traversal",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 15,
+          "name": "15 LatLon",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 16,
+          "name": "16 Western aspects",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 17,
+          "name": "17 Natal transit",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 18,
+          "name": "18 Rahu wheel",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 19,
+          "name": "19 Rasi strengths",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 20,
+          "name": "20 Transit planets",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 50,
+          "name": "50 Rahu manual reference",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 54,
+          "name": "54 Chart zoom",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 64,
+          "name": "64 Rasi aspects mode",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 78,
+          "name": "78 Rahu 28 divisions",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 79,
+          "name": "79 Rahu Moon reference",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 81,
+          "name": "81 Aspect counting",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 83,
+          "name": "83 Nakshatra inspection",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 84,
+          "name": "84 Western legend",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 89,
+          "name": "89 Chart inspect print",
+          "classification": "desktop presentation/verification"
+        },
+        {
+          "number": 108,
+          "name": "108 Compact chart - 1280x800",
+          "classification": "native compact desktop layout; uniformly scaled editable chart geometry"
+        },
+        {
+          "number": 111,
+          "name": "111 Rasi aspects - all strengths",
+          "classification": "source-informed mode 11 all-strengths state"
+        }
+      ],
+      "production_route": true,
+      "figcraft_page_name": "01 Natal chart",
+      "figcraft_flow_name": "APP / Charts and modes"
+    },
+    {
+      "slug": "profiles",
+      "title": "Profiles & locations",
+      "goal": "One record workspace handles creation, editing, coordinates, validation, search, deletion and backup/import states.",
+      "source": "UserDBActivity.java; main.java R0()/record load; L0/C0046p.java",
+      "behaviors": "Birth data · Saved records · Birth/current locations · Validation · Import/export · Undo",
+      "states": [
+        {
+          "number": 5,
+          "name": "05 Saved profiles",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 6,
+          "name": "06 Birth profile",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 8,
+          "name": "08 Empty library",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 9,
+          "name": "09 Invalid birth date",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 31,
+          "name": "31 Profile library",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 32,
+          "name": "32 Location editor",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 35,
+          "name": "35 Unknown birth time",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 36,
+          "name": "36 Unsaved changes",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 37,
+          "name": "37 Backup restore",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 47,
+          "name": "47 Delete profile",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 48,
+          "name": "48 Profile deleted",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 49,
+          "name": "49 Import review",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 52,
+          "name": "52 Import complete",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 53,
+          "name": "53 No matching profiles",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 55,
+          "name": "55 Invalid backup",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 69,
+          "name": "69 Birth coordinates",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 70,
+          "name": "70 Current coordinates",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 71,
+          "name": "71 Coordinate validation",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 72,
+          "name": "72 Date and time editor",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 105,
+          "name": "105 First launch - anonymous sample",
+          "classification": "free desktop first-run state; anonymous local sample, no account"
+        },
+        {
+          "number": 106,
+          "name": "106 Profile contexts - Natal and Transit",
+          "classification": "desktop UX improvement; independent Natal and Transit assignment"
+        }
+      ],
+      "production_route": true,
+      "figcraft_page_name": "31 Profile library",
+      "figcraft_flow_name": "APP / Profiles and locations"
+    },
+    {
+      "slug": "settings",
+      "title": "Calculation setup",
+      "goal": "One settings workspace preserves all zodiac, ayanamsha, house, lunar-node and display choices, with separate Save-to-profile behavior.",
+      "source": "main.java input defaults and settings; L0/AbstractC0055z.java",
+      "behaviors": "2 zodiacs · 9 ayanamshas · 8 house systems · True/Mean Rahu · Themes",
+      "states": [
+        {
+          "number": 7,
+          "name": "07 Settings",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 33,
+          "name": "33 Calculation options",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 38,
+          "name": "38 Themes",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 56,
+          "name": "56 Pink theme",
+          "classification": "design variation, not an application route"
+        },
+        {
+          "number": 57,
+          "name": "57 Blue theme",
+          "classification": "design variation, not an application route"
+        },
+        {
+          "number": 58,
+          "name": "58 Monochrome theme",
+          "classification": "design variation, not an application route"
+        },
+        {
+          "number": 65,
+          "name": "65 Zodiac picker",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 66,
+          "name": "66 Ayanamsha picker",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 67,
+          "name": "67 House system picker",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 68,
+          "name": "68 Lunar node picker",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 86,
+          "name": "86 Design foundations",
+          "classification": "design variation, not an application route"
+        },
+        {
+          "number": 87,
+          "name": "87 Desktop 1280",
+          "classification": "design variation, not an application route"
+        },
+        {
+          "number": 88,
+          "name": "88 Desktop 1024",
+          "classification": "design variation, not an application route"
+        },
+        {
+          "number": 90,
+          "name": "90 Settings confirmation",
+          "classification": "desktop presentation/verification"
+        },
+        {
+          "number": 102,
+          "name": "102 Original calculation controls",
+          "classification": "original calendar and aspect profile preferences"
+        },
+        {
+          "number": 110,
+          "name": "110 Design system - component states",
+          "classification": "visible Gold Heritage primitive, semantic and component-state contracts"
+        }
+      ],
+      "production_route": true,
+      "figcraft_page_name": "33 Calculation options",
+      "figcraft_flow_name": "APP / Calculation setup"
+    },
+    {
+      "slug": "time",
+      "title": "Time & analysis",
+      "goal": "One analysis workspace unifies independent natal/transit epochs, date scrubbing, Dasha hierarchy and strength controls.",
+      "source": "main.java S0(), W()/X()/Y(); L0/u0.java",
+      "behaviors": "4 independent epoch combinations · 6 time units · Dasha · Strengths · Range handling",
+      "states": [
+        {
+          "number": 4,
+          "name": "04 Periods",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 21,
+          "name": "21 Strength timeline",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 34,
+          "name": "34 Time navigator",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 39,
+          "name": "39 Period drilldown",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 40,
+          "name": "40 Period outside range",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 51,
+          "name": "51 Filtered strengths",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 73,
+          "name": "73 Source time slider",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 74,
+          "name": "74 Natal planets natal asc",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 75,
+          "name": "75 Natal planets transit asc",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 76,
+          "name": "76 Transit planets natal asc",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 77,
+          "name": "77 Transit planets transit asc",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 80,
+          "name": "80 Dasha subperiod",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 82,
+          "name": "82 Strength controls",
+          "classification": "source-informed state"
+        },
+        {
+          "number": 101,
+          "name": "101 Myanmar lunar calendar",
+          "classification": "source calendar and lunar date state"
+        },
+        {
+          "number": 103,
+          "name": "103 Traditional observances",
+          "classification": "source traditional day classification"
+        }
+      ],
+      "production_route": true,
+      "figcraft_page_name": "34 Time navigator",
+      "figcraft_flow_name": "APP / Time and analysis"
+    },
+    {
+      "slug": "advanced",
+      "title": "Advanced analysis",
+      "goal": "All original and extended feature entries are enabled for everyone without membership, payment, hidden research gates, or fake calculations. Advertised-only formulas remain explicitly unverified.",
+      "source": "main.java f3306o/f3307p mode lists and T0 == 11; paidversion.java is historical marketing evidence",
+      "behaviors": "All modes included, direct source mode 11 access, searchable categorized advanced catalog, free 2D/3D sky workflows, recoverable errors",
+      "states": [
+        {
+          "number": 11,
+          "name": "11 All tools",
+          "classification": "recovered mode or original UI"
+        },
+        {
+          "number": 22,
+          "name": "22 Ashtakavarga",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 23,
+          "name": "23 KP subdivisions",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 24,
+          "name": "24 Heliocentric",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 25,
+          "name": "25 Divisional charts",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 26,
+          "name": "26 Interpretations",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 27,
+          "name": "27 Electional timing",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 28,
+          "name": "28 Ephemeris calendar",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 29,
+          "name": "29 Eclipses",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 30,
+          "name": "30 Transit events",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 41,
+          "name": "41 Ten pillars",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 42,
+          "name": "42 Nakshatra groups",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 43,
+          "name": "43 Daily Tatkalika",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 44,
+          "name": "44 Satapati name wheel",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 45,
+          "name": "45 Sarvatobhadra",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 46,
+          "name": "46 Yoga analysis",
+          "classification": "advertised-only; formula unverified"
+        },
+        {
+          "number": 59,
+          "name": "59 All features included",
+          "classification": "free-access desktop state; source activation workflow preserved in original reverse-engineered repo"
+        },
+        {
+          "number": 60,
+          "name": "60 Included feature overview",
+          "classification": "free-access desktop state; source activation workflow preserved in original reverse-engineered repo"
+        },
+        {
+          "number": 61,
+          "name": "61 No account required",
+          "classification": "free-access desktop state; source activation workflow preserved in original reverse-engineered repo"
+        },
+        {
+          "number": 62,
+          "name": "62 Offline feature access",
+          "classification": "free-access desktop state; source activation workflow preserved in original reverse-engineered repo"
+        },
+        {
+          "number": 63,
+          "name": "63 Rasi aspects ready",
+          "classification": "free-access desktop state; source activation workflow preserved in original reverse-engineered repo"
+        },
+        {
+          "number": 85,
+          "name": "85 Advanced source register",
+          "classification": "source-related desktop extension"
+        },
+        {
+          "number": 104,
+          "name": "104 Sky map - 2D",
+          "classification": "free enabled sibling-inspired 2D sky workflow; illustrative fixture, runtime data unverified"
+        },
+        {
+          "number": 107,
+          "name": "107 Sky map - 3D",
+          "classification": "free enabled sibling-inspired 3D sky workflow; illustrative fixture, runtime data unverified"
+        },
+        {
+          "number": 109,
+          "name": "109 Advanced calculation - recoverable error",
+          "classification": "free advanced recovery state; inputs preserved, no fabricated result"
+        }
+      ],
+      "production_route": true,
+      "figcraft_page_name": "11 All tools",
+      "figcraft_flow_name": "APP / Advanced analysis"
+    }
+  ],
+  "constraints": [
+    "Source recovered features use original calculations/labels/ordering; visual improvements are allowed without changing mathematical meaning",
+    "Rasi aspects mode 11 is included for everyone, distinct from Rasi strengths.",
+    "Original aspect 5D/15D setting is stored but not consumed in this build: do not claim an effect",
+    "Vehlow_Placidus is custom mapped, not plain house code 90",
+    "Natal/transit planets and Ascendant epochs are independent (4 combinations)",
+    "Time scrubber uses current system time plus slider progress minus 60, with 6 stepping units",
+    "Advertised ZarTarPro features are enabled free; never fabricate formulas or claim MOTAA APK algorithm parity",
+    "Source methods with damaged decompilation and MUNP semantics remain explicitly unverified",
+    "FigCraft screens are illustrative; numerical parity remains a release gate"
+  ],
+  "flow_audit": "The 5 native app flow starts are preserved, with the Advanced analysis flow renamed. All tools directly opens mode 11, bypassing the historical source activation route in this edition.",
+  "conditional_reference_pages": [
+    "05 Saved profiles",
+    "08 Empty library",
+    "55 Invalid backup"
+  ],
+  "conditional_reference_note": "Three original reference pages are conditional fixtures not reachable through normal prototype links. They are preserved and belong to the Profiles workspace; actual app triggers them based on persisted data or import errors.",
+  "access_policy": {
+    "edition": "free-for-all",
+    "membership_required": false,
+    "activation_required": false,
+    "device_id_required": false,
+    "purchase_required": false,
+    "subscription_required": false,
+    "all_recovered_modes_included": true,
+    "original_mode_11": "64 Rasi aspects mode",
+    "all_tools_direct_mode_11": true,
+    "original_android_membership": "historical original behavior only, not enforced in desktop edition",
+    "advertised_only_algorithms": "entry and workflow included free for everyone; numerical correctness remains unverified; no fake results or research paywall",
+    "advanced_research_policy": {
+      "free_access": true,
+      "hidden": false,
+      "fake_calculations": false,
+      "enabled_2d_3d_sky_workflows": true,
+      "honesty": "Illustrative fixtures are labeled; runtime formulas and numerical parity remain implementation verification gates."
+    }
+  },
+  "current_design_pages": {
+    "total": 110,
+    "application_feature_state_pages": 100,
+    "educational_and_algorithm_pages": 10,
+    "new_source_parity_states": [
+      101,
+      102,
+      103,
+      104
+    ],
+    "new_ux_parity_states": [
+      105,
+      106,
+      107,
+      108,
+      109,
+      110
+    ]
+  },
+  "sibling_reference_boundary": "104 and 107 are enabled free 2D/3D sibling-inspired workspaces with editable illustrative fixtures; they are not recovered MOTAA APK algorithms or live ephemeris output."
+}

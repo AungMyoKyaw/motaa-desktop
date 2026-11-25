@@ -1,0 +1,42 @@
+@startuml
+' Source: motaa-app/MASTER_REVERSE_ENGINEERING.md §6.1
+title MOTAA V31.1 · Two independent calculation paths
+caption RECOVERED LOGIC · Static decompilation, not yet numerically validated
+left to right direction
+skinparam backgroundColor #FAF8F0
+skinparam defaultFontName Helvetica
+skinparam roundcorner 14
+skinparam shadowing false
+skinparam rectangle {
+  BorderColor #CFC7AA
+  FontColor #282B22
+  FontSize 16
+}
+skinparam ArrowColor #756020
+skinparam ArrowThickness 2
+rectangle "BIRTH RECORD\nDate · time · timezone\nCoordinates · settings" as IN #E8DDAF
+package "PATH A  ·  ASTRONOMY" #FFFDF6 {
+  rectangle "Normalize time + place\nCivil date → Julian day" as A1 #FFFFFF
+  rectangle "Ephemeris\nPlanet longitudes + motion" as A2 #FFFFFF
+  rectangle "Astrological rules\nHouses · aspects · Nakshatra\nRahu · Vimshottari Dasha" as A3 #FFFFFF
+  A1 --> A2
+  A2 --> A3
+}
+package "PATH B  ·  MYANMAR CALENDAR" #FFFDF6 {
+  rectangle "Civil date → JDN" as B1 #FFFFFF
+  rectangle "Myanmar year + watat\nMonth · moon phase · lunar day" as B2 #FFFFFF
+  rectangle "Traditional observances\nSabbath · Yatyaza · Pyathada\nand other calendar flags" as B3 #FFFFFF
+  B1 --> B2
+  B2 --> B3
+}
+rectangle "Original MOTAA charts / tables\nMode-specific display dispatch" as OUT #E8DDAF
+IN --> A1
+IN --> B1
+A3 --> OUT
+B3 --> OUT
+note bottom of OUT
+  A and B are distinct deterministic paths.
+  The current desktop FigCraft is illustrative;
+  no running desktop calculation engine exists.
+end note
+@enduml

@@ -1,0 +1,34 @@
+@startuml
+' Source: motaa-app/MASTER_REVERSE_ENGINEERING.md §6.7
+title Vimshottari Dasha · Moon longitude to period timeline
+caption RECOVERED SOURCE CONSTANTS · Boundary behavior still requires APK golden tests
+skinparam backgroundColor #FAF8F0
+skinparam defaultFontName Helvetica
+skinparam ActivityBackgroundColor #FFFEF9
+skinparam ActivityBorderColor #756020
+skinparam ActivityFontColor #282B22
+skinparam ActivityDiamondBackgroundColor #E8DDAF
+skinparam ActivityDiamondBorderColor #756020
+skinparam ArrowColor #756020
+skinparam shadowing false
+start
+:Get sidereal Moon longitude from ephemeris;
+:Normalize longitude to 0 .. 360 degrees;
+:Each of 27 Nakshatras is 13 1/3 degrees;
+:Index = floor(longitude / 13.3333333333);
+:Progress = fractional part\nof longitude / 13.3333333333;
+:Look up original 21-entry Nakshatra table;
+:Derive active lord + years\nand nine-lord 120-year cycle;
+:Backdate active start using source factor\n365.25636305 days;
+:Build subsequent major periods\nusing civil-date year addition;
+:Calculate nested subperiods and active tracking;
+:Display remaining balance using distinct\n365.2422-day conversion;
+:Return period boundaries, active selection\nand traceable assumptions;
+stop
+note right
+  Do NOT replace the two year
+  constants with 365.25.
+  Their distinct uses are recovered
+  from the decompiled code.
+end note
+@enduml

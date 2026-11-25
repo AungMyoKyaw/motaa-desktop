@@ -1,0 +1,41 @@
+@startuml
+' Design proposal only, pending algorithm-engine requirements approval
+title Proposed Rust engine · Architecture, not implemented
+caption PROPOSED · This is not a recovered MOTAA runtime architecture
+left to right direction
+skinparam backgroundColor #FAF8F0
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam component {
+  BackgroundColor #FFFEF9
+  BorderColor #756020
+  FontColor #282B22
+}
+skinparam ArrowColor #756020
+skinparam ArrowThickness 2
+rectangle "Future desktop UI\nFigCraft design reference" as UI #E8DDAF
+rectangle "JSON CLI\nAgent-readable API" as CLI #E8DDAF
+package "Proposed Rust calculation core" #F3EEDB {
+  component "Versioned request schema\nvalidation + normalization" as V
+  component "Astronomy facade" as A
+  component "Myanmar calendar" as M
+  component "Traditional rules\nRasi · Rahu · Dasha · Aspects" as R
+  component "Result model + provenance" as O
+}
+component "Licensed/version-pinned\nephemeris backend adapter" as E #FFFFFF
+database "Fixtures + parity evidence\nOriginal APK reference runs" as T #FFFFFF
+UI ..> V : Future Tauri adapter
+CLI --> V
+V --> A
+V --> M
+A --> E
+A --> R
+R --> O
+M --> O
+O ..> T : Compare golden results
+note bottom of E
+  Distribution requires license review.
+  No backend integrated at this time.
+end note
+@enduml

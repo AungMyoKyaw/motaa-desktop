@@ -1,0 +1,3211 @@
+{
+  "source": "MOTAA Android V31.1 res/values/arrays.xml",
+  "selection_header": "မြို့များရွေးရန်",
+  "town_count": 534,
+  "towns": [
+    {
+      "source_index": 1,
+      "name_my": "ဂျင်မ်ခါနာ",
+      "latitude": 16.7849651,
+      "longitude": 96.1315063
+    },
+    {
+      "source_index": 2,
+      "name_my": "ရန်ကုန်အနောက်ပိုင်းဆေးရုံ",
+      "latitude": 16.7959048,
+      "longitude": 96.1233671
+    },
+    {
+      "source_index": 3,
+      "name_my": "ရန်ကုန်အရှေ့ပိုင်းဆေးရုံဂန္ဒီ",
+      "latitude": 16.7716336,
+      "longitude": 96.1704925
+    },
+    {
+      "source_index": 4,
+      "name_my": "ကမာရွတ်",
+      "latitude": 16.82768,
+      "longitude": 96.13244
+    },
+    {
+      "source_index": 5,
+      "name_my": "ကျောက်မြောင်း",
+      "latitude": 22.59329,
+      "longitude": 95.94495
+    },
+    {
+      "source_index": 6,
+      "name_my": "ကျောက်တံတား",
+      "latitude": 16.77426,
+      "longitude": 96.16164
+    },
+    {
+      "source_index": 7,
+      "name_my": "ကြည့်မြင်တိုင်",
+      "latitude": 16.81457,
+      "longitude": 96.12188
+    },
+    {
+      "source_index": 8,
+      "name_my": "စမ်းချောင်း",
+      "latitude": 16.80381,
+      "longitude": 96.13729
+    },
+    {
+      "source_index": 9,
+      "name_my": "ဆိပ်ကမ်း",
+      "latitude": 16.7704,
+      "longitude": 96.15505
+    },
+    {
+      "source_index": 10,
+      "name_my": "ဆိပ်ကြီးခနောင်တို",
+      "latitude": 16.75779,
+      "longitude": 96.11637
+    },
+    {
+      "source_index": 11,
+      "name_my": "တာမွေ",
+      "latitude": 16.81018,
+      "longitude": 96.17646
+    },
+    {
+      "source_index": 12,
+      "name_my": "တောင်ဥက္ကလာပ",
+      "latitude": 16.84625,
+      "longitude": 96.17986
+    },
+    {
+      "source_index": 13,
+      "name_my": "ဒဂုံ",
+      "latitude": 16.79495,
+      "longitude": 96.1469
+    },
+    {
+      "source_index": 14,
+      "name_my": "ဒဂုံမြို့သစ်",
+      "latitude": 16.84049,
+      "longitude": 96.27256
+    },
+    {
+      "source_index": 15,
+      "name_my": "ဒဂုံမြို့သစ်အရှေ့ပိုင်း",
+      "latitude": 16.91281,
+      "longitude": 96.21323
+    },
+    {
+      "source_index": 16,
+      "name_my": "ဒဂုံမြို့သစ်တောင်ပိုင်း",
+      "latitude": 16.84016,
+      "longitude": 96.22582
+    },
+    {
+      "source_index": 17,
+      "name_my": "ဒဂုံမြို့သစ်မြောက်ပိုင်း",
+      "latitude": 16.87774,
+      "longitude": 96.19079
+    },
+    {
+      "source_index": 18,
+      "name_my": "ဒလ",
+      "latitude": 16.75855,
+      "longitude": 96.143
+    },
+    {
+      "source_index": 19,
+      "name_my": "ဒေါပုံ",
+      "latitude": 16.78192,
+      "longitude": 96.18435
+    },
+    {
+      "source_index": 20,
+      "name_my": "ပန်းဘဲတန်း",
+      "latitude": 16.77698,
+      "longitude": 96.15601
+    },
+    {
+      "source_index": 21,
+      "name_my": "ပုဇွန်တောင်",
+      "latitude": 16.77965,
+      "longitude": 96.17439
+    },
+    {
+      "source_index": 22,
+      "name_my": "ဗဟန်း",
+      "latitude": 16.81543,
+      "longitude": 96.15611
+    },
+    {
+      "source_index": 23,
+      "name_my": "ဗိုလ်တထောင်",
+      "latitude": 16.77197,
+      "longitude": 96.16971
+    },
+    {
+      "source_index": 24,
+      "name_my": "မင်္ဂလာတောင်ညွန့်",
+      "latitude": 16.78891,
+      "longitude": 96.16786
+    },
+    {
+      "source_index": 25,
+      "name_my": "မင်္ဂလာဒုံ",
+      "latitude": 16.94914,
+      "longitude": 96.12795
+    },
+    {
+      "source_index": 26,
+      "name_my": "မရမ်းကုန်း",
+      "latitude": 16.86619,
+      "longitude": 96.14261
+    },
+    {
+      "source_index": 27,
+      "name_my": "မြောက်ဥက္ကလာပ",
+      "latitude": 16.91878,
+      "longitude": 96.16303
+    },
+    {
+      "source_index": 28,
+      "name_my": "ရန်ကင်း",
+      "latitude": 16.83601,
+      "longitude": 96.1624
+    },
+    {
+      "source_index": 29,
+      "name_my": "ရွှေပြည်သာ",
+      "latitude": 16.95504,
+      "longitude": 96.08329
+    },
+    {
+      "source_index": 30,
+      "name_my": "လမ်းမတော်",
+      "latitude": 16.77991,
+      "longitude": 96.14234
+    },
+    {
+      "source_index": 31,
+      "name_my": "လသာ",
+      "latitude": 16.77712,
+      "longitude": 96.15053
+    },
+    {
+      "source_index": 32,
+      "name_my": "လှိုင်ရန်ကုန်",
+      "latitude": 16.84793,
+      "longitude": 96.12523
+    },
+    {
+      "source_index": 33,
+      "name_my": "လှိုင်သာယာ",
+      "latitude": 16.85402,
+      "longitude": 96.06893
+    },
+    {
+      "source_index": 34,
+      "name_my": "သင်္ဃန်းကျွန်း",
+      "latitude": 16.83101,
+      "longitude": 96.19323
+    },
+    {
+      "source_index": 35,
+      "name_my": "သာကေတ",
+      "latitude": 16.79301,
+      "longitude": 96.20296
+    },
+    {
+      "source_index": 36,
+      "name_my": "အင်းစိန်",
+      "latitude": 16.90177,
+      "longitude": 96.09596
+    },
+    {
+      "source_index": 37,
+      "name_my": "ရန်ကုန်အလုံ",
+      "latitude": 16.7824,
+      "longitude": 96.12786
+    },
+    {
+      "source_index": 38,
+      "name_my": "မန္တလေးဆေးရုံကြီး",
+      "latitude": 21.97744,
+      "longitude": 96.08819
+    },
+    {
+      "source_index": 39,
+      "name_my": "ချမ်းမြသာစည်",
+      "latitude": 21.9394,
+      "longitude": 96.09584
+    },
+    {
+      "source_index": 40,
+      "name_my": "ချမ်းအေးသာဇံ",
+      "latitude": 21.97535,
+      "longitude": 96.0946
+    },
+    {
+      "source_index": 41,
+      "name_my": "ပြည်ကြီးတံခွန်",
+      "latitude": 21.90196,
+      "longitude": 96.10418
+    },
+    {
+      "source_index": 42,
+      "name_my": "မဟာအောင်မြေ",
+      "latitude": 21.97535,
+      "longitude": 96.0946
+    },
+    {
+      "source_index": 43,
+      "name_my": "အောင်မြေသာဇံ",
+      "latitude": 21.99321,
+      "longitude": 96.09686
+    },
+    {
+      "source_index": 44,
+      "name_my": "ပျဥ်းမနားဆေးရုံ",
+      "latitude": 19.73532,
+      "longitude": 96.19922
+    },
+    {
+      "source_index": 45,
+      "name_my": "ဇမ္ဗူသီရိ",
+      "latitude": 19.76867,
+      "longitude": 96.07261
+    },
+    {
+      "source_index": 46,
+      "name_my": "ဇေယျာသီရိ",
+      "latitude": 19.862,
+      "longitude": 96.309
+    },
+    {
+      "source_index": 47,
+      "name_my": "ဒက္ခိဏသီရိ",
+      "latitude": 19.70026,
+      "longitude": 96.0905
+    },
+    {
+      "source_index": 48,
+      "name_my": "ပုဗ္ဗသီရိ",
+      "latitude": 19.84383,
+      "longitude": 96.18252
+    },
+    {
+      "source_index": 49,
+      "name_my": "ဥတ္တရသီရိ",
+      "latitude": 19.891,
+      "longitude": 96.043
+    },
+    {
+      "source_index": 50,
+      "name_my": "ကံမသရက်",
+      "latitude": 19.02897,
+      "longitude": 95.09594
+    },
+    {
+      "source_index": 51,
+      "name_my": "ကညွတ်ကွင်း",
+      "latitude": 18.3404,
+      "longitude": 96.49218
+    },
+    {
+      "source_index": 52,
+      "name_my": "ကနီ",
+      "latitude": 22.43291,
+      "longitude": 94.84847
+    },
+    {
+      "source_index": 53,
+      "name_my": "ကနောင်",
+      "latitude": 18.21566,
+      "longitude": 95.38137
+    },
+    {
+      "source_index": 54,
+      "name_my": "ကန့်ဘလူ",
+      "latitude": 23.20305,
+      "longitude": 95.51886
+    },
+    {
+      "source_index": 55,
+      "name_my": "ကန်ကြီးထောင့်",
+      "latitude": 16.9329,
+      "longitude": 94.89476
+    },
+    {
+      "source_index": 56,
+      "name_my": "ကန်ပက်လက်",
+      "latitude": 21.19337,
+      "longitude": 94.05666
+    },
+    {
+      "source_index": 57,
+      "name_my": "ကန်ပိုက်တီ",
+      "latitude": 25.40319,
+      "longitude": 98.11739
+    },
+    {
+      "source_index": 58,
+      "name_my": "ကမမောင်း",
+      "latitude": 17.34688,
+      "longitude": 97.6529
+    },
+    {
+      "source_index": 59,
+      "name_my": "ကမာ၀က်",
+      "latitude": 16.1409,
+      "longitude": 97.73403
+    },
+    {
+      "source_index": 60,
+      "name_my": "ကမ္မပခုက္ကူ",
+      "latitude": 21.38358,
+      "longitude": 94.81558
+    },
+    {
+      "source_index": 61,
+      "name_my": "ကမ်းထောင့်ကြီး",
+      "latitude": 19.85695,
+      "longitude": 93.75902
+    },
+    {
+      "source_index": 62,
+      "name_my": "ကျင်ဒွေး",
+      "latitude": 20.973,
+      "longitude": 93.8382
+    },
+    {
+      "source_index": 63,
+      "name_my": "ကျွန်းစု",
+      "latitude": 12.47386,
+      "longitude": 98.45443
+    },
+    {
+      "source_index": 64,
+      "name_my": "ကျွန်းလှ",
+      "latitude": 23.31964,
+      "longitude": 95.5321
+    },
+    {
+      "source_index": 65,
+      "name_my": "ကျွဲပွဲ",
+      "latitude": 18.7,
+      "longitude": 96.4099
+    },
+    {
+      "source_index": 66,
+      "name_my": "ကျိန္တလီ",
+      "latitude": 18.00712,
+      "longitude": 94.49141
+    },
+    {
+      "source_index": 67,
+      "name_my": "ကျိုက္ခမီ",
+      "latitude": 16.08,
+      "longitude": 97.5675
+    },
+    {
+      "source_index": 68,
+      "name_my": "ကျိုက်ထို",
+      "latitude": 17.31156,
+      "longitude": 97.01989
+    },
+    {
+      "source_index": 69,
+      "name_my": "ကျိုက်ဒုံ",
+      "latitude": 16.00253,
+      "longitude": 98.39268
+    },
+    {
+      "source_index": 70,
+      "name_my": "ကျိုက်မရော",
+      "latitude": 16.37045,
+      "longitude": 97.72411
+    },
+    {
+      "source_index": 71,
+      "name_my": "ကျိုက်လတ်",
+      "latitude": 16.44431,
+      "longitude": 95.72614
+    },
+    {
+      "source_index": 72,
+      "name_my": "ကျိုင်းတုံ",
+      "latitude": 21.29189,
+      "longitude": 99.6036
+    },
+    {
+      "source_index": 73,
+      "name_my": "ကျိုင်းတောင်း",
+      "latitude": 20.75728,
+      "longitude": 98.29333
+    },
+    {
+      "source_index": 74,
+      "name_my": "ကျိုင်းလပ်",
+      "latitude": 20.867,
+      "longitude": 100.534
+    },
+    {
+      "source_index": 75,
+      "name_my": "ကျီခါး",
+      "latitude": 23.88976,
+      "longitude": 93.53347
+    },
+    {
+      "source_index": 76,
+      "name_my": "ကျုံဒိုး",
+      "latitude": 16.59446,
+      "longitude": 98.04353
+    },
+    {
+      "source_index": 77,
+      "name_my": "ကျုံပျော်",
+      "latitude": 17.3,
+      "longitude": 95.2
+    },
+    {
+      "source_index": 78,
+      "name_my": "ကျုံမငေး",
+      "latitude": 16.43803,
+      "longitude": 95.1319
+    },
+    {
+      "source_index": 79,
+      "name_my": "ကျေးသီး",
+      "latitude": 21.92515,
+      "longitude": 97.81933
+    },
+    {
+      "source_index": 80,
+      "name_my": "ကျော",
+      "latitude": 21.92737,
+      "longitude": 94.35789
+    },
+    {
+      "source_index": 81,
+      "name_my": "ကျောက်ကြီး",
+      "latitude": 18.32764,
+      "longitude": 96.76862
+    },
+    {
+      "source_index": 82,
+      "name_my": "ကျောက်ဆည်",
+      "latitude": 21.61325,
+      "longitude": 96.13033
+    },
+    {
+      "source_index": 83,
+      "name_my": "ကျောက်တံခါး",
+      "latitude": 18.15867,
+      "longitude": 96.61391
+    },
+    {
+      "source_index": 84,
+      "name_my": "ကျောက်တန်း",
+      "latitude": 16.63393,
+      "longitude": 96.32351
+    },
+    {
+      "source_index": 85,
+      "name_my": "ကျောက်တလုံးကြီး",
+      "latitude": 20.371,
+      "longitude": 97.024
+    },
+    {
+      "source_index": 86,
+      "name_my": "ကျောက်တော်",
+      "latitude": 20.84396,
+      "longitude": 92.97282
+    },
+    {
+      "source_index": 87,
+      "name_my": "ကျောက်ထု",
+      "latitude": 21.406,
+      "longitude": 94.136
+    },
+    {
+      "source_index": 88,
+      "name_my": "ကျောက်ပန်းတောင်း",
+      "latitude": 20.84248,
+      "longitude": 95.13218
+    },
+    {
+      "source_index": 89,
+      "name_my": "ကျောက်ဖြူ",
+      "latitude": 19.4239,
+      "longitude": 93.5544
+    },
+    {
+      "source_index": 90,
+      "name_my": "ကျောက်မဲ",
+      "latitude": 22.54172,
+      "longitude": 97.03671
+    },
+    {
+      "source_index": 91,
+      "name_my": "ကျောင်းကုန်း",
+      "latitude": 17.10768,
+      "longitude": 95.1904
+    },
+    {
+      "source_index": 92,
+      "name_my": "ကရသူရိ",
+      "latitude": 10.93336,
+      "longitude": 98.75998
+    },
+    {
+      "source_index": 93,
+      "name_my": "ကြံခင်း",
+      "latitude": 18.34035,
+      "longitude": 95.23914
+    },
+    {
+      "source_index": 94,
+      "name_my": "ကြာအင်းဆိပ်ကြီး",
+      "latitude": 16.04079,
+      "longitude": 98.12322
+    },
+    {
+      "source_index": 95,
+      "name_my": "ကြို့ပင်ကောက်",
+      "latitude": 18.22989,
+      "longitude": 95.65259
+    },
+    {
+      "source_index": 96,
+      "name_my": "ကလိန်အောင်",
+      "latitude": 14.6238,
+      "longitude": 98.13849
+    },
+    {
+      "source_index": 97,
+      "name_my": "ကလေး",
+      "latitude": 23.1933,
+      "longitude": 94.02977
+    },
+    {
+      "source_index": 98,
+      "name_my": "ကလေးဝ",
+      "latitude": 23.1998,
+      "longitude": 94.30036
+    },
+    {
+      "source_index": 99,
+      "name_my": "ကလော",
+      "latitude": 20.62418,
+      "longitude": 96.55864
+    },
+    {
+      "source_index": 100,
+      "name_my": "ကလောင်ဖါ",
+      "latitude": 22.71811,
+      "longitude": 98.72545
+    },
+    {
+      "source_index": 101,
+      "name_my": "ကဝ",
+      "latitude": 17.08967,
+      "longitude": 96.46632
+    },
+    {
+      "source_index": 102,
+      "name_my": "ကွတ်ခိုင်",
+      "latitude": 23.45921,
+      "longitude": 97.94341
+    },
+    {
+      "source_index": 103,
+      "name_my": "ကွန်ဟိန်း",
+      "latitude": 21.301,
+      "longitude": 98.424
+    },
+    {
+      "source_index": 104,
+      "name_my": "ကွမ်းခြံကုန်း",
+      "latitude": 16.4394,
+      "longitude": 96.0119
+    },
+    {
+      "source_index": 105,
+      "name_my": "ကွမ်းလုံ",
+      "latitude": 23.41645,
+      "longitude": 98.65053
+    },
+    {
+      "source_index": 106,
+      "name_my": "ကသာ",
+      "latitude": 24.18163,
+      "longitude": 96.33167
+    },
+    {
+      "source_index": 107,
+      "name_my": "ကာမိုင်း",
+      "latitude": 25.5226,
+      "longitude": 96.71153
+    },
+    {
+      "source_index": 108,
+      "name_my": "ကာလိ",
+      "latitude": 21.28872,
+      "longitude": 98.53381
+    },
+    {
+      "source_index": 109,
+      "name_my": "ကိုကိုးကျွန်း",
+      "latitude": 14.13443,
+      "longitude": 93.36821
+    },
+    {
+      "source_index": 110,
+      "name_my": "ကုန်းကြမ်း",
+      "latitude": 23.82946,
+      "longitude": 98.53934
+    },
+    {
+      "source_index": 111,
+      "name_my": "ကူမဲ",
+      "latitude": 21.3583,
+      "longitude": 96.1603
+    },
+    {
+      "source_index": 112,
+      "name_my": "ကေတုမတီ",
+      "latitude": 19.01432,
+      "longitude": 96.40357
+    },
+    {
+      "source_index": 113,
+      "name_my": "ကော့ကရိတ်",
+      "latitude": 16.55553,
+      "longitude": 98.23996
+    },
+    {
+      "source_index": 114,
+      "name_my": "ကော့မှူး",
+      "latitude": 16.54616,
+      "longitude": 96.06195
+    },
+    {
+      "source_index": 115,
+      "name_my": "ကော့သောင်း",
+      "latitude": 9.98261,
+      "longitude": 98.54995
+    },
+    {
+      "source_index": 116,
+      "name_my": "ကောလင်း",
+      "latitude": 23.79026,
+      "longitude": 95.68339
+    },
+    {
+      "source_index": 117,
+      "name_my": "ခင်ဦး",
+      "latitude": 22.77016,
+      "longitude": 95.62149
+    },
+    {
+      "source_index": 118,
+      "name_my": "ခန္တီး",
+      "latitude": 25.99243,
+      "longitude": 95.69547
+    },
+    {
+      "source_index": 119,
+      "name_my": "ခမောက်ကြီး",
+      "latitude": 10.353,
+      "longitude": 98.625
+    },
+    {
+      "source_index": 120,
+      "name_my": "ခမောင်းဆိပ်",
+      "latitude": 21.26554,
+      "longitude": 92.27141
+    },
+    {
+      "source_index": 121,
+      "name_my": "ချင်းရွှေဟော်",
+      "latitude": 23.47557,
+      "longitude": 98.82419
+    },
+    {
+      "source_index": 122,
+      "name_my": "ချီဖွေ",
+      "latitude": 25.88635,
+      "longitude": 98.12976
+    },
+    {
+      "source_index": 123,
+      "name_my": "ချောက်",
+      "latitude": 20.89098,
+      "longitude": 94.81829
+    },
+    {
+      "source_index": 124,
+      "name_my": "ချောင်းဆုံ",
+      "latitude": 16.35125,
+      "longitude": 97.55048
+    },
+    {
+      "source_index": 125,
+      "name_my": "ချောင်းသာ",
+      "latitude": 16.9597,
+      "longitude": 94.4447
+    },
+    {
+      "source_index": 126,
+      "name_my": "ချောင်းဦး",
+      "latitude": 21.95693,
+      "longitude": 95.27363
+    },
+    {
+      "source_index": 127,
+      "name_my": "ခရမ်း",
+      "latitude": 16.90544,
+      "longitude": 96.5605
+    },
+    {
+      "source_index": 128,
+      "name_my": "ခွန်းမား",
+      "latitude": 22.9794,
+      "longitude": 99.46016
+    },
+    {
+      "source_index": 129,
+      "name_my": "ခါမ်းပါတ်",
+      "latitude": 23.77977,
+      "longitude": 94.14575
+    },
+    {
+      "source_index": 130,
+      "name_my": "ခိုင်ကမ်း",
+      "latitude": 23.2175,
+      "longitude": 93.9551
+    },
+    {
+      "source_index": 131,
+      "name_my": "ခိုလမ်",
+      "latitude": 21.09887,
+      "longitude": 98.10086
+    },
+    {
+      "source_index": 132,
+      "name_my": "ခေါင်လန်ဖူး",
+      "latitude": 27.06043,
+      "longitude": 98.36034
+    },
+    {
+      "source_index": 133,
+      "name_my": "ခေါဇာ",
+      "latitude": 15.03752,
+      "longitude": 97.82935
+    },
+    {
+      "source_index": 134,
+      "name_my": "ဂန့်ဂေါ",
+      "latitude": 22.17421,
+      "longitude": 94.13582
+    },
+    {
+      "source_index": 135,
+      "name_my": "ဂွ",
+      "latitude": 17.59369,
+      "longitude": 94.57996
+    },
+    {
+      "source_index": 136,
+      "name_my": "ငပလီ",
+      "latitude": 18.43755,
+      "longitude": 94.3206
+    },
+    {
+      "source_index": 137,
+      "name_my": "ငပုတော",
+      "latitude": 16.5431,
+      "longitude": 94.69224
+    },
+    {
+      "source_index": 138,
+      "name_my": "ငဖဲ",
+      "latitude": 20.07538,
+      "longitude": 94.46767
+    },
+    {
+      "source_index": 139,
+      "name_my": "ငရုတ်ကောင်း",
+      "latitude": 16.52089,
+      "longitude": 94.3019
+    },
+    {
+      "source_index": 140,
+      "name_my": "ငွေဆောင်",
+      "latitude": 16.86379,
+      "longitude": 94.38711
+    },
+    {
+      "source_index": 141,
+      "name_my": "ငသိုင်းချောင်း",
+      "latitude": 17.39927,
+      "longitude": 95.07731
+    },
+    {
+      "source_index": 142,
+      "name_my": "ငါ့သရောက်",
+      "latitude": 21.15058,
+      "longitude": 95.13772
+    },
+    {
+      "source_index": 143,
+      "name_my": "ငါန်းဇွန်",
+      "latitude": 21.89846,
+      "longitude": 95.68723
+    },
+    {
+      "source_index": 144,
+      "name_my": "စကု",
+      "latitude": 20.22609,
+      "longitude": 94.76831
+    },
+    {
+      "source_index": 145,
+      "name_my": "စစ်ကွင်း",
+      "latitude": 17.8941,
+      "longitude": 95.7232
+    },
+    {
+      "source_index": 146,
+      "name_my": "စစ်ကိုင်း",
+      "latitude": 21.88008,
+      "longitude": 95.96231
+    },
+    {
+      "source_index": 147,
+      "name_my": "စစ်တွေ",
+      "latitude": 20.13727,
+      "longitude": 92.88551
+    },
+    {
+      "source_index": 148,
+      "name_my": "စဉ့်ကိုင်",
+      "latitude": 21.73114,
+      "longitude": 96.10611
+    },
+    {
+      "source_index": 149,
+      "name_my": "စဉ့်ကူး",
+      "latitude": 22.54838,
+      "longitude": 95.99655
+    },
+    {
+      "source_index": 150,
+      "name_my": "စနဲ",
+      "latitude": 19.2166,
+      "longitude": 93.7336
+    },
+    {
+      "source_index": 151,
+      "name_my": "စလင်း",
+      "latitude": 20.5772,
+      "longitude": 94.65936
+    },
+    {
+      "source_index": 152,
+      "name_my": "စလေ",
+      "latitude": 20.8338,
+      "longitude": 94.7424
+    },
+    {
+      "source_index": 153,
+      "name_my": "စိုင်ပြင်",
+      "latitude": 22.5561,
+      "longitude": 95.2366
+    },
+    {
+      "source_index": 154,
+      "name_my": "စုကလိ",
+      "latitude": 16.15439,
+      "longitude": 98.59621
+    },
+    {
+      "source_index": 155,
+      "name_my": "စေတုတ္ထရာ",
+      "latitude": 20.4466,
+      "longitude": 94.24559
+    },
+    {
+      "source_index": 156,
+      "name_my": "ဆင်ပေါင်ဝဲ",
+      "latitude": 19.72292,
+      "longitude": 95.16186
+    },
+    {
+      "source_index": 157,
+      "name_my": "ဆင်ဖြူကျွန်း",
+      "latitude": 20.6642,
+      "longitude": 94.6929
+    },
+    {
+      "source_index": 158,
+      "name_my": "ဆင်ဘို",
+      "latitude": 24.77923,
+      "longitude": 97.03917
+    },
+    {
+      "source_index": 159,
+      "name_my": "ဆင်မြီးဆွဲ",
+      "latitude": 18.7369,
+      "longitude": 95.3594
+    },
+    {
+      "source_index": 160,
+      "name_my": "ဆဒုံး",
+      "latitude": 25.39709,
+      "longitude": 97.89996
+    },
+    {
+      "source_index": 161,
+      "name_my": "ဆမီး",
+      "latitude": 21.29333,
+      "longitude": 93.09649
+    },
+    {
+      "source_index": 162,
+      "name_my": "ဆွမ္မရာ",
+      "latitude": 25.36455,
+      "longitude": 94.68729
+    },
+    {
+      "source_index": 163,
+      "name_my": "ဆွမ်ပရာဘွမ်",
+      "latitude": 26.54373,
+      "longitude": 97.5677
+    },
+    {
+      "source_index": 164,
+      "name_my": "ဆွာ",
+      "latitude": 19.26498,
+      "longitude": 96.29072
+    },
+    {
+      "source_index": 165,
+      "name_my": "ဆားတောင်",
+      "latitude": 22.1639,
+      "longitude": 95.7574
+    },
+    {
+      "source_index": 166,
+      "name_my": "ဆားလင်းကြီး",
+      "latitude": 21.97363,
+      "longitude": 95.08269
+    },
+    {
+      "source_index": 167,
+      "name_my": "ဆိပ်ဖြူ",
+      "latitude": 20.90651,
+      "longitude": 94.79243
+    },
+    {
+      "source_index": 168,
+      "name_my": "ဆီဆိုင်",
+      "latitude": 20.16227,
+      "longitude": 97.2519
+    },
+    {
+      "source_index": 169,
+      "name_my": "ဆီမီးခုံ",
+      "latitude": 21.735,
+      "longitude": 95.4221
+    },
+    {
+      "source_index": 170,
+      "name_my": "ဆူရ်ခွား",
+      "latitude": 22.25553,
+      "longitude": 93.63416
+    },
+    {
+      "source_index": 171,
+      "name_my": "ဆော",
+      "latitude": 21.15224,
+      "longitude": 94.15466
+    },
+    {
+      "source_index": 172,
+      "name_my": "ဆော့လော်",
+      "latitude": 26.15419,
+      "longitude": 98.27049
+    },
+    {
+      "source_index": 173,
+      "name_my": "ဆောင်ဖ",
+      "latitude": 23.0846,
+      "longitude": 99.22365
+    },
+    {
+      "source_index": 174,
+      "name_my": "ဇင်းကျိုက်",
+      "latitude": 16.69655,
+      "longitude": 97.42371
+    },
+    {
+      "source_index": 175,
+      "name_my": "ဇလွန်",
+      "latitude": 17.4781,
+      "longitude": 95.55666
+    },
+    {
+      "source_index": 176,
+      "name_my": "ဇီးကုန်းနတ်တလင်း",
+      "latitude": 18.33846,
+      "longitude": 95.62304
+    },
+    {
+      "source_index": 177,
+      "name_my": "ဇီးကုန်းတန့်ဆည်",
+      "latitude": 22.9311,
+      "longitude": 95.5636
+    },
+    {
+      "source_index": 178,
+      "name_my": "ဇေယျ၀တီ",
+      "latitude": 18.54097,
+      "longitude": 96.43084
+    },
+    {
+      "source_index": 179,
+      "name_my": "ညောင်တုန်း",
+      "latitude": 17.04903,
+      "longitude": 95.63359
+    },
+    {
+      "source_index": 180,
+      "name_my": "ညောင်ရွှေ",
+      "latitude": 20.65957,
+      "longitude": 96.93206
+    },
+    {
+      "source_index": 181,
+      "name_my": "ညောင်လေးပင်",
+      "latitude": 17.95323,
+      "longitude": 96.72151
+    },
+    {
+      "source_index": 182,
+      "name_my": "ညောင်ဦး",
+      "latitude": 21.19543,
+      "longitude": 94.91011
+    },
+    {
+      "source_index": 183,
+      "name_my": "တံတား",
+      "latitude": 16.64788,
+      "longitude": 96.53949
+    },
+    {
+      "source_index": 184,
+      "name_my": "တံတားဦး",
+      "latitude": 21.8151,
+      "longitude": 95.97069
+    },
+    {
+      "source_index": 185,
+      "name_my": "တကောင်း",
+      "latitude": 23.50188,
+      "longitude": 96.01367
+    },
+    {
+      "source_index": 186,
+      "name_my": "တနင်္သာရီ",
+      "latitude": 12.08941,
+      "longitude": 99.01278
+    },
+    {
+      "source_index": 187,
+      "name_my": "တနိုင်း",
+      "latitude": 26.35797,
+      "longitude": 96.71655
+    },
+    {
+      "source_index": 188,
+      "name_my": "တန့်ဆည်",
+      "latitude": 22.94407,
+      "longitude": 95.37361
+    },
+    {
+      "source_index": 189,
+      "name_my": "တန့်ယန်း",
+      "latitude": 22.4981,
+      "longitude": 98.3968
+    },
+    {
+      "source_index": 190,
+      "name_my": "တန်းလွဲရွာမ",
+      "latitude": 18.99829,
+      "longitude": 94.12645
+    },
+    {
+      "source_index": 191,
+      "name_my": "တပ်ကုန်း",
+      "latitude": 20.13041,
+      "longitude": 96.20297
+    },
+    {
+      "source_index": 192,
+      "name_my": "တပ်တောင်",
+      "latitude": 19.5682,
+      "longitude": 93.9358
+    },
+    {
+      "source_index": 193,
+      "name_my": "တမူး",
+      "latitude": 24.21149,
+      "longitude": 94.31534
+    },
+    {
+      "source_index": 194,
+      "name_my": "တလုတ္ထော်",
+      "latitude": 17.6419,
+      "longitude": 95.3046
+    },
+    {
+      "source_index": 195,
+      "name_my": "တွံတေး",
+      "latitude": 16.70734,
+      "longitude": 95.93047
+    },
+    {
+      "source_index": 196,
+      "name_my": "တွန်းဇန်",
+      "latitude": 23.60306,
+      "longitude": 93.69175
+    },
+    {
+      "source_index": 197,
+      "name_my": "တာချီလိတ်",
+      "latitude": 20.45304,
+      "longitude": 99.88403
+    },
+    {
+      "source_index": 198,
+      "name_my": "တာပွန်",
+      "latitude": 18.361,
+      "longitude": 95.4549
+    },
+    {
+      "source_index": 199,
+      "name_my": "တာမိုးညဲ",
+      "latitude": 23.57597,
+      "longitude": 98.09862
+    },
+    {
+      "source_index": 200,
+      "name_my": "တာလေ",
+      "latitude": 20.71262,
+      "longitude": 100.09307
+    },
+    {
+      "source_index": 201,
+      "name_my": "တိုက်ကြီး",
+      "latitude": 17.31263,
+      "longitude": 95.96344
+    },
+    {
+      "source_index": 202,
+      "name_my": "တီးတိန်",
+      "latitude": 23.37058,
+      "longitude": 93.65619
+    },
+    {
+      "source_index": 203,
+      "name_my": "တုံတာ",
+      "latitude": 21.33004,
+      "longitude": 99.28781
+    },
+    {
+      "source_index": 204,
+      "name_my": "တောင်ကြီး",
+      "latitude": 20.77477,
+      "longitude": 97.03598
+    },
+    {
+      "source_index": 205,
+      "name_my": "တောင်ကုတ်",
+      "latitude": 18.85353,
+      "longitude": 94.23972
+    },
+    {
+      "source_index": 206,
+      "name_my": "တောင်ငူ",
+      "latitude": 18.93953,
+      "longitude": 96.43314
+    },
+    {
+      "source_index": 207,
+      "name_my": "တောင်တွင်းကြီး",
+      "latitude": 20.00187,
+      "longitude": 95.54614
+    },
+    {
+      "source_index": 208,
+      "name_my": "တောင်ပြိုလက်ဝဲ",
+      "latitude": 21.19991,
+      "longitude": 92.20068
+    },
+    {
+      "source_index": 209,
+      "name_my": "တောင်သာ",
+      "latitude": 21.27603,
+      "longitude": 95.44541
+    },
+    {
+      "source_index": 210,
+      "name_my": "ပဲခူးထန်းတပင်",
+      "latitude": 18.71667,
+      "longitude": 96.53333
+    },
+    {
+      "source_index": 211,
+      "name_my": "ရန်ကုန်ထန်းတပင်",
+      "latitude": 17.133333,
+      "longitude": 95.91667
+    },
+    {
+      "source_index": 212,
+      "name_my": "ထန်တလန်",
+      "latitude": 22.69843,
+      "longitude": 93.4278
+    },
+    {
+      "source_index": 213,
+      "name_my": "ထန်ပါခွေ",
+      "latitude": 25.96589,
+      "longitude": 95.24148
+    },
+    {
+      "source_index": 214,
+      "name_my": "ထားဝယ်",
+      "latitude": 14.07753,
+      "longitude": 98.19636
+    },
+    {
+      "source_index": 215,
+      "name_my": "ထီးချိုင့်",
+      "latitude": 23.75452,
+      "longitude": 96.14833
+    },
+    {
+      "source_index": 216,
+      "name_my": "ထီးလင်း",
+      "latitude": 21.69636,
+      "longitude": 94.09278
+    },
+    {
+      "source_index": 217,
+      "name_my": "ထူးကြီး",
+      "latitude": 17.97132,
+      "longitude": 95.26073
+    },
+    {
+      "source_index": 218,
+      "name_my": "ထောက်ကြန့်",
+      "latitude": 17.04276,
+      "longitude": 96.13231
+    },
+    {
+      "source_index": 219,
+      "name_my": "ဒိုက်ဦး",
+      "latitude": 17.78967,
+      "longitude": 96.66969
+    },
+    {
+      "source_index": 220,
+      "name_my": "ဒီးမော့ဆို",
+      "latitude": 19.53832,
+      "longitude": 97.15881
+    },
+    {
+      "source_index": 221,
+      "name_my": "ဒီပဲယင်း",
+      "latitude": 22.68529,
+      "longitude": 95.32121
+    },
+    {
+      "source_index": 222,
+      "name_my": "ဒုံဟီး",
+      "latitude": 26.7757,
+      "longitude": 95.79165
+    },
+    {
+      "source_index": 223,
+      "name_my": "ဒူးယား",
+      "latitude": 17.5616,
+      "longitude": 95.4802
+    },
+    {
+      "source_index": 224,
+      "name_my": "ဒေးဒရဲ",
+      "latitude": 16.40806,
+      "longitude": 95.88512
+    },
+    {
+      "source_index": 225,
+      "name_my": "ဒေါ့ဖုန်းယန်",
+      "latitude": 24.61398,
+      "longitude": 97.46127
+    },
+    {
+      "source_index": 226,
+      "name_my": "ဓနုဖြူ",
+      "latitude": 17.25468,
+      "longitude": 95.59583
+    },
+    {
+      "source_index": 227,
+      "name_my": "နတ်တလင်း",
+      "latitude": 18.42753,
+      "longitude": 95.54731
+    },
+    {
+      "source_index": 228,
+      "name_my": "နတ်မောက်",
+      "latitude": 20.35339,
+      "longitude": 95.39966
+    },
+    {
+      "source_index": 229,
+      "name_my": "နန့်မွန်း",
+      "latitude": 25.0047,
+      "longitude": 96.3548
+    },
+    {
+      "source_index": 230,
+      "name_my": "နန်းပန်",
+      "latitude": 20.45493,
+      "longitude": 96.90596
+    },
+    {
+      "source_index": 231,
+      "name_my": "နန်းမယ်ခုံ",
+      "latitude": 19.6696,
+      "longitude": 97.1091
+    },
+    {
+      "source_index": 232,
+      "name_my": "နန်းမား",
+      "latitude": 24.87399,
+      "longitude": 96.43625
+    },
+    {
+      "source_index": 233,
+      "name_my": "နန်းယွန်း",
+      "latitude": 26.97979,
+      "longitude": 96.16705
+    },
+    {
+      "source_index": 234,
+      "name_my": "နမ္မတီး",
+      "latitude": 25.37835,
+      "longitude": 97.00896
+    },
+    {
+      "source_index": 235,
+      "name_my": "နမ္မတူ",
+      "latitude": 23.09361,
+      "longitude": 97.40049
+    },
+    {
+      "source_index": 236,
+      "name_my": "နမ့်ခမ်း",
+      "latitude": 23.837,
+      "longitude": 97.6818
+    },
+    {
+      "source_index": 237,
+      "name_my": "နမ့်စန်",
+      "latitude": 20.88912,
+      "longitude": 97.72022
+    },
+    {
+      "source_index": 238,
+      "name_my": "နမ့်ဆန်လွယ်လင်",
+      "latitude": 22.96407,
+      "longitude": 97.16126
+    },
+    {
+      "source_index": 239,
+      "name_my": "နမ့်ဆန်ကျောက်မဲ",
+      "latitude": 22.965,
+      "longitude": 97.16333
+    },
+    {
+      "source_index": 240,
+      "name_my": "နမ့်တစ်",
+      "latitude": 23.47583,
+      "longitude": 98.86722
+    },
+    {
+      "source_index": 241,
+      "name_my": "နမ့်ဖိုင်",
+      "latitude": 21.92906,
+      "longitude": 99.20035
+    },
+    {
+      "source_index": 242,
+      "name_my": "နမ်ခမ်းဝူး",
+      "latitude": 22.47704,
+      "longitude": 99.18664
+    },
+    {
+      "source_index": 243,
+      "name_my": "နွားထိုးကြီး",
+      "latitude": 21.4237,
+      "longitude": 95.6545
+    },
+    {
+      "source_index": 244,
+      "name_my": "နှာဟရိန်",
+      "latitude": 22.1898,
+      "longitude": 93.4361
+    },
+    {
+      "source_index": 245,
+      "name_my": "နားကောင်",
+      "latitude": 22.37369,
+      "longitude": 98.71027
+    },
+    {
+      "source_index": 246,
+      "name_my": "နားဖန်",
+      "latitude": 22.60793,
+      "longitude": 99.09258
+    },
+    {
+      "source_index": 247,
+      "name_my": "နာဝီး",
+      "latitude": 23.11117,
+      "longitude": 98.66354
+    },
+    {
+      "source_index": 248,
+      "name_my": "နောင်ခစ်",
+      "latitude": 22.43836,
+      "longitude": 98.9248
+    },
+    {
+      "source_index": 249,
+      "name_my": "နောင်ချို",
+      "latitude": 22.33003,
+      "longitude": 96.79895
+    },
+    {
+      "source_index": 250,
+      "name_my": "နောင်တရား",
+      "latitude": 20.29326,
+      "longitude": 96.75691
+    },
+    {
+      "source_index": 251,
+      "name_my": "နောင်မွန်း",
+      "latitude": 27.50532,
+      "longitude": 97.81785
+    },
+    {
+      "source_index": 252,
+      "name_my": "ပခန်းကြီး",
+      "latitude": 21.53715,
+      "longitude": 95.2037
+    },
+    {
+      "source_index": 253,
+      "name_my": "ပခုက္ကူ",
+      "latitude": 21.335,
+      "longitude": 95.08227
+    },
+    {
+      "source_index": 254,
+      "name_my": "ပင်းတယ",
+      "latitude": 20.94158,
+      "longitude": 96.66279
+    },
+    {
+      "source_index": 255,
+      "name_my": "ပင်လည်ဘူး",
+      "latitude": 24.08089,
+      "longitude": 95.37026
+    },
+    {
+      "source_index": 256,
+      "name_my": "ပင်လုံ",
+      "latitude": 20.991,
+      "longitude": 97.532
+    },
+    {
+      "source_index": 257,
+      "name_my": "ပင်လောင်း",
+      "latitude": 20.12439,
+      "longitude": 96.78219
+    },
+    {
+      "source_index": 258,
+      "name_my": "ပန်းတနော်",
+      "latitude": 16.98212,
+      "longitude": 95.46595
+    },
+    {
+      "source_index": 259,
+      "name_my": "ပန်းတောင်း",
+      "latitude": 18.71797,
+      "longitude": 95.15353
+    },
+    {
+      "source_index": 260,
+      "name_my": "ပန်ခမ့်",
+      "latitude": 22.17594,
+      "longitude": 99.17044
+    },
+    {
+      "source_index": 261,
+      "name_my": "ပန်ဆန်းပန်ခမ်း",
+      "latitude": 22.17594,
+      "longitude": 99.17044
+    },
+    {
+      "source_index": 262,
+      "name_my": "ပန်ဆိုင်းကြူကုတ်",
+      "latitude": 24.07548,
+      "longitude": 98.06229
+    },
+    {
+      "source_index": 263,
+      "name_my": "ပန်ဆောင်",
+      "latitude": 27.23683,
+      "longitude": 96.16712
+    },
+    {
+      "source_index": 264,
+      "name_my": "ပန်နန်းဒင်",
+      "latitude": 27.7281,
+      "longitude": 97.87662
+    },
+    {
+      "source_index": 265,
+      "name_my": "ပန်ယန်း",
+      "latitude": 22.12912,
+      "longitude": 98.79675
+    },
+    {
+      "source_index": 266,
+      "name_my": "ပန်လုံ",
+      "latitude": 23.25641,
+      "longitude": 98.78571
+    },
+    {
+      "source_index": 267,
+      "name_my": "ပန်ဝါ",
+      "latitude": 25.59866,
+      "longitude": 98.37863
+    },
+    {
+      "source_index": 268,
+      "name_my": "ပန်ဝိုင်",
+      "latitude": 23.05628,
+      "longitude": 99.30908
+    },
+    {
+      "source_index": 269,
+      "name_my": "ပျဉ်းမနား",
+      "latitude": 19.7361,
+      "longitude": 96.20895
+    },
+    {
+      "source_index": 270,
+      "name_my": "ပျော်ဘွယ်",
+      "latitude": 20.59472,
+      "longitude": 96.05094
+    },
+    {
+      "source_index": 271,
+      "name_my": "ပြင်စလူ",
+      "latitude": 15.82677,
+      "longitude": 94.80943
+    },
+    {
+      "source_index": 272,
+      "name_my": "ပြင်ဦးလွင်",
+      "latitude": 22.01397,
+      "longitude": 96.45634
+    },
+    {
+      "source_index": 273,
+      "name_my": "ပြည်",
+      "latitude": 18.82151,
+      "longitude": 95.22103
+    },
+    {
+      "source_index": 274,
+      "name_my": "ပြည်ကြီးမဏ္ဍိုင်",
+      "latitude": 11.46842,
+      "longitude": 99.00144
+    },
+    {
+      "source_index": 275,
+      "name_my": "ပြွန်တန်ဆာ",
+      "latitude": 17.87517,
+      "longitude": 96.71597
+    },
+    {
+      "source_index": 276,
+      "name_my": "ပလ",
+      "latitude": 12.84928,
+      "longitude": 98.66188
+    },
+    {
+      "source_index": 277,
+      "name_my": "ပလက်ဝ",
+      "latitude": 21.30441,
+      "longitude": 92.85461
+    },
+    {
+      "source_index": 278,
+      "name_my": "ပလောက်",
+      "latitude": 13.27223,
+      "longitude": 98.62248
+    },
+    {
+      "source_index": 279,
+      "name_my": "ပွင့်ဖြူ",
+      "latitude": 20.36334,
+      "longitude": 94.66933
+    },
+    {
+      "source_index": 280,
+      "name_my": "ပိန်းဇလုပ်",
+      "latitude": 18.0699,
+      "longitude": 96.66836
+    },
+    {
+      "source_index": 281,
+      "name_my": "ပိုင်ကျုံ",
+      "latitude": 17.0217,
+      "longitude": 97.98597
+    },
+    {
+      "source_index": 282,
+      "name_my": "ပုံပါကျင်",
+      "latitude": 19.8892,
+      "longitude": 98.9382
+    },
+    {
+      "source_index": 283,
+      "name_my": "ပုဂံ",
+      "latitude": 21.13197,
+      "longitude": 94.86257
+    },
+    {
+      "source_index": 284,
+      "name_my": "ပုဏ္ဏားကျွန်း",
+      "latitude": 20.33199,
+      "longitude": 93.0043
+    },
+    {
+      "source_index": 285,
+      "name_my": "ပုတီးကုန်း",
+      "latitude": 18.57236,
+      "longitude": 95.45645
+    },
+    {
+      "source_index": 286,
+      "name_my": "ပုလော",
+      "latitude": 12.97531,
+      "longitude": 98.64579
+    },
+    {
+      "source_index": 287,
+      "name_my": "ပုလဲ",
+      "latitude": 21.93415,
+      "longitude": 94.87486
+    },
+    {
+      "source_index": 288,
+      "name_my": "ပုသိမ်",
+      "latitude": 16.77924,
+      "longitude": 94.73303
+    },
+    {
+      "source_index": 289,
+      "name_my": "ပုသိမ်ကြီး",
+      "latitude": 22.00399,
+      "longitude": 96.16465
+    },
+    {
+      "source_index": 290,
+      "name_my": "ပူတာအို",
+      "latitude": 27.29934,
+      "longitude": 97.4159
+    },
+    {
+      "source_index": 291,
+      "name_my": "ပေါက်",
+      "latitude": 21.45215,
+      "longitude": 94.47374
+    },
+    {
+      "source_index": 292,
+      "name_my": "ပေါက်ခေါင်း",
+      "latitude": 18.9028,
+      "longitude": 95.54819
+    },
+    {
+      "source_index": 293,
+      "name_my": "ပေါက်တော",
+      "latitude": 20.18098,
+      "longitude": 93.06817
+    },
+    {
+      "source_index": 294,
+      "name_my": "ပေါင်",
+      "latitude": 16.61679,
+      "longitude": 97.45672
+    },
+    {
+      "source_index": 295,
+      "name_my": "ပေါင်းတည်",
+      "latitude": 18.48947,
+      "longitude": 95.50721
+    },
+    {
+      "source_index": 296,
+      "name_my": "ပေါင်းတလည်",
+      "latitude": 18.84968,
+      "longitude": 95.38459
+    },
+    {
+      "source_index": 297,
+      "name_my": "ပေါင်းလောင်း",
+      "latitude": 19.98626,
+      "longitude": 96.58254
+    },
+    {
+      "source_index": 298,
+      "name_my": "ပဲခူး",
+      "latitude": 17.33583,
+      "longitude": 96.48389
+    },
+    {
+      "source_index": 299,
+      "name_my": "ပဲနွယ်ကုန်း",
+      "latitude": 18.22271,
+      "longitude": 96.56886
+    },
+    {
+      "source_index": 300,
+      "name_my": "ဖဒို",
+      "latitude": 18.0377,
+      "longitude": 96.5549
+    },
+    {
+      "source_index": 301,
+      "name_my": "ဖယ်ခုံ",
+      "latitude": 19.86348,
+      "longitude": 97.00831
+    },
+    {
+      "source_index": 302,
+      "name_my": "ဖျာပုံ",
+      "latitude": 16.29161,
+      "longitude": 95.68019
+    },
+    {
+      "source_index": 303,
+      "name_my": "ဖရူဆို",
+      "latitude": 19.41387,
+      "longitude": 97.12799
+    },
+    {
+      "source_index": 304,
+      "name_my": "ဖြူး",
+      "latitude": 18.48438,
+      "longitude": 96.43572
+    },
+    {
+      "source_index": 305,
+      "name_my": "ဖလမ်း",
+      "latitude": 22.91105,
+      "longitude": 93.68034
+    },
+    {
+      "source_index": 306,
+      "name_my": "ဖားကန့်",
+      "latitude": 25.6128,
+      "longitude": 96.31212
+    },
+    {
+      "source_index": 307,
+      "name_my": "ဖားဆောင်း",
+      "latitude": 18.87063,
+      "longitude": 97.31592
+    },
+    {
+      "source_index": 308,
+      "name_my": "ဖာပွန်",
+      "latitude": 18.06306,
+      "longitude": 97.44321
+    },
+    {
+      "source_index": 309,
+      "name_my": "ဖောင်းပြင်",
+      "latitude": 24.26768,
+      "longitude": 94.81686
+    },
+    {
+      "source_index": 310,
+      "name_my": "ဗန်းမောက်",
+      "latitude": 24.39986,
+      "longitude": 95.85767
+    },
+    {
+      "source_index": 311,
+      "name_my": "ဗန်းမော်",
+      "latitude": 24.25493,
+      "longitude": 97.23441
+    },
+    {
+      "source_index": 312,
+      "name_my": "ဘက်ရဲ",
+      "latitude": 18.30044,
+      "longitude": 95.14703
+    },
+    {
+      "source_index": 313,
+      "name_my": "ဘားအံ",
+      "latitude": 16.88076,
+      "longitude": 97.63691
+    },
+    {
+      "source_index": 314,
+      "name_my": "ဘိုကလေး",
+      "latitude": 16.295,
+      "longitude": 95.3968
+    },
+    {
+      "source_index": 315,
+      "name_my": "ဘီးလင်း",
+      "latitude": 17.21987,
+      "longitude": 97.23931
+    },
+    {
+      "source_index": 316,
+      "name_my": "ဘုတလင်",
+      "latitude": 22.38918,
+      "longitude": 95.14857
+    },
+    {
+      "source_index": 317,
+      "name_my": "ဘုတ်ပြင်း",
+      "latitude": 11.26504,
+      "longitude": 98.75909
+    },
+    {
+      "source_index": 318,
+      "name_my": "ဘုရားကြီး",
+      "latitude": 17.47538,
+      "longitude": 96.52654
+    },
+    {
+      "source_index": 319,
+      "name_my": "ဘုရားသုံးဆူ",
+      "latitude": 15.30444,
+      "longitude": 98.37808
+    },
+    {
+      "source_index": 320,
+      "name_my": "ဘူးသီးတောင်",
+      "latitude": 20.87498,
+      "longitude": 92.525
+    },
+    {
+      "source_index": 321,
+      "name_my": "ဘောဂလိ",
+      "latitude": 18.91451,
+      "longitude": 96.78565
+    },
+    {
+      "source_index": 322,
+      "name_my": "ဘောလခဲ",
+      "latitude": 19.17256,
+      "longitude": 97.34284
+    },
+    {
+      "source_index": 323,
+      "name_my": "မံစီ",
+      "latitude": 24.11962,
+      "longitude": 97.29311
+    },
+    {
+      "source_index": 324,
+      "name_my": "မကွီအိမ်နူး",
+      "latitude": 21.1727,
+      "longitude": 93.5945
+    },
+    {
+      "source_index": 325,
+      "name_my": "မကွေး",
+      "latitude": 20.14027,
+      "longitude": 94.92696
+    },
+    {
+      "source_index": 326,
+      "name_my": "မက်မန်း",
+      "latitude": 21.95417,
+      "longitude": 98.87088
+    },
+    {
+      "source_index": 327,
+      "name_my": "မချမ်းဘော",
+      "latitude": 27.28395,
+      "longitude": 97.58937
+    },
+    {
+      "source_index": 328,
+      "name_my": "မင်းကင်း",
+      "latitude": 22.87781,
+      "longitude": 94.4942
+    },
+    {
+      "source_index": 329,
+      "name_my": "မင်းတပ်",
+      "latitude": 21.37176,
+      "longitude": 93.97365
+    },
+    {
+      "source_index": 330,
+      "name_my": "မင်းတုန်း",
+      "latitude": 19.35131,
+      "longitude": 94.73233
+    },
+    {
+      "source_index": 331,
+      "name_my": "မင်းပြား",
+      "latitude": 20.36452,
+      "longitude": 93.27269
+    },
+    {
+      "source_index": 332,
+      "name_my": "မင်းဘူး",
+      "latitude": 20.17161,
+      "longitude": 94.87518
+    },
+    {
+      "source_index": 333,
+      "name_my": "မင်းလှသာယာဝတီ",
+      "latitude": 17.97389,
+      "longitude": 95.70905
+    },
+    {
+      "source_index": 334,
+      "name_my": "မင်းလှသရက်",
+      "latitude": 19.96559,
+      "longitude": 95.0367
+    },
+    {
+      "source_index": 335,
+      "name_my": "မတူပီ",
+      "latitude": 21.60475,
+      "longitude": 93.44086
+    },
+    {
+      "source_index": 336,
+      "name_my": "မတ္တရာ",
+      "latitude": 22.21036,
+      "longitude": 96.10639
+    },
+    {
+      "source_index": 337,
+      "name_my": "မဒေါက်",
+      "latitude": 17.91491,
+      "longitude": 96.84535
+    },
+    {
+      "source_index": 338,
+      "name_my": "မန်ကန်",
+      "latitude": 22.68954,
+      "longitude": 98.59519
+    },
+    {
+      "source_index": 339,
+      "name_my": "မန်တွန်း",
+      "latitude": 22.94789,
+      "longitude": 98.612
+    },
+    {
+      "source_index": 340,
+      "name_my": "မန်တုံ",
+      "latitude": 23.24648,
+      "longitude": 97.12222
+    },
+    {
+      "source_index": 341,
+      "name_my": "မန်မန်ဆိုင်",
+      "latitude": 22.50304,
+      "longitude": 98.76685
+    },
+    {
+      "source_index": 342,
+      "name_my": "မန်ဟီးရိုး",
+      "latitude": 23.95176,
+      "longitude": 97.80064
+    },
+    {
+      "source_index": 343,
+      "name_my": "မဘိမ်း",
+      "latitude": 23.47292,
+      "longitude": 96.6292
+    },
+    {
+      "source_index": 344,
+      "name_my": "မယ်စဲ",
+      "latitude": 18.67246,
+      "longitude": 97.66277
+    },
+    {
+      "source_index": 345,
+      "name_my": "မြင်းခြံ",
+      "latitude": 21.45745,
+      "longitude": 95.39179
+    },
+    {
+      "source_index": 346,
+      "name_my": "မြင်းမူ",
+      "latitude": 21.92681,
+      "longitude": 95.57157
+    },
+    {
+      "source_index": 347,
+      "name_my": "မြင်းလွှတ်",
+      "latitude": 20.62786,
+      "longitude": 92.50212
+    },
+    {
+      "source_index": 348,
+      "name_my": "မြစ်ကြီးနား",
+      "latitude": 25.38749,
+      "longitude": 97.39036
+    },
+    {
+      "source_index": 349,
+      "name_my": "မြစ်ခြေ",
+      "latitude": 21.2454,
+      "longitude": 94.8511
+    },
+    {
+      "source_index": 350,
+      "name_my": "မြစ်ငယ်",
+      "latitude": 21.85418,
+      "longitude": 96.06856
+    },
+    {
+      "source_index": 351,
+      "name_my": "မြစ်သား",
+      "latitude": 21.42427,
+      "longitude": 96.13086
+    },
+    {
+      "source_index": 352,
+      "name_my": "မြန်အောင်",
+      "latitude": 18.28696,
+      "longitude": 95.31779
+    },
+    {
+      "source_index": 353,
+      "name_my": "မြဝတီ",
+      "latitude": 16.68868,
+      "longitude": 98.51304
+    },
+    {
+      "source_index": 354,
+      "name_my": "မြိတ်",
+      "latitude": 12.44112,
+      "longitude": 98.60978
+    },
+    {
+      "source_index": 355,
+      "name_my": "မြို့လှတောင်ငူ",
+      "latitude": 20.1992323,
+      "longitude": 96.2718178
+    },
+    {
+      "source_index": 356,
+      "name_my": "မြို့လှရွှေကူ",
+      "latitude": 24.47856,
+      "longitude": 96.65522
+    },
+    {
+      "source_index": 357,
+      "name_my": "မြို့သစ်မကွေး",
+      "latitude": 20.19923,
+      "longitude": 95.4477555
+    },
+    {
+      "source_index": 358,
+      "name_my": "မြို့သစ်တမူး",
+      "latitude": 24.51539,
+      "longitude": 94.51857
+    },
+    {
+      "source_index": 359,
+      "name_my": "မြိုင်",
+      "latitude": 21.61256,
+      "longitude": 94.85432
+    },
+    {
+      "source_index": 360,
+      "name_my": "မြေပုံ",
+      "latitude": 20.04676,
+      "longitude": 93.37376
+    },
+    {
+      "source_index": 361,
+      "name_my": "မြောက်ဦး",
+      "latitude": 20.59185,
+      "longitude": 93.18844
+    },
+    {
+      "source_index": 362,
+      "name_my": "မြောင်",
+      "latitude": 21.83164,
+      "longitude": 95.42425
+    },
+    {
+      "source_index": 363,
+      "name_my": "မြောင်းမြ",
+      "latitude": 16.59926,
+      "longitude": 94.92977
+    },
+    {
+      "source_index": 364,
+      "name_my": "မလှိုင်",
+      "latitude": 21.09867,
+      "longitude": 95.64698
+    },
+    {
+      "source_index": 365,
+      "name_my": "မှော်ဘီ",
+      "latitude": 17.09987,
+      "longitude": 96.0418
+    },
+    {
+      "source_index": 366,
+      "name_my": "မအီ",
+      "latitude": 19.34234,
+      "longitude": 94.13845
+    },
+    {
+      "source_index": 367,
+      "name_my": "မအူပင်",
+      "latitude": 16.73023,
+      "longitude": 95.6494
+    },
+    {
+      "source_index": 368,
+      "name_my": "မာန်အောင်",
+      "latitude": 18.85506,
+      "longitude": 93.7215
+    },
+    {
+      "source_index": 369,
+      "name_my": "မိတ္ထီလာ",
+      "latitude": 20.88189,
+      "longitude": 95.86311
+    },
+    {
+      "source_index": 370,
+      "name_my": "မိုးကုတ်",
+      "latitude": 22.92139,
+      "longitude": 96.5054
+    },
+    {
+      "source_index": 371,
+      "name_my": "မိုးကောင်း",
+      "latitude": 25.30274,
+      "longitude": 96.94038
+    },
+    {
+      "source_index": 372,
+      "name_my": "မိုးညှင်း",
+      "latitude": 24.77711,
+      "longitude": 96.36493
+    },
+    {
+      "source_index": 373,
+      "name_my": "မိုးညို",
+      "latitude": 18.02719,
+      "longitude": 95.51185
+    },
+    {
+      "source_index": 374,
+      "name_my": "မိုးနဲ",
+      "latitude": 20.5136,
+      "longitude": 97.8712
+    },
+    {
+      "source_index": 375,
+      "name_my": "မိုးမိတ်",
+      "latitude": 23.11422,
+      "longitude": 96.66999
+    },
+    {
+      "source_index": 376,
+      "name_my": "မိုးမောက်",
+      "latitude": 24.25095,
+      "longitude": 97.34653
+    },
+    {
+      "source_index": 377,
+      "name_my": "မိုင်းကာ",
+      "latitude": 21.84343,
+      "longitude": 99.41942
+    },
+    {
+      "source_index": 378,
+      "name_my": "မိုင်းကိုင်",
+      "latitude": 21.61149,
+      "longitude": 97.52699
+    },
+    {
+      "source_index": 379,
+      "name_my": "မိုင်းခတ်",
+      "latitude": 21.7499,
+      "longitude": 99.46377
+    },
+    {
+      "source_index": 380,
+      "name_my": "မိုင်းခုတ်",
+      "latitude": 20.74048,
+      "longitude": 99.4636
+    },
+    {
+      "source_index": 381,
+      "name_my": "မိုင်းငေါ့",
+      "latitude": 22.77316,
+      "longitude": 96.98402
+    },
+    {
+      "source_index": 382,
+      "name_my": "မိုင်းစံမုန်းဆန်း",
+      "latitude": 21.65989,
+      "longitude": 98.36456
+    },
+    {
+      "source_index": 383,
+      "name_my": "မိုင်းဆတ်",
+      "latitude": 20.50544,
+      "longitude": 99.24724
+    },
+    {
+      "source_index": 384,
+      "name_my": "မိုင်းတုံ",
+      "latitude": 20.30351,
+      "longitude": 98.90008
+    },
+    {
+      "source_index": 385,
+      "name_my": "မိုင်းနောင်",
+      "latitude": 21.645,
+      "longitude": 98.123
+    },
+    {
+      "source_index": 386,
+      "name_my": "မိုင်းပန်",
+      "latitude": 20.3188,
+      "longitude": 98.3541
+    },
+    {
+      "source_index": 387,
+      "name_my": "မိုင်းပျဉ်း",
+      "latitude": 21.3502,
+      "longitude": 99.026
+    },
+    {
+      "source_index": 388,
+      "name_my": "မိုင်းပေါက်",
+      "latitude": 22.00822,
+      "longitude": 99.3101
+    },
+    {
+      "source_index": 389,
+      "name_my": "မိုင်းဖျန်",
+      "latitude": 21.98542,
+      "longitude": 99.59892
+    },
+    {
+      "source_index": 390,
+      "name_my": "မိုင်းဖြတ်",
+      "latitude": 20.87804,
+      "longitude": 99.92333
+    },
+    {
+      "source_index": 391,
+      "name_my": "မိုင်းမော",
+      "latitude": 22.96912,
+      "longitude": 98.96356
+    },
+    {
+      "source_index": 392,
+      "name_my": "မိုင်းယန်း",
+      "latitude": 21.84235,
+      "longitude": 99.68711
+    },
+    {
+      "source_index": 393,
+      "name_my": "မိုင်းယု",
+      "latitude": 21.32976,
+      "longitude": 100.55082
+    },
+    {
+      "source_index": 394,
+      "name_my": "မိုင်းယောင်း",
+      "latitude": 21.1807,
+      "longitude": 100.3579
+    },
+    {
+      "source_index": 395,
+      "name_my": "မိုင်းရယ်",
+      "latitude": 22.42762,
+      "longitude": 98.039
+    },
+    {
+      "source_index": 396,
+      "name_my": "မိုင်းရှူး",
+      "latitude": 21.90513,
+      "longitude": 98.36044
+    },
+    {
+      "source_index": 397,
+      "name_my": "မိုင်းလား",
+      "latitude": 21.6729,
+      "longitude": 100.01867
+    },
+    {
+      "source_index": 398,
+      "name_my": "မိုင်းလုံ",
+      "latitude": 22.7908,
+      "longitude": 96.62431
+    },
+    {
+      "source_index": 399,
+      "name_my": "မိုပိုင်းလွတ်",
+      "latitude": 25.04671,
+      "longitude": 94.78748
+    },
+    {
+      "source_index": 400,
+      "name_my": "မိုဝိုင်းလွတ်",
+      "latitude": 25.0834,
+      "longitude": 94.9645
+    },
+    {
+      "source_index": 401,
+      "name_my": "မုံးထ",
+      "latitude": 19.7979,
+      "longitude": 98.56708
+    },
+    {
+      "source_index": 402,
+      "name_my": "မုံရွာ",
+      "latitude": 22.12168,
+      "longitude": 95.13963
+    },
+    {
+      "source_index": 403,
+      "name_my": "မုဒုံ",
+      "latitude": 16.25812,
+      "longitude": 97.72478
+    },
+    {
+      "source_index": 404,
+      "name_my": "မုန်းကိုး",
+      "latitude": 24.0998,
+      "longitude": 98.3031
+    },
+    {
+      "source_index": 405,
+      "name_my": "မူဆယ်",
+      "latitude": 23.98989,
+      "longitude": 97.90165
+    },
+    {
+      "source_index": 406,
+      "name_my": "မေတ္တာ",
+      "latitude": 14.16355,
+      "longitude": 98.52017
+    },
+    {
+      "source_index": 407,
+      "name_my": "မောက်မယ်",
+      "latitude": 20.2305,
+      "longitude": 97.72369
+    },
+    {
+      "source_index": 408,
+      "name_my": "မောင်တော",
+      "latitude": 20.81897,
+      "longitude": 92.36776
+    },
+    {
+      "source_index": 409,
+      "name_my": "မောတောင်",
+      "latitude": 11.7952,
+      "longitude": 99.6275
+    },
+    {
+      "source_index": 410,
+      "name_my": "မော်ထိုက်",
+      "latitude": 24.09692,
+      "longitude": 98.86098
+    },
+    {
+      "source_index": 411,
+      "name_my": "မော်လမြိုင်",
+      "latitude": 16.48459,
+      "longitude": 97.62593
+    },
+    {
+      "source_index": 412,
+      "name_my": "မော်လမြိုင်ကျွန်း",
+      "latitude": 16.37894,
+      "longitude": 95.26298
+    },
+    {
+      "source_index": 413,
+      "name_my": "မော်လိုက်",
+      "latitude": 23.63512,
+      "longitude": 94.41201
+    },
+    {
+      "source_index": 414,
+      "name_my": "မော်လူး",
+      "latitude": 24.4649,
+      "longitude": 96.1796
+    },
+    {
+      "source_index": 415,
+      "name_my": "မဲဇလီကုန်း",
+      "latitude": 17.9009,
+      "longitude": 95.2288
+    },
+    {
+      "source_index": 416,
+      "name_my": "ယင်းမာပင်",
+      "latitude": 22.07779,
+      "longitude": 94.90014
+    },
+    {
+      "source_index": 417,
+      "name_my": "ယောင်လင်း",
+      "latitude": 22.95939,
+      "longitude": 99.31197
+    },
+    {
+      "source_index": 418,
+      "name_my": "ရင်ဖန့်",
+      "latitude": 22.62819,
+      "longitude": 99.28307
+    },
+    {
+      "source_index": 419,
+      "name_my": "ရပ်စောက်",
+      "latitude": 21.24664,
+      "longitude": 96.86518
+    },
+    {
+      "source_index": 420,
+      "name_my": "ရမည်းသင်း",
+      "latitude": 20.4305,
+      "longitude": 96.13747
+    },
+    {
+      "source_index": 421,
+      "name_my": "ရမ်းဗြဲ",
+      "latitude": 19.08769,
+      "longitude": 93.85886
+    },
+    {
+      "source_index": 422,
+      "name_my": "ရွှေကျင်",
+      "latitude": 17.92304,
+      "longitude": 96.87767
+    },
+    {
+      "source_index": 423,
+      "name_my": "ရွှေကူ",
+      "latitude": 24.20695,
+      "longitude": 96.80606
+    },
+    {
+      "source_index": 424,
+      "name_my": "ရွှေညောင်",
+      "latitude": 20.76015,
+      "longitude": 96.93614
+    },
+    {
+      "source_index": 425,
+      "name_my": "ရွှေတောင်",
+      "latitude": 18.7051,
+      "longitude": 95.21404
+    },
+    {
+      "source_index": 426,
+      "name_my": "ရွှေပြည်အေး",
+      "latitude": 24.68344,
+      "longitude": 94.73147
+    },
+    {
+      "source_index": 427,
+      "name_my": "ရွှေဘို",
+      "latitude": 22.56996,
+      "longitude": 95.69849
+    },
+    {
+      "source_index": 428,
+      "name_my": "ရွှေသောင်ယံ",
+      "latitude": 17.07674,
+      "longitude": 94.46133
+    },
+    {
+      "source_index": 429,
+      "name_my": "ရွာငံ",
+      "latitude": 21.16282,
+      "longitude": 96.44229
+    },
+    {
+      "source_index": 430,
+      "name_my": "ရွာသစ်",
+      "latitude": 19.16673,
+      "longitude": 97.4995
+    },
+    {
+      "source_index": 431,
+      "name_my": "ရသေ့တောင်",
+      "latitude": 20.48215,
+      "longitude": 92.75606
+    },
+    {
+      "source_index": 432,
+      "name_my": "ရှင်ဗွေယန်",
+      "latitude": 26.69478,
+      "longitude": 96.2094
+    },
+    {
+      "source_index": 433,
+      "name_my": "ရှမ်းရွာသစ်",
+      "latitude": 17.42438,
+      "longitude": 97.88778
+    },
+    {
+      "source_index": 434,
+      "name_my": "ရှားတော",
+      "latitude": 19.63174,
+      "longitude": 97.52073
+    },
+    {
+      "source_index": 435,
+      "name_my": "ရိခေါ်ဒါရ်",
+      "latitude": 23.36097,
+      "longitude": 93.38869
+    },
+    {
+      "source_index": 436,
+      "name_my": "ရေး",
+      "latitude": 15.24539,
+      "longitude": 97.84935
+    },
+    {
+      "source_index": 437,
+      "name_my": "ရေကြည်",
+      "latitude": 17.34456,
+      "longitude": 95.12067
+    },
+    {
+      "source_index": 438,
+      "name_my": "ရေစကြို",
+      "latitude": 21.63388,
+      "longitude": 95.2453
+    },
+    {
+      "source_index": 439,
+      "name_my": "ရေဇွာ",
+      "latitude": 22.05289,
+      "longitude": 93.40857
+    },
+    {
+      "source_index": 440,
+      "name_my": "ရေတာရှည်",
+      "latitude": 19.15693,
+      "longitude": 96.34234
+    },
+    {
+      "source_index": 441,
+      "name_my": "ရေနံချောင်း",
+      "latitude": 20.45837,
+      "longitude": 94.8731
+    },
+    {
+      "source_index": 442,
+      "name_my": "ရေနီ",
+      "latitude": 19.47438,
+      "longitude": 96.26804
+    },
+    {
+      "source_index": 443,
+      "name_my": "ရေဖြူ",
+      "latitude": 14.24591,
+      "longitude": 98.20291
+    },
+    {
+      "source_index": 444,
+      "name_my": "ရေဦး",
+      "latitude": 22.76914,
+      "longitude": 95.43049
+    },
+    {
+      "source_index": 445,
+      "name_my": "လက်ပံတန်း",
+      "latitude": 17.779,
+      "longitude": 95.74529
+    },
+    {
+      "source_index": 446,
+      "name_my": "လင်းခေး",
+      "latitude": 20.34222,
+      "longitude": 98.00371
+    },
+    {
+      "source_index": 447,
+      "name_my": "လင်ဟော်",
+      "latitude": 22.77647,
+      "longitude": 98.83702
+    },
+    {
+      "source_index": 448,
+      "name_my": "လပွတ္တာ",
+      "latitude": 16.14557,
+      "longitude": 94.75889
+    },
+    {
+      "source_index": 449,
+      "name_my": "လပွတ္တာ၃မိုင်",
+      "latitude": 16.19983,
+      "longitude": 94.78124
+    },
+    {
+      "source_index": 450,
+      "name_my": "လမိုင်း",
+      "latitude": 15.50351,
+      "longitude": 97.83215
+    },
+    {
+      "source_index": 451,
+      "name_my": "လယ်ဝေး",
+      "latitude": 19.63467,
+      "longitude": 96.11007
+    },
+    {
+      "source_index": 452,
+      "name_my": "လွယ်ဂျယ်",
+      "latitude": 24.19932,
+      "longitude": 97.72077
+    },
+    {
+      "source_index": 453,
+      "name_my": "လွိုင်ကော်",
+      "latitude": 19.67424,
+      "longitude": 97.20993
+    },
+    {
+      "source_index": 454,
+      "name_my": "လွိုင်လင်",
+      "latitude": 20.92536,
+      "longitude": 97.56581
+    },
+    {
+      "source_index": 455,
+      "name_my": "လွိုင်လင်လေး",
+      "latitude": 19.8777,
+      "longitude": 97.2318
+    },
+    {
+      "source_index": 456,
+      "name_my": "လဟယ်",
+      "latitude": 26.32594,
+      "longitude": 95.44113
+    },
+    {
+      "source_index": 457,
+      "name_my": "လှည်းကူး",
+      "latitude": 17.09875,
+      "longitude": 96.22745
+    },
+    {
+      "source_index": 458,
+      "name_my": "လှိုင်းဘွဲ့",
+      "latitude": 17.12574,
+      "longitude": 97.81871
+    },
+    {
+      "source_index": 459,
+      "name_my": "လားရှိုး",
+      "latitude": 22.95277,
+      "longitude": 97.74747
+    },
+    {
+      "source_index": 460,
+      "name_my": "လိပ်သို",
+      "latitude": 19.22235,
+      "longitude": 96.58097
+    },
+    {
+      "source_index": 461,
+      "name_my": "လိုင်လင်းပီ",
+      "latitude": 21.9592,
+      "longitude": 93.1143
+    },
+    {
+      "source_index": 462,
+      "name_my": "လုံထန်",
+      "latitude": 22.90568,
+      "longitude": 99.36871
+    },
+    {
+      "source_index": 463,
+      "name_my": "လေးတောင်",
+      "latitude": 19.03862,
+      "longitude": 93.69485
+    },
+    {
+      "source_index": 464,
+      "name_my": "လေးမျက်နှာ",
+      "latitude": 17.60038,
+      "longitude": 95.17454
+    },
+    {
+      "source_index": 465,
+      "name_my": "လေရှီး",
+      "latitude": 25.44706,
+      "longitude": 94.95663
+    },
+    {
+      "source_index": 466,
+      "name_my": "လောက်ကိုင်",
+      "latitude": 23.69163,
+      "longitude": 98.76408
+    },
+    {
+      "source_index": 467,
+      "name_my": "လောင်းလုံး",
+      "latitude": 13.97522,
+      "longitude": 98.11963
+    },
+    {
+      "source_index": 468,
+      "name_my": "လောပိတ",
+      "latitude": 19.8777,
+      "longitude": 97.2318
+    },
+    {
+      "source_index": 469,
+      "name_my": "လဲချား",
+      "latitude": 21.27024,
+      "longitude": 97.66509
+    },
+    {
+      "source_index": 470,
+      "name_my": "ဝက်လက်",
+      "latitude": 22.36715,
+      "longitude": 95.78812
+    },
+    {
+      "source_index": 471,
+      "name_my": "ဝန်းသို",
+      "latitude": 23.89924,
+      "longitude": 95.68193
+    },
+    {
+      "source_index": 472,
+      "name_my": "ဝမ်းတွင်း",
+      "latitude": 21.09691,
+      "longitude": 96.03001
+    },
+    {
+      "source_index": 473,
+      "name_my": "ဝါးခယ်မ",
+      "latitude": 16.60383,
+      "longitude": 95.18041
+    },
+    {
+      "source_index": 474,
+      "name_my": "ဝိန်းကောင်",
+      "latitude": 22.30273,
+      "longitude": 98.93896
+    },
+    {
+      "source_index": 475,
+      "name_my": "ဝိုင်းမော်",
+      "latitude": 25.35099,
+      "longitude": 97.44281
+    },
+    {
+      "source_index": 476,
+      "name_my": "ဝေဘူလ",
+      "latitude": 23.0168,
+      "longitude": 93.9133
+    },
+    {
+      "source_index": 477,
+      "name_my": "ဝေါ",
+      "latitude": 17.4836,
+      "longitude": 96.68234
+    },
+    {
+      "source_index": 478,
+      "name_my": "ဝေါလေမြိုင်",
+      "latitude": 16.29392,
+      "longitude": 98.71324
+    },
+    {
+      "source_index": 479,
+      "name_my": "သံတွဲ",
+      "latitude": 18.4662,
+      "longitude": 94.3677
+    },
+    {
+      "source_index": 480,
+      "name_my": "သံတောင်",
+      "latitude": 19.02175,
+      "longitude": 96.58266
+    },
+    {
+      "source_index": 481,
+      "name_my": "သံတောင်ကြီး",
+      "latitude": 19.07339,
+      "longitude": 96.67547
+    },
+    {
+      "source_index": 482,
+      "name_my": "သံဖြူဇရပ်",
+      "latitude": 15.9667,
+      "longitude": 97.7333
+    },
+    {
+      "source_index": 483,
+      "name_my": "သက္ကလ",
+      "latitude": 17.02939,
+      "longitude": 96.59657
+    },
+    {
+      "source_index": 484,
+      "name_my": "သထုံ",
+      "latitude": 16.9197,
+      "longitude": 97.3678
+    },
+    {
+      "source_index": 485,
+      "name_my": "သနပ်ပင်",
+      "latitude": 17.28903,
+      "longitude": 96.57664
+    },
+    {
+      "source_index": 486,
+      "name_my": "သန်လျင်",
+      "latitude": 16.76378,
+      "longitude": 96.25184
+    },
+    {
+      "source_index": 487,
+      "name_my": "သပိတ်ကျင်း",
+      "latitude": 22.88593,
+      "longitude": 95.97525
+    },
+    {
+      "source_index": 488,
+      "name_my": "သရက်",
+      "latitude": 19.3215,
+      "longitude": 95.17716
+    },
+    {
+      "source_index": 489,
+      "name_my": "သရက်ချောင်း",
+      "latitude": 13.8687,
+      "longitude": 98.26252
+    },
+    {
+      "source_index": 490,
+      "name_my": "သာစည်",
+      "latitude": 20.85019,
+      "longitude": 96.05838
+    },
+    {
+      "source_index": 491,
+      "name_my": "သာပေါင်း",
+      "latitude": 17.04734,
+      "longitude": 94.80589
+    },
+    {
+      "source_index": 492,
+      "name_my": "သာယာဝတီ",
+      "latitude": 17.65441,
+      "longitude": 95.78629
+    },
+    {
+      "source_index": 493,
+      "name_my": "သိန္နီ",
+      "latitude": 23.3072,
+      "longitude": 97.9736
+    },
+    {
+      "source_index": 494,
+      "name_my": "သိမ်ဇရပ်",
+      "latitude": 17.5137,
+      "longitude": 96.884
+    },
+    {
+      "source_index": 495,
+      "name_my": "သီပေါ",
+      "latitude": 22.61894,
+      "longitude": 97.2981
+    },
+    {
+      "source_index": 496,
+      "name_my": "သုံးခွ",
+      "latitude": 16.7586,
+      "longitude": 96.52309
+    },
+    {
+      "source_index": 497,
+      "name_my": "သုံးဆယ်",
+      "latitude": 17.62988,
+      "longitude": 95.78985
+    },
+    {
+      "source_index": 498,
+      "name_my": "သုဝဏ္ဏဝတီ",
+      "latitude": 17.06022,
+      "longitude": 97.30482
+    },
+    {
+      "source_index": 499,
+      "name_my": "သဲကုန်း",
+      "latitude": 18.64698,
+      "longitude": 95.41721
+    },
+    {
+      "source_index": 500,
+      "name_my": "ဟင်္သာတ",
+      "latitude": 17.64958,
+      "longitude": 95.45818
+    },
+    {
+      "source_index": 501,
+      "name_my": "ဟားခါး",
+      "latitude": 22.64011,
+      "longitude": 93.60483
+    },
+    {
+      "source_index": 502,
+      "name_my": "ဟိုင်းကြီးကျွန်း",
+      "latitude": 15.82677,
+      "longitude": 94.80943
+    },
+    {
+      "source_index": 503,
+      "name_my": "ဟိုတောင်း",
+      "latitude": 22.04143,
+      "longitude": 99.55067
+    },
+    {
+      "source_index": 504,
+      "name_my": "ဟိုပင်",
+      "latitude": 24.99183,
+      "longitude": 96.53019
+    },
+    {
+      "source_index": 505,
+      "name_my": "ဟိုပန်",
+      "latitude": 23.42544,
+      "longitude": 98.75029
+    },
+    {
+      "source_index": 506,
+      "name_my": "ဟိုပုံး",
+      "latitude": 20.79743,
+      "longitude": 97.17024
+    },
+    {
+      "source_index": 507,
+      "name_my": "ဟိုမိန်း",
+      "latitude": 19.769,
+      "longitude": 97.979
+    },
+    {
+      "source_index": 508,
+      "name_my": "ဟုမ္မလင်း",
+      "latitude": 24.8644,
+      "longitude": 94.91088
+    },
+    {
+      "source_index": 509,
+      "name_my": "ဟဲဟိုး",
+      "latitude": 20.7221,
+      "longitude": 96.8239
+    },
+    {
+      "source_index": 510,
+      "name_my": "အင်းတကော်",
+      "latitude": 17.18087,
+      "longitude": 96.37637
+    },
+    {
+      "source_index": 511,
+      "name_my": "အင်းတော်",
+      "latitude": 24.22252,
+      "longitude": 96.14167
+    },
+    {
+      "source_index": 512,
+      "name_my": "အင်းတော်ကြီး",
+      "latitude": 25.0929,
+      "longitude": 96.2876
+    },
+    {
+      "source_index": 513,
+      "name_my": "အင်းမ",
+      "latitude": 18.52806,
+      "longitude": 95.34904
+    },
+    {
+      "source_index": 514,
+      "name_my": "အင်ဂျန်းယန်",
+      "latitude": 25.82991,
+      "longitude": 97.72671
+    },
+    {
+      "source_index": 515,
+      "name_my": "အင်တော",
+      "latitude": 21.63124,
+      "longitude": 96.92252
+    },
+    {
+      "source_index": 516,
+      "name_my": "အင်ပင်",
+      "latitude": 18.0935,
+      "longitude": 95.269
+    },
+    {
+      "source_index": 517,
+      "name_my": "အင်္ဂပူ",
+      "latitude": 17.80981,
+      "longitude": 95.26926
+    },
+    {
+      "source_index": 518,
+      "name_my": "အထောင်",
+      "latitude": 17.34855,
+      "longitude": 95.33365
+    },
+    {
+      "source_index": 519,
+      "name_my": "အဖျောက်",
+      "latitude": 17.38239,
+      "longitude": 95.69338
+    },
+    {
+      "source_index": 520,
+      "name_my": "အမရပူရ",
+      "latitude": 21.90314,
+      "longitude": 96.04948
+    },
+    {
+      "source_index": 521,
+      "name_my": "အမာ",
+      "latitude": 15.7994,
+      "longitude": 95.29017
+    },
+    {
+      "source_index": 522,
+      "name_my": "အမ်း",
+      "latitude": 19.79537,
+      "longitude": 94.04791
+    },
+    {
+      "source_index": 523,
+      "name_my": "အရာတော်",
+      "latitude": 22.28525,
+      "longitude": 95.45068
+    },
+    {
+      "source_index": 524,
+      "name_my": "အသုတ်",
+      "latitude": 17.19974,
+      "longitude": 95.08331
+    },
+    {
+      "source_index": 525,
+      "name_my": "အိမ်မဲ",
+      "latitude": 16.8962,
+      "longitude": 95.1805
+    },
+    {
+      "source_index": 526,
+      "name_my": "အိုးသည်ကုန်း",
+      "latitude": 18.0432,
+      "longitude": 95.6935
+    },
+    {
+      "source_index": 527,
+      "name_my": "အိုက်ချန်",
+      "latitude": 22.76395,
+      "longitude": 99.22358
+    },
+    {
+      "source_index": 528,
+      "name_my": "အုတ်တွင်း",
+      "latitude": 18.83293,
+      "longitude": 96.41363
+    },
+    {
+      "source_index": 529,
+      "name_my": "အုတ်ဖို",
+      "latitude": 18.13022,
+      "longitude": 95.67177
+    },
+    {
+      "source_index": 530,
+      "name_my": "အေးသာယာ",
+      "latitude": 20.77475,
+      "longitude": 96.99882
+    },
+    {
+      "source_index": 531,
+      "name_my": "အောင်ပန်း",
+      "latitude": 20.66122,
+      "longitude": 96.63584
+    },
+    {
+      "source_index": 532,
+      "name_my": "အောင်လံ",
+      "latitude": 19.35855,
+      "longitude": 95.21684
+    },
+    {
+      "source_index": 533,
+      "name_my": "ဥက္ကံ",
+      "latitude": 17.49696,
+      "longitude": 95.8607
+    },
+    {
+      "source_index": 534,
+      "name_my": "ဥရှစ်ပင်",
+      "latitude": 18.68519,
+      "longitude": 95.01383
+    }
+  ]
+}

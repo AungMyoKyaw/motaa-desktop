@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-11T00:00:00Z",
+  "title": "Design System: MOTAA Desktop",
+  "extensions": {
+    "shadows": [],
+    "motion": [],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Static visual specimen from the first FigCraft design; interaction states are not established.",
+      "html": "<button class=\"ds-primary\">Save profile</button>",
+      "css": ".ds-primary{background:#756020;color:#FFFEF9;border:0;border-radius:6px;height:38px;padding:0 14px;font:500 14px \"Helvetica Neue\",\"Myanmar Sangam MN\",sans-serif}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Static visual specimen from the first FigCraft design; interaction states are not established.",
+      "html": "<button class=\"ds-secondary\">Cancel</button>",
+      "css": ".ds-secondary{background:#FFFEF9;color:#282B22;border:1px solid #DAD9CB;border-radius:6px;height:38px;padding:0 14px;font:500 14px \"Helvetica Neue\",\"Myanmar Sangam MN\",sans-serif}"
+    },
+    {
+      "name": "Birth field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Static visual specimen from the first FigCraft design; interaction states are not established.",
+      "html": "<label class=\"ds-label\">Name<input class=\"ds-field\" value=\"sample\" readonly></label>",
+      "css": ".ds-label{display:grid;gap:12px;color:#666958;font:13px \"Helvetica Neue\",\"Myanmar Sangam MN\",sans-serif}.ds-field{background:#FFFEF9;color:#282B22;border:1px solid #DAD9CB;border-radius:5px;height:44px;padding:0 12px;font:16px \"Helvetica Neue\",sans-serif}"
+    },
+    {
+      "name": "Selected navigation",
+      "kind": "nav",
+      "refersTo": "navigation-selected",
+      "description": "Static visual specimen from the first FigCraft design; interaction states are not established.",
+      "html": "<div class=\"ds-nav\">Chart<small>Natal and transits</small></div>",
+      "css": ".ds-nav{background:#E8DDAF;color:#282B22;border-radius:7px;padding:10px 14px;font:15px \"Helvetica Neue\",\"Myanmar Sangam MN\",sans-serif}.ds-nav small{display:block;color:#666958;font:12px \"Helvetica Neue\",sans-serif}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The desktop chart workbook",
+    "overview": "**Creative North Star: \"The desktop chart workbook\"**\n\nMOTAA is a cream and gold working chart book translated into a desktop workspace for astrologers using an English interface and traditional Myanmar chart notation. Traditional square and circular chart geometry occupies the main working surface, while a persistent rail, active birth profile and calculation setup give the dense notation context. The source-informed circular chart uses seven rings, 27 nakshatras and 108 subdivisions, with a separate detail view. This document records the FigCraft design; it does not describe an implemented Tauri application.\n\n**Key Characteristics:**\n\n- English interface labels with traditional Burmese planetary numerals.\n- Flat paper surfaces, quiet rules and restrained gold selection.\n- Drawn chart geometry and readable data symbols.\n",
+    "keyCharacteristics": [
+      "English interface and English digits, with original phonetic syllables preserved.",
+      "Flat paper surfaces, quiet rules and restrained gold selection.",
+      "Drawn chart geometry and readable data symbols."
+    ],
+    "rules": [
+      {
+        "name": "The Notation Rule",
+        "body": "English digits (0\u20139) throughout charts, tables and period rows. Preserve source numeric values, including code 0. Preserve the linguistic syllable ring. Use the user-provided 27 spellings in the full name key; condense and abbreviate ring labels only when necessary.",
+        "section": "typography"
+      },
+      {
+        "name": "The Reference Rule",
+        "body": "Visible chart values, period dates and aspect marks remain identified as reference or illustrative fixtures until calculation parity is independently established. A drawn Save control or prototype link is not evidence of persistence or computation.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do use English for every interface label, action and validation message.",
+      "Do reserve Baskerville for the MOTAA wordmark.",
+      "Do preserve traditional chart geometry and numeric values displayed with English digits.",
+      "Do keep birth details and calculation setup visible while exploring charts.",
+      "Do pair data color with symbols, labels or a legend.",
+      "Do distinguish reference fixtures from verified calculation output."
+    ],
+    "donts": [
+      "Don't replace charts with screenshot backgrounds.",
+      "Don't use data red, green or blue as competing primary actions.",
+      "Don't add shadows or gradients to the recorded paper surfaces.",
+      "Don't turn dense result rows into a stack of decorative cards.",
+      "Don't claim smaller-window behavior from the fixed desktop canvas.",
+      "Don't treat navigation hotspots as working forms, saving or calculations."
+    ]
+  }
+}

@@ -1,0 +1,498 @@
+    public final void m2274m0() {
+        String str;
+        int i2;
+        String str2;
+        String str3;
+        String str4;
+        String str5;
+        int i3;
+        int i4;
+        float f2;
+        float f3;
+        Bitmap bitmapCreateBitmap = Bitmap.createBitmap(this.f4168R0, this.f4172S0, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmapCreateBitmap);
+        canvas.translate(0.0f, 0.0f);
+        float f4 = this.f4164Q0;
+        canvas.scale(f4, f4);
+        Paint paint = new Paint(1);
+        Paint paint2 = new Paint(1);
+        Paint.Style style = Paint.Style.FILL_AND_STROKE;
+        paint2.setStyle(style);
+        Paint paint3 = new Paint(1);
+        paint3.setStyle(style);
+        Paint paint4 = new Paint(1);
+        paint4.setStyle(style);
+        if (AbstractC0273n.m738t("gold", this.f4118H)) {
+            paint4.setColor(AbstractC0273n.m727i(AbstractC0273n.m728j(this, R.color.gold_1, canvas, R.color.gold_1, paint2), R.color.gold_2, paint3, this, R.color.gold_3));
+        } else if (AbstractC0273n.m738t("pink", this.f4118H)) {
+            paint4.setColor(AbstractC0273n.m727i(AbstractC0273n.m728j(this, R.color.pink_1, canvas, R.color.pink_1, paint2), R.color.pink_2, paint3, this, R.color.pink_3));
+        } else if (AbstractC0273n.m738t("blue", this.f4118H)) {
+            paint4.setColor(AbstractC0273n.m727i(AbstractC0273n.m728j(this, R.color.blue_1, canvas, R.color.blue_1, paint2), R.color.blue_2, paint3, this, R.color.blue_3));
+        } else if (AbstractC0273n.m738t("bw", this.f4118H)) {
+            paint4.setColor(AbstractC0273n.m727i(AbstractC0273n.m728j(this, R.color.bw_1, canvas, R.color.bw_1, paint2), R.color.bw_2, paint3, this, R.color.bw_3));
+        } else {
+            paint4.setColor(AbstractC0273n.m727i(AbstractC0273n.m728j(this, R.color.gold_1, canvas, R.color.gold_1, paint2), R.color.gold_2, paint3, this, R.color.gold_3));
+        }
+        canvas.drawCircle(240.0f, 240.0f, 240.0f, paint3);
+        canvas.drawCircle(240.0f, 240.0f, 220.0f, paint2);
+        canvas.drawCircle(240.0f, 240.0f, 145.0f, paint3);
+        canvas.drawCircle(240.0f, 240.0f, 125.0f, paint2);
+        canvas.drawCircle(240.0f, 240.0f, 95.0f, paint3);
+        canvas.drawCircle(240.0f, 240.0f, 78.0f, paint2);
+        canvas.drawCircle(240.0f, 240.0f, 60.0f, paint4);
+        Paint.Style style2 = Paint.Style.STROKE;
+        paint.setStyle(style2);
+        paint.setStrokeWidth(2.0f);
+        paint.setColor(-16777216);
+        canvas.drawCircle(240.0f, 240.0f, 240.0f, paint);
+        canvas.drawCircle(240.0f, 240.0f, 220.0f, paint);
+        canvas.drawCircle(240.0f, 240.0f, 145.0f, paint);
+        paint.setStrokeWidth(1.0f);
+        canvas.drawCircle(240.0f, 240.0f, 125.0f, paint);
+        canvas.drawCircle(240.0f, 240.0f, 95.0f, paint);
+        canvas.drawCircle(240.0f, 240.0f, 78.0f, paint);
+        paint.setStrokeWidth(1.0f);
+        canvas.drawCircle(240.0f, 240.0f, 60.0f, paint);
+        paint.setStrokeWidth(0.4f);
+        paint.setStyle(style);
+        paint.setTypeface(this.f4167R);
+        paint.setTextSize(11.0f);
+        canvas.drawText(this.f4153O, 210.0f, 200.0f, paint);
+        canvas.drawText("" + this.f4170R2 + "." + this.f4174S2 + "." + this.f4178T2, 195.0f, 215.0f, paint);
+        canvas.drawText("" + this.f4182U2 + ":" + this.f4186V2 + ":" + this.f4190W2, 188.0f, 230.0f, paint);
+        paint.setTextSize(9.0f);
+        if (this.f4200Z0) {
+            canvas.drawText(this.f4221e2, 185.0f, 245.0f, paint);
+        } else {
+            canvas.drawText(this.f4096C2, 185.0f, 245.0f, paint);
+        }
+        if (this.f4257n2.equals("Sidereal")) {
+            canvas.drawText(this.f4257n2 + " " + this.f4262o2, 188.0f, 260.0f, paint);
+        } else {
+            canvas.drawText(this.f4257n2, 188.0f, 260.0f, paint);
+        }
+        canvas.drawText(this.f4267p2, 195.0f, 275.0f, paint);
+        paint.setTextSize(10.0f);
+        StringBuilder sb = new StringBuilder("လ ");
+        double[] dArr = this.f4218d3;
+        AbstractC0273n.m735q(dArr[0], sb, " ");
+        sb.append(m2214K(dArr[0]));
+        sb.append(m2218M(dArr[0]));
+        sb.append("'");
+        canvas.drawText(sb.toString(), 2.0f, 15.0f, paint);
+        StringBuilder sb2 = new StringBuilder("၁ ");
+        AbstractC0273n.m735q(dArr[1], sb2, " ");
+        sb2.append(m2214K(dArr[1]));
+        sb2.append(m2218M(dArr[1]));
+        sb2.append("'");
+        canvas.drawText(sb2.toString(), 2.0f, 30.0f, paint);
+        StringBuilder sb3 = new StringBuilder("၂ ");
+        AbstractC0273n.m735q(dArr[2], sb3, " ");
+        sb3.append(m2214K(dArr[2]));
+        sb3.append(m2218M(dArr[2]));
+        sb3.append("'");
+        canvas.drawText(sb3.toString(), 2.0f, 45.0f, paint);
+        StringBuilder sb4 = new StringBuilder("၃ ");
+        AbstractC0273n.m735q(dArr[3], sb4, " ");
+        sb4.append(m2214K(dArr[3]));
+        sb4.append(m2218M(dArr[3]));
+        sb4.append("'");
+        String[] strArr = this.f4246k3;
+        sb4.append(strArr[3]);
+        canvas.drawText(sb4.toString(), 2.0f, 60.0f, paint);
+        StringBuilder sb5 = new StringBuilder("၄ ");
+        AbstractC0273n.m735q(dArr[4], sb5, " ");
+        sb5.append(m2214K(dArr[4]));
+        sb5.append(m2218M(dArr[4]));
+        sb5.append("'");
+        sb5.append(strArr[4]);
+        canvas.drawText(sb5.toString(), 2.0f, 425.0f, paint);
+        StringBuilder sb6 = new StringBuilder("၅ ");
+        AbstractC0273n.m735q(dArr[5], sb6, " ");
+        sb6.append(m2214K(dArr[5]));
+        sb6.append(m2218M(dArr[5]));
+        sb6.append("'");
+        sb6.append(strArr[5]);
+        canvas.drawText(sb6.toString(), 2.0f, 440.0f, paint);
+        StringBuilder sb7 = new StringBuilder("၆ ");
+        AbstractC0273n.m735q(dArr[6], sb7, " ");
+        sb7.append(m2214K(dArr[6]));
+        sb7.append(m2218M(dArr[6]));
+        sb7.append("'");
+        sb7.append(strArr[6]);
+        canvas.drawText(sb7.toString(), 2.0f, 455.0f, paint);
+        StringBuilder sb8 = new StringBuilder("၀ ");
+        char c2 = 7;
+        AbstractC0273n.m735q(dArr[7], sb8, " ");
+        sb8.append(m2214K(dArr[7]));
+        sb8.append(m2218M(dArr[7]));
+        sb8.append("'");
+        sb8.append(strArr[7]);
+        canvas.drawText(sb8.toString(), 2.0f, 470.0f, paint);
+        StringBuilder sb9 = new StringBuilder("၈ ");
+        AbstractC0273n.m735q(dArr[8], sb9, " ");
+        sb9.append(m2214K(dArr[8]));
+        sb9.append(m2218M(dArr[8]));
+        sb9.append("'");
+        sb9.append(strArr[8]);
+        canvas.drawText(sb9.toString(), 402.0f, 15.0f, paint);
+        StringBuilder sb10 = new StringBuilder("၉ ");
+        AbstractC0273n.m735q(dArr[9], sb10, " ");
+        sb10.append(m2214K(dArr[9]));
+        sb10.append(m2218M(dArr[9]));
+        sb10.append("'");
+        sb10.append(strArr[9]);
+        canvas.drawText(sb10.toString(), 402.0f, 30.0f, paint);
+        StringBuilder sb11 = new StringBuilder("10th ");
+        AbstractC0273n.m735q(this.f4242j3[10], sb11, " ");
+        sb11.append(m2214K(this.f4242j3[10]));
+        sb11.append(m2218M(this.f4242j3[10]));
+        sb11.append("'");
+        canvas.drawText(sb11.toString(), 402.0f, 455.0f, paint);
+        StringBuilder sb12 = new StringBuilder("4th ");
+        AbstractC0273n.m735q(this.f4242j3[4], sb12, " ");
+        sb12.append(m2214K(this.f4242j3[4]));
+        sb12.append(m2218M(this.f4242j3[4]));
+        sb12.append("'");
+        canvas.drawText(sb12.toString(), 402.0f, 470.0f, paint);
+        m2233b0(dArr);
+        Paint paint5 = new Paint(1);
+        paint5.setStrokeWidth(1.0f);
+        paint5.setStyle(style2);
+        paint5.setColor(-16777216);
+        Paint paint6 = new Paint(1);
+        paint6.setColor(-16777216);
+        paint6.setStyle(style);
+        paint6.setTypeface(this.f4167R);
+        paint6.setStrokeWidth(0.5f);
+        paint6.setTextSize(20.0f);
+        Paint paint7 = new Paint(1);
+        paint7.setTypeface(this.f4167R);
+        paint7.setColor(-16777216);
+        paint7.setTextSize(20.0f);
+        paint7.setStyle(style);
+        paint7.setStrokeWidth(1.0f);
+        paint.setColor(-16777216);
+        paint.setStrokeWidth(2.0f);
+        int i5 = 0;
+        while (i5 < 12) {
+            double d2 = ((double) (i5 * 360)) / 12.0d;
+            canvas.drawLine(m2209G0(d2, 240.0d, 220.0d), m2211H0(d2, 240.0d, 220.0d), m2209G0(d2, 240.0d, 145.0d), m2211H0(d2, 240.0d, 145.0d), paint);
+            i5++;
+            c2 = c2;
+            dArr = dArr;
+        }
+        double[] dArr2 = dArr;
+        String[] strArr2 = {"၉", "၆", "၁", "၂", "၃", "၈", "၅", "၀", "၄", "၉", "၆", "၁", "၂", "၃", "၈", "၅", "၀", "၄", "၉", "၆", "၁", "၂", "၃", "၈", "၅", "၀", "၄"};
+        String[] strArr3 = {"၁", "၂", "၃", "၄", "၅", "၆", "၇", "၈", "၉", "၁၀", "၁၁", "၁၂", "၁၃", "၁၄", "၁၅", "၁၆", "၁၇", "၁၈", "၁၉", "၂၀", "၂၁", "၂၂", "၂၃", "၂၄", "၂၅", "၂၆", "၂၇"};
+        int i6 = 0;
+        while (true) {
+            float f5 = 8.0f;
+            if (i6 >= 27) {
+                break;
+            }
+            if (i6 == 0 || i6 == 9) {
+                f2 = 4.0f;
+                f3 = 2.0f;
+                paint5.setStrokeWidth(f3);
+                double d3 = ((double) (i6 * 360)) / 27.0d;
+                canvas.drawLine(m2209G0(d3, 240.0d, 240.0d), m2211H0(d3, 240.0d, 240.0d), m2209G0(d3, 240.0d, 60.0d), m2211H0(d3, 240.0d, 60.0d), paint5);
+            } else if (i6 == 18) {
+                f5 = 8.0f;
+                i6 = i6;
+                f3 = 2.0f;
+                f2 = 4.0f;
+                paint5.setStrokeWidth(f3);
+                double d4 = ((double) (i6 * 360)) / 27.0d;
+                canvas.drawLine(m2209G0(d4, 240.0d, 240.0d), m2211H0(d4, 240.0d, 240.0d), m2209G0(d4, 240.0d, 60.0d), m2211H0(d4, 240.0d, 60.0d), paint5);
+            } else {
+                paint5.setStrokeWidth(1.0f);
+                double d5 = ((double) (i6 * 360)) / 27.0d;
+                f2 = 4.0f;
+                f5 = 8.0f;
+                i6 = i6;
+                canvas.drawLine(m2209G0(d5, 240.0d, 145.0d), m2211H0(d5, 240.0d, 145.0d), m2209G0(d5, 240.0d, 60.0d), m2211H0(d5, 240.0d, 60.0d), paint5);
+                paint5.setStrokeWidth(1.0f);
+                canvas.drawLine(m2209G0(d5, 240.0d, 240.0d), m2211H0(d5, 240.0d, 240.0d), m2209G0(d5, 240.0d, 220.0d), m2211H0(d5, 240.0d, 220.0d), paint5);
+            }
+            paint6.setTextSize(f5);
+            double d6 = (((double) (i6 * 360)) / 27.0d) + 6.0d;
+            canvas.drawText(this.f4252m1[i6], m2209G0(d6, 240.0d, 110.0d) - 10.0f, m2211H0(d6, 240.0d, 110.0d) + 3.0f, paint6);
+            paint6.setTextSize(10.0f);
+            paint6.setColor(-16776961);
+            canvas.drawText(strArr2[i6], m2209G0(d6, 240.0d, 86.0d) - f2, m2211H0(d6, 240.0d, 86.0d) + 2.0f, paint6);
+            paint6.setTextSize(f5);
+            paint6.setColor(-16777216);
+            canvas.drawText(strArr3[i6], m2209G0(d6, 240.0d, 68.0d) - f2, m2211H0(d6, 240.0d, 68.0d) + 1.0f, paint6);
+            i6++;
+        }
+        float f6 = 4.0f;
+        int i7 = 9;
+        Paint paint8 = new Paint(1);
+        paint8.setTypeface(this.f4167R);
+        paint8.setColor(-16777216);
+        paint8.setTextSize(10.0f);
+        paint8.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint8.setStrokeWidth(0.5f);
+        int i8 = 0;
+        String str6 = "";
+        while (true) {
+            str = "၀";
+            i2 = 108;
+            if (i8 >= 108) {
+                break;
+            }
+            paint8.setColor(-16777216);
+            double d7 = ((double) (i8 * 360)) / 108.0d;
+            String str7 = "၃";
+            String str8 = "၆";
+            canvas.drawLine(m2209G0(d7, 240.0d, 220.0d), m2211H0(d7, 240.0d, 220.0d), m2209G0(d7, 240.0d, 145.0d), m2211H0(d7, 240.0d, 145.0d), paint4);
+            int i9 = i8 % 12;
+            if (i9 == 0) {
+                str6 = str7;
+            }
+            String str9 = i9 == 1 ? str8 : str6;
+            if (i9 == 2) {
+                str9 = "၄";
+            }
+            if (i9 == 3) {
+                str9 = "၂";
+            }
+            if (i9 == 4) {
+                str9 = "၁";
+            }
+            str6 = "၅";
+            int i10 = i7;
+            if (i9 == 5) {
+                str9 = "၄";
+            }
+            str7 = i9 != 7 ? i9 != 6 ? str9 : "၆" : "၃";
+            if (i9 == 8) {
+                str7 = str6;
+            }
+            if (i9 == i10) {
+                str7 = "၀";
+            }
+            str = i9 != 10 ? str7 : "၀";
+            if (i9 != 11) {
+                str6 = str;
+            }
+            paint8.setTextSize(7.0f);
+            paint8.setColor(-16777216);
+            double d8 = i8;
+            double d9 = ((0.6d + d8) * 360.0d) / 108.0d;
+            canvas.drawText(str6, m2209G0(d9, 240.0d, 135.0d) - 3.0f, m2211H0(d9, 240.0d, 135.0d) + 2.0f, paint8);
+            paint8.setTextSize(8.0f);
+            paint8.setColor(-16777216);
+            double d10 = ((d8 + 0.5d) * 360.0d) / 108.0d;
+            canvas.drawText(new String[]{"စု", "စေ", "စော", "လ", "လိ", "လု", "လေ", "လော", "အ", "ဣ", "ဥ", "ဧ", "သြ", "ဝ", "ဝိ", "ဝု", "ဝေ", "ဝေါ", "က", "ကိ", "ကု", "ဃ", "င", "ဆ", "ကေ", "ကော", "ဟ", "ဟိ", "ဟု", "ဟေ", "ဟော", "ဍ", "ဍိ", "ဍု", "ဍေ", "ဍော", "မ", "မိ", "မု", "မေ", "မော", "ဋ", "ဋိ", "ဋု", "ဋေ", "ဋော", "ပ", "ပိ", "ပု", "သျှ", "ဏ", "ဌ", "ပေ", "ပေါ", "ရ", "ရိ", "ရု", "ရေ", "ရော", "တ", "တိ", "တု", "တေ", "တော", "န", "နိ", "နု", "နေ", "နော", "ယ", "ယိ", "ယု", "ယေ", "ယော", "ဘ", "ဘိ", "ဘု", "ဓ", "ဖ", "ဎ", "ဘေ", "ဘော", "ဇ", "ဇိဇုဇော", "ခခိ", "ခု", "ခေ", "ခေါ", "ဂ", "ဂိ", "ဂု", "ဂေ", "ဂေါ", "သ", "သိ", "သု", "သေ", "သော", "ဒ", "ဒိ", "ဒု", "ထ", "စျ", "ည", "ဒေ", "ဒေါ", "စ", "စိ"}[i8], m2209G0(d10, 240.0d, 230.0d) - 5.0f, m2211H0(d10, 240.0d, 230.0d) + 2.0f, paint8);
+            i8++;
+            i7 = i10;
+        }
+        String str10 = "၃";
+        String str11 = "၆";
+        String str12 = "၄";
+        String str13 = "၅";
+        int i11 = i7;
+        paint8.setColor(-65536);
+        Paint paint9 = new Paint(1);
+        paint9.setTypeface(this.f4167R);
+        paint9.setColor(-16777216);
+        paint9.setTextSize(10.0f);
+        paint9.setStyle(Paint.Style.STROKE);
+        paint9.setStrokeWidth(1.0f);
+        Paint paint10 = new Paint(1);
+        paint10.setTypeface(this.f4167R);
+        paint10.setColor(-16777216);
+        paint10.setTextSize(20.0f);
+        paint10.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint10.setStrokeWidth(2.0f);
+        double[] dArr3 = this.f4234h3;
+        double[] dArr4 = this.f4242j3;
+        int i12 = 1;
+        while (i12 < 13) {
+            if (i12 == 1) {
+                paint10.setColor(-256);
+            }
+            if (i12 == 5) {
+                paint10.setColor(Color.rgb(247, 220, 111));
+            }
+            if (i12 == i11) {
+                paint10.setColor(Color.rgb(241, 196, 15));
+            }
+            if (i12 == 4 || i12 == 7 || i12 == 10) {
+                paint10.setColor(-16711936);
+            }
+            if (i12 == 6 || i12 == 8) {
+                i3 = 12;
+            } else {
+                i3 = 12;
+                if (i12 == 12) {
+                }
+                if (i12 == 2) {
+                    paint10.setColor(-16711681);
+                }
+                if (i12 == 3) {
+                    paint10.setColor(Color.rgb(194, 234, 252));
+                }
+                if (i12 == 11) {
+                    paint10.setColor(Color.rgb(237, 205, 252));
+                }
+                if (i12 == i3) {
+                    i4 = 1;
+                } else {
+                    i4 = i12 + 1;
+                }
+                int[] iArrM2252x0 = m2252x0(dArr4[i12]);
+                double d11 = (((double) (((iArrM2252x0[0] * 4) + iArrM2252x0[1]) * 360.0f)) / 108.0d) + 1.6d;
+                canvas.drawCircle(m2209G0(d11, 240.0d, 160.0d), m2211H0(d11, 240.0d, 160.0d), f6, paint10);
+                int[] iArrM2252x1 = m2252x0(dArr3[i12]);
+                float f7 = (iArrM2252x1[0] * 4) + iArrM2252x1[1];
+                paint8.setColor(-16777216);
+                double d12 = (((double) (f7 * 360.0f)) / 108.0d) + 1.6d;
+                canvas.drawCircle(m2209G0(d12, 240.0d, 150.0d), m2211H0(d12, 240.0d, 150.0d), 4.0f, paint8);
+                int[] iArrM2252x2 = m2252x0(dArr3[i4]);
+                float f8 = (iArrM2252x2[0] * 4) + iArrM2252x2[1];
+                int i13 = i12;
+                canvas.drawLine(m2209G0(d12, 240.0d, 150.0d), m2211H0(d12, 240.0d, 150.0d), m2209G0(d11, 240.0d, 160.0d), m2211H0(d11, 240.0d, 160.0d), paint10);
+                double d13 = (((double) (f8 * 360.0f)) / 108.0d) + 1.6d;
+                canvas.drawLine(m2209G0(d13, 240.0d, 150.0d), m2211H0(d13, 240.0d, 150.0d), m2209G0(d11, 240.0d, 160.0d), m2211H0(d11, 240.0d, 160.0d), paint10);
+                canvas.drawText(String.valueOf(i13), m2209G0(d11, 240.0d, 160.0d) - 3.0f, m2211H0(d11, 240.0d, 160.0d) + 2.0f, paint8);
+                i12 = i13 + 1;
+                i2 = 108;
+                dArr4 = dArr4;
+                i11 = 9;
+                dArr3 = dArr3;
+                str13 = str13;
+                bitmapCreateBitmap = bitmapCreateBitmap;
+                f6 = 4.0f;
+            }
+            paint10.setColor(-65536);
+            if (i12 == 2) {
+                paint10.setColor(-16711681);
+            }
+            if (i12 == 3) {
+                paint10.setColor(Color.rgb(194, 234, 252));
+            }
+            if (i12 == 11) {
+                paint10.setColor(Color.rgb(237, 205, 252));
+            }
+            if (i12 == i3) {
+                i4 = 1;
+            } else {
+                i4 = i12 + 1;
+            }
+            int[] iArrM2252x3 = m2252x0(dArr4[i12]);
+            double d14 = (((double) (((iArrM2252x3[0] * 4) + iArrM2252x3[1]) * 360.0f)) / 108.0d) + 1.6d;
+            canvas.drawCircle(m2209G0(d14, 240.0d, 160.0d), m2211H0(d14, 240.0d, 160.0d), f6, paint10);
+            int[] iArrM2252x4 = m2252x0(dArr3[i12]);
+            float f9 = (iArrM2252x4[0] * 4) + iArrM2252x4[1];
+            paint8.setColor(-16777216);
+            double d15 = (((double) (f9 * 360.0f)) / 108.0d) + 1.6d;
+            canvas.drawCircle(m2209G0(d15, 240.0d, 150.0d), m2211H0(d15, 240.0d, 150.0d), 4.0f, paint8);
+            int[] iArrM2252x5 = m2252x0(dArr3[i4]);
+            float f10 = (iArrM2252x5[0] * 4) + iArrM2252x5[1];
+            int i14 = i12;
+            canvas.drawLine(m2209G0(d15, 240.0d, 150.0d), m2211H0(d15, 240.0d, 150.0d), m2209G0(d14, 240.0d, 160.0d), m2211H0(d14, 240.0d, 160.0d), paint10);
+            double d16 = (((double) (f10 * 360.0f)) / 108.0d) + 1.6d;
+            canvas.drawLine(m2209G0(d16, 240.0d, 150.0d), m2211H0(d16, 240.0d, 150.0d), m2209G0(d14, 240.0d, 160.0d), m2211H0(d14, 240.0d, 160.0d), paint10);
+            canvas.drawText(String.valueOf(i14), m2209G0(d14, 240.0d, 160.0d) - 3.0f, m2211H0(d14, 240.0d, 160.0d) + 2.0f, paint8);
+            i12 = i14 + 1;
+            i2 = 108;
+            dArr4 = dArr4;
+            i11 = 9;
+            dArr3 = dArr3;
+            str13 = str13;
+            bitmapCreateBitmap = bitmapCreateBitmap;
+            f6 = 4.0f;
+        }
+        Bitmap bitmap = bitmapCreateBitmap;
+        int i15 = i2;
+        int i16 = i11;
+        String str14 = str13;
+        int i17 = 0;
+        while (i17 < i15) {
+            int i18 = 0;
+            int i19 = 0;
+            int i20 = 10;
+            while (i18 < i20) {
+                double[] dArr5 = dArr2;
+                if (((int) ((dArr5[i18] / 13.333333333333334d) * 4.0d)) % i15 == i17) {
+                    if (i18 == 0) {
+                        paint8.setColor(m2205E0("လ", dArr5));
+                    }
+                    if (i18 == 1) {
+                        paint8.setColor(m2205E0("၁", dArr5));
+                    }
+                    if (i18 == 2) {
+                        paint8.setColor(m2205E0("၂", dArr5));
+                    }
+                    str3 = str10;
+                    if (i18 == 3) {
+                        paint8.setColor(m2205E0(str3, dArr5));
+                    }
+                    String str15 = str12;
+                    if (i18 == 4) {
+                        paint8.setColor(m2205E0(str15, dArr5));
+                    }
+                    if (i18 == 5) {
+                        str5 = str14;
+                        paint8.setColor(m2205E0(str5, dArr5));
+                    } else {
+                        str5 = str14;
+                    }
+                    if (i18 == 6) {
+                        str4 = str11;
+                        paint8.setColor(m2205E0(str4, dArr5));
+                    } else {
+                        str4 = str11;
+                    }
+                    if (i18 == 7) {
+                        paint8.setColor(m2205E0(str, dArr5));
+                    }
+                    if (i18 == 8) {
+                        paint8.setColor(m2205E0("၈", dArr5));
+                    }
+                    if (i18 == i16) {
+                        paint8.setColor(m2205E0("၉", dArr5));
+                    }
+                    double d17 = (((double) (i17 * 360)) / 108.0d) + 1.6d;
+                    double d18 = 210.0f - (i19 * 12);
+                    str12 = str15;
+                    str2 = str5;
+                    canvas.drawCircle(m2209G0(d17, 240.0d, d18), m2211H0(d17, 240.0d, d18), 7.0f, paint8);
+                    paint8.setTextSize(10.0f);
+                    paint8.setColor(-1);
+                    if (i18 == 0) {
+                        canvas.drawText(m2207F0(i18), m2209G0(d17, 240.0d, d18) - 5.0f, m2211H0(d17, 240.0d, d18) + 2.0f, paint8);
+                    } else {
+                        canvas.drawText(m2207F0(i18), m2209G0(d17, 240.0d, d18) - 3.0f, m2211H0(d17, 240.0d, d18) + 3.0f, paint8);
+                    }
+                    i19++;
+                } else {
+                    str2 = str14;
+                    str3 = str10;
+                    str4 = str11;
+                }
+                i18++;
+                str11 = str4;
+                dArr2 = dArr5;
+                str10 = str3;
+                str = str;
+                str14 = str2;
+                i15 = 108;
+                i20 = 10;
+                i16 = 9;
+            }
+            i17++;
+            i15 = 108;
+            i16 = 9;
+        }
+        Paint paint11 = new Paint(1);
+        paint11.setColor(-16777216);
+        paint11.setTypeface(this.f4167R);
+        paint11.setTextSize(20.0f);
+        paint11.setStrokeWidth(1.0f);
+        paint11.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint11.setTypeface(this.f4167R);
+        this.f4175T.setImageBitmap(bitmap);

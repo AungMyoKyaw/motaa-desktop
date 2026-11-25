@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>MOTAA — Understand the Algorithms</title>
+<style>
+:root{font-family:Inter,"Helvetica Neue",Arial,sans-serif;background:#f6f3ec;color:#282b22;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0}a{color:#6f5918}a:focus-visible{outline:3px solid #2f6386;outline-offset:3px}
+header{padding:54px clamp(22px,6vw,92px) 42px;display:grid;grid-template-columns:minmax(0,2fr) minmax(220px,1fr);gap:35px;background:#eeeadd;border-bottom:1px solid #d2c8ab}
+.kicker{font-size:11px;letter-spacing:.17em;text-transform:uppercase;color:#715d25;font-weight:800}h1{font-size:clamp(38px,5vw,68px);line-height:1.04;max-width:800px;letter-spacing:-.05em;margin:16px 0}h2{font-size:clamp(25px,2.9vw,40px);letter-spacing:-.045em;margin:0 0 8px}p{line-height:1.7;color:#555b4d}header p{font-size:16px;max-width:650px}.status{background:#fffef8;border:1px solid #d8d0b8;padding:25px;border-radius:8px;align-self:center;font-size:14px;line-height:1.8}.status b{display:block;color:#755f19;font-size:11px;letter-spacing:.12em;margin-bottom:7px}
+nav{position:sticky;top:0;background:#f6f3eceb;backdrop-filter:blur(8px);border-bottom:1px solid #ded7c6;display:flex;gap:15px;padding:15px clamp(22px,6vw,92px);overflow:auto;z-index:2;white-space:nowrap}
+nav a{text-decoration:none;font-size:12px;font-weight:600}nav a:hover{text-decoration:underline}
+main{max-width:1700px;margin:auto;padding:24px clamp(20px,5vw,80px) 75px}
+article{scroll-margin-top:90px;margin:48px 0 92px}
+.topline{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:800;color:#8d7840;margin-bottom:12px}
+.desc{font-size:15px;max-width:900px;margin:6px 0 20px}
+.figure{background:#fffefb;border:1px solid #e3dbcb;border-radius:8px;padding:clamp(12px,3vw,38px);overflow:auto}
+.figure img{display:block;margin:0 auto;max-width:100%;height:auto}
+.figure img.wide{min-width:min(850px,100%)}
+.links{display:flex;gap:18px;margin:15px 0;align-items:center;font-size:13px}
+.links a{text-underline-offset:3px}
+.note{font-size:12px;color:#675a37;border-left:3px solid #94762c;padding:12px 16px;background:#f2eddc;max-width:1050px}
+footer{border-top:1px solid #d5cdb8;padding:30px clamp(22px,6vw,92px);font-size:13px;color:#6b705f}
+@media(max-width:780px){header{display:block;padding-top:30px}.status{margin-top:25px}nav{gap:13px}article{margin:40px 0 65px}}
+</style>
+<header>
+  <div>
+    <div class="kicker">MOTAA V31.1 / source-led learning atlas</div>
+    <h1>Understand the<br>calculation engine.</h1>
+    <p>Six diagrams. Two recovered algorithm paths. One clear distinction between what the original Android source establishes and what remains a proposed desktop implementation.</p>
+  </div>
+  <aside class="status">
+    <b>STATUS / RESEARCH ONLY</b>
+    Android source recovered: 1,104 Java files.<br>
+    PlantUML source: editable.<br>
+    Numerical parity: not verified.<br>
+    FigCraft master: unchanged by this atlas.
+  </aside>
+</header>
+<nav aria-label="Lessons">
+  <a href="#paths">01 Two paths</a><a href="#astro">02 Astronomy</a><a href="#calendar">03 Myanmar calendar</a><a href="#dasha">04 Dasha</a><a href="#rust">05 Rust design</a><a href="#testing">06 Verification</a>
+</nav>
+<main>
+  <article id="paths">
+    <div class="topline">01 / Recovered logic</div><h2>Two algorithms. One chart.</h2>
+    <p class="desc">MOTAA combines astronomical results with a separate Myanmar calendar calculation. Traditional observance flags do not require planetary longitudes.</p>
+    <div class="figure"><img class="wide" src="01-original-two-paths.svg" alt="Two-path calculation flow"></div>
+    <div class="links"><a href="01-original-two-paths.puml">PlantUML source</a><a href="01-original-two-paths.svg">Open SVG</a><a href="01-original-two-paths.png">PNG export</a></div>
+    <p class="note">Source: MASTER_REVERSE_ENGINEERING.md §6.1. Both branches were reconstructed statically.</p>
+  </article>
+  <article id="astro">
+    <div class="topline">02 / Source-mapped sequence</div><h2>From birth time to planet positions.</h2>
+    <p class="desc">Local date and zone information become a Julian day; the recovered ephemeris interface calculates bodies and houses; traditional rules then interpret those values.</p>
+    <div class="figure"><img class="wide" src="02-astronomy-sequence.svg" alt="Astronomy sequence"></div>
+    <div class="links"><a href="02-astronomy-sequence.puml">PlantUML source</a><a href="02-astronomy-sequence.svg">Open SVG</a><a href="02-astronomy-sequence.png">PNG export</a></div>
+    <p class="note">Source: REVERSE_ENGINEERING.md §4 and MASTER_REVERSE_ENGINEERING.md §6.2–6.5. Conceptual ordering, not a traced execution recording.</p>
+  </article>
+  <article id="calendar">
+    <div class="topline">03 / Independent calendar</div><h2>How Myanmar calendar dates are built.</h2>
+    <p class="desc">The recovered algorithm determines JDN, Myanmar year, intercalary status, moon phase and traditional day classifications. It does not depend on Swiss Ephemeris planet calculations.</p>
+    <div class="figure"><img src="03-myanmar-calendar.svg" alt="Myanmar calendar algorithm flow"></div>
+    <div class="links"><a href="03-myanmar-calendar.puml">PlantUML source</a><a href="03-myanmar-calendar.svg">Open SVG</a><a href="03-myanmar-calendar.png">PNG export</a></div>
+    <p class="note">Source: MASTER_REVERSE_ENGINEERING.md §6.8–6.9. Calendar-boundary golden fixtures still needed.</p>
+  </article>
+  <article id="dasha">
+    <div class="topline">04 / Source-specific constants</div><h2>Vimshottari Dasha without hand-waving.</h2>
+    <p class="desc">The sidereal Moon determines the Nakshatra and starting lord. The original backdating and remaining-balance paths deliberately use different day-per-year constants.</p>
+    <div class="figure"><img src="04-dasha-walkthrough.svg" alt="Dasha from Moon longitude to major and nested periods"></div>
+    <div class="links"><a href="04-dasha-walkthrough.puml">PlantUML source</a><a href="04-dasha-walkthrough.svg">Open SVG</a><a href="04-dasha-walkthrough.png">PNG export</a></div>
+    <p class="note">Source: MASTER_REVERSE_ENGINEERING.md §6.7. Distinct constants: 365.25636305 and 365.2422.</p>
+  </article>
+  <article id="rust">
+    <div class="topline">05 / Proposed architecture — not source evidence</div><h2>What a clean Rust engine could look like.</h2>
+    <p class="desc">An independent, agent-friendly Rust core could expose a JSON CLI and reusable results for Tauri while keeping the ephemeris backend replaceable and licensed.</p>
+    <div class="figure"><img class="wide" src="05-proposed-rust-engine.svg" alt="Proposed Rust calculation engine architecture"></div>
+    <div class="links"><a href="05-proposed-rust-engine.puml">PlantUML source</a><a href="05-proposed-rust-engine.svg">Open SVG</a><a href="05-proposed-rust-engine.png">PNG export</a></div>
+    <p class="note">Proposal only. The 120-question algorithm-engine specification has not been approved and no core has been implemented.</p>
+  </article>
+  <article id="testing">
+    <div class="topline">06 / Release gate</div><h2>What does “correct” actually mean?</h2>
+    <p class="desc">The design is not an astronomical calculation benchmark. Original APK golden outputs, boundary fixtures and documented tolerances are required before claiming numerical equivalence.</p>
+    <div class="figure"><img src="06-verification-gates.svg" alt="Algorithm numerical verification workflow"></div>
+    <div class="links"><a href="06-verification-gates.puml">PlantUML source</a><a href="06-verification-gates.svg">Open SVG</a><a href="06-verification-gates.png">PNG export</a></div>
+    <p class="note">Plan derived from MASTER_REVERSE_ENGINEERING.md §7. No comparison to a new implementation has yet been run.</p>
+  </article>
+</main>
+<footer>Made from the recovered MOTAA V31.1 research. No production code, original APK data, or FigCraft master was modified by these diagrams.</footer>
+</html>

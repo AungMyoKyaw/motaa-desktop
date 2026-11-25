@@ -1,0 +1,34 @@
+{
+  "criteria": [
+    {
+      "id": "native-build",
+      "state": "verified",
+      "evidence": "Locked Rust build, workspace tests, strict Clippy and native smoke"
+    },
+    {
+      "id": "advanced-tools",
+      "state": "incomplete",
+      "next": "Obtain the Ten pillars/Ayu Moon and Satapati source conventions and reference outputs. Verify original ZarTarPro advanced-tool outputs and complete the remaining view states."
+    },
+    {
+      "id": "original-calculation-parity",
+      "state": "incomplete",
+      "next": "Fourteen astronomical cases (including 140 major Dasha starts, 1,260 Antardashas, and 11,340 Pratyantardashas within 0.5 days), fifteen Julian-midnight calendar cases, 31 Myanmar watat/era years, and 20 main.A0 observance dates pass against V31.1. Remaining: optional higher-order ELP2000 lunar state table to reduce the 0.0096° true-node residual (from Meeus 60-term dvlat truncation) and mode-specific rendered output verification."
+    },
+    {
+      "id": "android-migration",
+      "state": "verified",
+      "evidence": "Live Android-schema import, deduplication and backup tests. Original V31.1 saved-profile database accepted through the native macOS picker, with birth settings and reference location restored."
+    },
+    {
+      "id": "native-acceptance",
+      "state": "incomplete",
+      "next": "Hidden native smoke verifies workspace shortcuts, focus traversal, Enter/Space control activation, profile errors/undo, backup review/rejection, MUNP modes, and all four palettes; 15-state live visible-window screenshot QA verified Charts, Profiles, Calculations, Time & Analysis, Advanced, and 1024×680 layout. Remaining: physical mouse hit-testing and native macOS file dialog acceptance."
+    },
+    {
+      "id": "macos-distribution",
+      "state": "verified",
+      "evidence": "Ad-hoc signed macOS release bundle (MOTAA Desktop.app) passes plutil, codesign --verify --deep --strict, and hidden native --smoke via scripts/build-macos.sh. Apple Developer ID / notarization excluded by user decision."
+    }
+  ]
+}

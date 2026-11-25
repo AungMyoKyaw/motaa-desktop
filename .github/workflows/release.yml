@@ -1,0 +1,138 @@
+name: Desktop Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Package ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-arm64
+            runner: macos-15
+          - platform: macos-x64
+            runner: macos-15-intel
+          - platform: windows-x64
+            runner: windows-2025
+          - platform: linux-x64
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    env:
+      PACKAGE: motaa-desktop-${{ github.ref_name }}-${{ matrix.platform }}
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Rust and validate version
+        shell: bash
+        run: |
+          rustup update stable
+          rustup override set stable
+          version=$(cargo metadata --locked --no-deps --format-version 1 |
+            jq -er '.packages[] | select(.name == "motaa-desktop") | .version')
+          test "$GITHUB_REF_NAME" = "v$version"
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libfontconfig1-dev libwayland-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev libxcb1-dev libxcb-shape0-dev \
+            libxcb-xfixes0-dev libvulkan-dev libx11-xcb-dev libudev-dev libclang-dev \
+            libssl-dev pkg-config
+      - name: Locate Windows shader compiler
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $compiler = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter fxc.exe |
+            Where-Object { $_.Directory.Name -eq 'x64' } |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          if (!$compiler) { throw "Windows SDK shader compiler fxc.exe was not found" }
+          "GPUI_FXC_PATH=$($compiler.FullName)" >> $env:GITHUB_ENV
+      - name: Build macOS bundle
+        if: runner.os == 'macOS'
+        run: |
+          xcrun --find metal || xcodebuild -downloadComponent MetalToolchain
+          bash scripts/build-macos.sh | tee "$RUNNER_TEMP/motaa-bundle.log"
+          app=$(tail -n 1 "$RUNNER_TEMP/motaa-bundle.log")
+          mkdir dist
+          ditto -c -k --keepParent "$app" "dist/$PACKAGE.zip"
+      - name: Build Linux archive
+        if: runner.os == 'Linux'
+        run: |
+          cargo build --locked --release --bin motaa-desktop
+          cargo test --release --locked --workspace
+          mkdir -p "stage/$PACKAGE" dist
+          cp target/release/motaa-desktop "stage/$PACKAGE/"
+          cp LICENSE "stage/$PACKAGE/LICENSE"
+          mkdir "stage/$PACKAGE/third_party"
+          cp third_party/*LICENSE* "stage/$PACKAGE/third_party/"
+          cp third_party/xattr/LICENSE-* "stage/$PACKAGE/third_party/"
+          ldd "stage/$PACKAGE/motaa-desktop" | tee "$RUNNER_TEMP/motaa-libraries.log"
+          if grep -q 'not found' "$RUNNER_TEMP/motaa-libraries.log"; then exit 1; fi
+          tar -C stage -czf "dist/$PACKAGE.tar.gz" "$PACKAGE"
+      - name: Build Windows archive
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cargo build --locked --release --bin motaa-desktop
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cargo test --release --locked --workspace
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Path "stage/$env:PACKAGE", dist
+          Copy-Item target/release/motaa-desktop.exe "stage/$env:PACKAGE/"
+          Copy-Item LICENSE "stage/$env:PACKAGE/LICENSE"
+          New-Item -ItemType Directory -Path "stage/$env:PACKAGE/third_party"
+          Copy-Item third_party/*LICENSE*, third_party/xattr/LICENSE-* "stage/$env:PACKAGE/third_party/"
+          Compress-Archive -Path "stage/$env:PACKAGE" -DestinationPath "dist/$env:PACKAGE.zip"
+          .\packaging\windows\build-msix.ps1 -ExePath target\release\motaa-desktop.exe -Version $env:GITHUB_REF_NAME -OutputMsix "dist/$env:PACKAGE.msix"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub release
+    needs: package
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Verify assets and publish
+        working-directory: dist
+        run: |
+          package="motaa-desktop-$GITHUB_REF_NAME"
+          assets=("$package-macos-arm64.zip" "$package-macos-x64.zip"
+                  "$package-windows-x64.zip" "$package-windows-x64.msix"
+                  "$package-linux-x64.tar.gz")
+          for asset in "${assets[@]}"; do test -s "$asset"; done
+          sha256sum "${assets[@]}" > SHA256SUMS.txt
+          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --verify-tag --draft \
+              --title "MOTAA Desktop $GITHUB_REF_NAME" \
+              --notes "Public desktop release. See CHANGELOG.md for release notes. macOS bundles are ad-hoc signed and not notarized. The Windows ZIP contains an unsigned portable executable. The Linux archive targets Ubuntu 24.04 x64."
+          fi
+          if [[ "$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft)" == true ]]; then
+            gh release upload "$GITHUB_REF_NAME" "${assets[@]}" SHA256SUMS.txt --clobber
+            gh release edit "$GITHUB_REF_NAME" --draft=false
+          fi

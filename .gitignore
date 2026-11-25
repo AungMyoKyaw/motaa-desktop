@@ -1,0 +1,67 @@
+# macOS and editor artifacts
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# Local browser automation and debug artifacts
+.playwright-cli/
+*.log
+*.tmp
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+.coverage
+htmlcov/
+
+# JavaScript / TypeScript and native build outputs
+node_modules/
+.bun/
+.next/
+.turbo/
+dist/
+build/
+target/
+*.rs.bk
+*.profraw
+*.profdata
+*.app/
+*.dmg
+*.pkg
+*.class
+*.jar
+
+# Local runtime databases
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+
+# Local environment configuration (keep shareable templates)
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+# Timestamped screenshots captured during local work
+/Screenshot *.png
+
+# Local design checkpoints; do not exclude authored FigCraft work
+/design/staging/motaa-before-*.figcraft
+
+# Private worked examples with personal birth data (never commit)
+/design/algorithm-explainer/local-examples/

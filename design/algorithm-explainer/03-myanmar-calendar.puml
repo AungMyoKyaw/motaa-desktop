@@ -1,0 +1,32 @@
+@startuml
+' Source: motaa-app/MASTER_REVERSE_ENGINEERING.md §6.8-6.9
+title Myanmar calendar · Independent calculation flow
+caption VERIFIED STATIC FORMULAS · Calendar rules do not depend on ephemeris positions
+skinparam backgroundColor #FAF8F0
+skinparam defaultFontName Helvetica
+skinparam ActivityBackgroundColor #FFFEF9
+skinparam ActivityBorderColor #756020
+skinparam ActivityFontColor #282B22
+skinparam ActivityDiamondBackgroundColor #E8DDAF
+skinparam ActivityDiamondBorderColor #756020
+skinparam ArrowColor #756020
+skinparam shadowing false
+start
+:Receive civil date (day, month, year);
+if (Calendar mode?) then (Hybrid)
+  :Use 1582 reform boundary\nJDN 2361222;
+elseif (Gregorian) then
+  :Apply Gregorian rules;
+else (Julian)
+  :Apply Julian rules;
+endif
+:Calculate integer Julian Day Number;
+:Estimate Myanmar year using solar-year constant\nand Myanmar epoch;
+:Select era-specific watat parameters\nand exceptions;
+:Calculate watat (intercalary year)\nand relevant full moon;
+:Resolve Myanmar year, month\n(First/Second Waso or late month where applicable);
+:Determine lunar day and phase\n(waxing / full / waning / new);
+:Calculate independent weekday-based flags\nSabbath · Yatyaza · Pyathada\nand other observances;
+:Return Myanmar calendar result\n+ traditional labels;
+stop
+@enduml

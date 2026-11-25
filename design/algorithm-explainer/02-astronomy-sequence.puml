@@ -1,0 +1,47 @@
+@startuml
+' Source: motaa-app/REVERSE_ENGINEERING.md §4 and MASTER_REVERSE_ENGINEERING.md §6.2-6.5
+title Planet positions and houses · Recovered Android call sequence
+caption SOURCE-MAPPED · Order and mappings recovered statically; actual numerical outputs unverified
+skinparam backgroundColor #FAF8F0
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #756020
+  LifeLineBorderColor #A89B6A
+  LifeLineBackgroundColor #FFFEF9
+  ParticipantBackgroundColor #E8DDAF
+  ParticipantBorderColor #756020
+  ParticipantFontColor #282B22
+  GroupBackgroundColor #F3EEDB
+  GroupBorderColor #DAD9CB
+}
+actor "Chart request" as C
+participant "main.java\ninput normalization" as MAIN
+participant "C0052w\ncalendar / Julian day" as JD
+participant "AbstractC0055z\nastro facade" as F
+participant "L0.D\nephemeris implementation" as EPH
+participant "Chart mode\nrules + display" as RULE
+C -> MAIN: Civil date/time, tz sign, DMS, zodiac, house, Rahu
+MAIN -> MAIN: Signed UTC offset\nN/E positive, S/W negative
+MAIN -> JD: Civil date, UTC hour, calendar mode
+JD --> MAIN: Julian day
+MAIN -> F: Planet body + JD + ayanamsha + zodiac
+F -> EPH: Select sidereal/tropical flags\nSet ayanamsha, calculate body
+EPH --> F: Longitude, latitude, speed etc.
+F --> MAIN: Source-ordered planet values
+MAIN -> F: JD, latitude, longitude, house option
+F -> EPH: Compute houses, Ascendant and MC
+EPH --> F: Cusps / Ascendant / MC
+alt Vehlow_Placidus selected
+  F -> F: Apply custom cusp remapping
+end
+F --> MAIN: House and cusp arrays
+MAIN -> RULE: Planet, house and source settings
+RULE -> RULE: Aspects / Nakshatra / Dasha\n(according to selected display mode)
+RULE --> C: Mode-specific chart data / display
+note over MAIN,RULE
+  Source identifiers: main.java, AbstractC0055z.java,
+  C0052w.java and L0/D.java.
+  This is a conceptual sequence, not a full call trace.
+end note
+@enduml

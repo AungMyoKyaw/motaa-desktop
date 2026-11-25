@@ -1,0 +1,131 @@
+@startuml
+title MOTAA Desktop · GPUI class design
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam BackgroundColor #FFFEFC
+skinparam classBackgroundColor #F8F5EE
+skinparam classBorderColor #7C5B21
+hide empty members
+
+package "Native GPUI views" {
+  interface "gpui::Render" as Render
+  class DesktopRoot {
+    session: Entity<WorkspaceSession>
+    render(window, context)
+  }
+  class WorkspaceViews <<module>> {
+    charts() / profiles() / calculations()
+    time_analysis() / advanced_analysis()
+  }
+  class ChartCanvas {
+    layout(scene, viewport)
+    paint(scene, palette)
+  }
+  class ThemeTokens {
+    shell: GoldHeritage
+    chart_palette: ChartPalette
+  }
+}
+package "Application state" {
+  class WorkspaceSession {
+    route: Workspace
+    profile_draft: Option<ProfileDraft>
+    calculation_drafts: ScopedDrafts
+    epochs: EpochSelection
+    time_cursor: TimeCursor
+    dispatch(action)
+  }
+  enum Workspace {
+    Charts
+    Profiles
+    Calculations
+    TimeAnalysis
+    AdvancedAnalysis
+  }
+  class ProfileContexts {
+    natal: ProfileRef
+    transit: ProfileRef
+    birth_location: Location
+    reference_location: Location
+  }
+  class CalculationSettings {
+    zodiac / ayanamsha / house_system / node
+    calendar / aspect_option
+  }
+  class TimeCursor {
+    anchor / selected_instant / step_unit
+    step(direction)
+    scrub(offset)
+  }
+  class EpochSelection {
+    planets: Epoch
+    ascendant: Epoch
+  }
+  class AnalysisState {
+    inputs: AnalysisRequest
+    request_id: RequestId
+    phase: AnalysisPhase
+    last_success: Option<AnalysisResult>
+    retry()
+  }
+  enum AnalysisPhase {
+    Idle
+    Running
+    Ready
+    Failed
+  }
+}
+package "Calculation and persistence" {
+  class AnalysisService {
+    calculate(request): Result<AnalysisResult>
+  }
+  class MotaaEngineAdapter {
+    {field} delegates to verified motaa-engine routines
+  }
+  class AnalysisResult {
+    data: ChartData
+    evidence: CalculationEvidence
+  }
+  class ChartScene {
+    paths / glyphs / hit_regions
+    from_result(result, mode)
+  }
+  class ProfileRepository {
+    list() / save() / delete() / undo()
+    export_backup() / inspect_import() / apply_import()
+  }
+  class SqliteProfileStore {
+    {field} adapts motaa-store after compatibility checks
+  }
+}
+Render <|.. DesktopRoot
+DesktopRoot *-- WorkspaceSession : Entity owns session
+DesktopRoot --> WorkspaceViews
+WorkspaceViews --> WorkspaceSession : actions and read state
+WorkspaceViews --> ThemeTokens
+WorkspaceViews --> ChartCanvas
+ChartCanvas --> ChartScene
+WorkspaceSession --> Workspace
+WorkspaceSession *-- ProfileContexts
+WorkspaceSession *-- CalculationSettings : effective settings
+WorkspaceSession *-- TimeCursor
+WorkspaceSession *-- EpochSelection
+WorkspaceSession *-- AnalysisState
+WorkspaceSession --> ProfileRepository
+AnalysisState --> AnalysisPhase
+AnalysisState --> AnalysisService
+AnalysisState --> AnalysisResult : last success
+AnalysisService --> MotaaEngineAdapter
+AnalysisService --> AnalysisResult
+ChartScene ..> AnalysisResult
+ProfileRepository --> SqliteProfileStore
+note right of AnalysisState
+  Request IDs discard stale completions.
+  Failure keeps inputs and prior success.
+end note
+note bottom of AnalysisResult
+  Original-output parity and independent
+  calculations carry distinct evidence.
+  Unknown birth time omits dependent angles.
+end note
+@enduml
