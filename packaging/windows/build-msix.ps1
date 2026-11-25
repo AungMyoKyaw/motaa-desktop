@@ -8,7 +8,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$OutputMsix,
 
-    [string]$Publisher = "CN=Aung Myo Kyaw"
+    [string]$Publisher = "CN=F9A61C2C-016B-4569-AF3E-D8FB4CBCB150"
 )
 
 $ErrorActionPreference = "Stop"

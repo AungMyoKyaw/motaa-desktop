@@ -39,7 +39,11 @@ jobs:
       - name: Set up Rust and validate version
         shell: bash
         run: |
-          rustup update stable
+          for i in 1 2 3; do
+            rustup update stable && break
+            echo "rustup update failed (attempt $i), retrying..."
+            sleep 5
+          done
           rustup override set stable
           version=$(cargo metadata --locked --no-deps --format-version 1 |
             jq -er '.packages[] | select(.name == "motaa-desktop") | .version')
