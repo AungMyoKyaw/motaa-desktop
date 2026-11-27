@@ -48,6 +48,9 @@ To build locally on Windows:
 | `04-time-analysis.png` | Independent transit time and location navigator |
 | `05-profiles.png` | Saved birth profiles with backup and import |
 | `06-advanced-tools.png` | Advanced astrological and astronomical tools directory |
+| `07-about.png` | About & Credits page with origin and creator links |
+
+Pre-generated Windows-chrome Store screenshots (`2880×1800` PNG) are also saved locally in `packaging/windows/screenshots/`.
 
 > **Policy 10.1.1.3 Compliance**: Never upload macOS screenshots from `docs/screenshots/` to Microsoft Partner Center. Always upload the Windows-captured screenshots from the `windows-store-submission` CI/CD artifact.
 

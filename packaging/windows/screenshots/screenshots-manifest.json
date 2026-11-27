@@ -1,0 +1,55 @@
+{
+  "platform": "windows-x64",
+  "count": 7,
+  "screenshots": [
+    {
+      "file": "01-rasi-chart.png",
+      "width": 2880,
+      "height": 1800,
+      "bytes": 437138,
+      "sha256": "63810aad79a56c9e3ad59376413324caebe6332322bca66f82b201737a1288a4"
+    },
+    {
+      "file": "02-tricakka-chart.png",
+      "width": 2880,
+      "height": 1800,
+      "bytes": 267419,
+      "sha256": "c011cbab61d4440df904e878208f556dec0ea8deaf1b221f4a09f21031e4cd60"
+    },
+    {
+      "file": "03-dasha-periods.png",
+      "width": 2880,
+      "height": 1800,
+      "bytes": 350161,
+      "sha256": "2b8bf536e47898ccfffba7a74d2a95ab0cbeb7105848c783bf3dda0c2c36b339"
+    },
+    {
+      "file": "04-time-analysis.png",
+      "width": 2880,
+      "height": 1800,
+      "bytes": 346200,
+      "sha256": "c100b24d6ae07bbd5ebda1f02bdb163f3516d348368202f43134630e29012444"
+    },
+    {
+      "file": "05-profiles.png",
+      "width": 2880,
+      "height": 1800,
+      "bytes": 183858,
+      "sha256": "4f0e36cea510bc03b517b36f3b34eec10ef8e92c7d2d4cc283f68c3ac01db5f4"
+    },
+    {
+      "file": "06-advanced-tools.png",
+      "width": 2880,
+      "height": 1800,
+      "bytes": 371228,
+      "sha256": "dac7b40315d6c6db66da0eb92037ec4eebe407b8d13c68c91ed9ff306f4c240a"
+    },
+    {
+      "file": "07-about.png",
+      "width": 2880,
+      "height": 1800,
+      "bytes": 394418,
+      "sha256": "aa50135417c7f6864cda224552826e905fa0b32c4d96e2c7e3d6024dc6cf4422"
+    }
+  ]
+}

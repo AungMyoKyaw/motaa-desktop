@@ -14,6 +14,8 @@ Special thanks to:
 - **Numan MOTAA**: [https://web.facebook.com/numan.motaa](https://web.facebook.com/numan.motaa)
 - **AstrologerKoPaKhan**: [https://web.facebook.com/AstrologerKoPaKhan](https://web.facebook.com/AstrologerKoPaKhan)
 
+![MOTAA Desktop About & Credits](docs/screenshots/07-about.png)
+
 ## Workspaces & Features
 
 - **Charts (`Cmd+1`)**: 12 chart modes including Rasi, Tricakka, Traditional aspects, Nakshatra traversal, LatLon, Western aspects, Natal + transit, Dasha periods, Circular chart (with 27-nakshatra detail view), Rahu wheel (27/28 divisions), Rasi strengths, and Rasi aspects.

@@ -321,6 +321,13 @@ const RAIL_ICONS: [(&str, &[u8]); 6] = [
     ("info", include_bytes!("../assets/rail/info.svg")),
 ];
 
+fn macos_chrome() -> bool {
+    static MACOS_CHROME: OnceLock<bool> = OnceLock::new();
+    *MACOS_CHROME.get_or_init(|| {
+        cfg!(target_os = "macos") && !std::env::args().any(|arg| arg == "--windows-chrome")
+    })
+}
+
 fn app_icon() -> Arc<Image> {
     static ICON: OnceLock<Arc<Image>> = OnceLock::new();
     ICON.get_or_init(|| {
@@ -1396,7 +1403,7 @@ impl Render for DesktopRoot {
             .bg(rgb(RAIL))
             .px(px(if collapsed { 8. } else { 12. }))
             .pb_3()
-            .pt(px(if cfg!(target_os = "macos") { 56. } else { 16. }))
+            .pt(px(if macos_chrome() { 56. } else { 16. }))
             .border_r_1()
             .border_color(rgb(SUBTLE_LINE))
             .child(
@@ -1448,7 +1455,7 @@ impl Render for DesktopRoot {
             .child(div().h(px(10.)))
             .children(Workspace::ALL.into_iter().enumerate().map(|(idx, entry)| {
                 let selected = entry == route;
-                let shortcut_hint = if cfg!(target_os = "macos") {
+                let shortcut_hint = if macos_chrome() {
                     format!("⌘{}", idx + 1)
                 } else {
                     format!("^{}", idx + 1)
@@ -1759,7 +1766,7 @@ impl Render for DesktopRoot {
                                             .hover(|s| s.bg(rgb(SOFT)))
                                             .child(ui_icon("ui/search", 12.5, MUTED))
                                             .child(caption("Quick jump"))
-                                            .child(shortcut_keycap(if cfg!(target_os = "macos") {
+                                            .child(shortcut_keycap(if macos_chrome() {
                                                 "⌘K"
                                             } else {
                                                 "^K"
@@ -2168,22 +2175,19 @@ fn main() {
                 KeyBinding::new(&primary_keybinding("q"), Quit, None),
             ]);
             let window_size = if store_screenshots.is_some() {
-                size(px(1440.), px(900.))
+                if macos_chrome() {
+                    size(px(1440.), px(900.))
+                } else {
+                    size(px(1440.), px(868.))
+                }
             } else {
                 size(px(1280.), px(800.))
             };
             let bounds = Bounds::centered(None, window_size, cx);
-            #[cfg(target_os = "macos")]
             let titlebar = Some(gpui::TitlebarOptions {
                 title: Some("MOTAA Desktop".into()),
-                appears_transparent: true,
-                traffic_light_position: Some(gpui::point(px(20.), px(19.))),
-            });
-            #[cfg(not(target_os = "macos"))]
-            let titlebar = Some(gpui::TitlebarOptions {
-                title: Some("MOTAA Desktop".into()),
-                appears_transparent: false,
-                traffic_light_position: None,
+                appears_transparent: macos_chrome(),
+                traffic_light_position: macos_chrome().then(|| gpui::point(px(20.), px(19.))),
             });
             let window = cx
                 .open_window(

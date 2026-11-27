@@ -717,6 +717,7 @@ pub(crate) fn run(
                 ("04-time-analysis", Workspace::Time),
                 ("05-profiles", Workspace::Profiles),
                 ("06-advanced-tools", Workspace::Advanced),
+                ("07-about", Workspace::About),
             ];
             for &(slug, route) in workspace_shots {
                 window
