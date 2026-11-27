@@ -1276,6 +1276,8 @@ impl DesktopRoot {
     pub(crate) fn about_overlay(&self, cx: &mut Context<Self>) -> AnyElement {
         div()
             .id("about-backdrop")
+            .occlude()
+            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
             .absolute()
             .inset_0()
             .bg(gpui::rgba(0x28251f70))

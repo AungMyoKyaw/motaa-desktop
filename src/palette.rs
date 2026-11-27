@@ -200,6 +200,8 @@ impl DesktopRoot {
 
         div()
             .id("command-palette-backdrop")
+            .occlude()
+            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
             .absolute()
             .inset_0()
             .bg(rgba(0x28251f66))
