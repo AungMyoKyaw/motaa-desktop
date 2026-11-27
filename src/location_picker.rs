@@ -600,6 +600,9 @@ impl DesktopRoot {
                             .child(div().flex_1().min_w(px(0.)).child(tz_input))
                             .child(
                                 action_control((prefix, 103usize), cx, move |view, _| {
+                                    if let Some(other) = view.draft_handles_mut(!reference) {
+                                        other.location.tz_open = false;
+                                    }
                                     if let Some(h) = view.draft_handles_mut(reference) {
                                         h.location.tz_open = !h.location.tz_open;
                                     }
@@ -613,11 +616,7 @@ impl DesktopRoot {
                                 .text_size(px(13.))
                                 .text_color(rgb(INK))
                                 .hover(|s| s.bg(rgb(SOFT)))
-                                .child(if tz_open {
-                                    "Hide list"
-                                } else {
-                                    "Choose timezone"
-                                }),
+                                .child("Choose timezone"),
                             )
                             .child(
                                 action_control((prefix, 104usize), cx, move |view, cx| {
@@ -641,11 +640,27 @@ impl DesktopRoot {
                     }),
             );
 
-        if tz_open {
-            section = section.child(self.render_timezone_panel(reference, effective_dt, cx));
-        }
-
         section
+    }
+
+    pub(super) fn active_timezone_popup(&self) -> Option<bool> {
+        if self.draft.as_ref().is_some_and(|d| d.location.tz_open) {
+            Some(false)
+        } else if self
+            .reference_location_draft
+            .as_ref()
+            .is_some_and(|d| d.location.tz_open)
+        {
+            Some(true)
+        } else {
+            None
+        }
+    }
+
+    pub(super) fn close_timezone_popup(&mut self, reference: bool) {
+        if let Some(handles) = self.draft_handles_mut(reference) {
+            handles.location.tz_open = false;
+        }
     }
 
     pub(super) fn active_map_popup(&self) -> Option<bool> {
@@ -1372,6 +1387,89 @@ impl DesktopRoot {
             .into_any_element()
     }
 
+    pub(super) fn timezone_overlay(&self, reference: bool, cx: &mut Context<Self>) -> AnyElement {
+        let title = if reference {
+            "Choose Reference Timezone"
+        } else {
+            "Choose Timezone"
+        };
+        let effective_dt = if reference {
+            self.session.read(cx).time
+        } else {
+            self.draft
+                .as_ref()
+                .map(|d| d.picker.current_datetime(cx))
+                .unwrap_or_else(|| self.session.read(cx).now())
+        };
+        let tz_summary = self
+            .draft_handles(reference)
+            .and_then(|h| describe_timezone_at(h.timezone.read(cx).value(), effective_dt).ok())
+            .unwrap_or_else(|| "Select an IANA timezone or UTC offset".to_owned());
+
+        div()
+            .id("timezone-backdrop")
+            .absolute()
+            .inset_0()
+            .bg(gpui::rgba(0x28251f70))
+            .flex()
+            .items_center()
+            .justify_center()
+            .p_6()
+            .on_click(cx.listener(move |root, _, _, cx| {
+                root.close_timezone_popup(reference);
+                cx.notify();
+            }))
+            .child(
+                div()
+                    .id("timezone-dialog")
+                    .w(px(580.))
+                    .max_w_full()
+                    .max_h(px(640.))
+                    .overflow_y_scroll()
+                    .bg(rgb(PAPER))
+                    .rounded(px(12.))
+                    .border_1()
+                    .border_color(rgb(LINE))
+                    .shadow_lg()
+                    .p_5()
+                    .flex()
+                    .flex_col()
+                    .gap_3()
+                    .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
+                    .on_click(|_, _, cx| cx.stop_propagation())
+                    .on_key_down(cx.listener(move |root, event: &gpui::KeyDownEvent, _, cx| {
+                        if event.keystroke.key == "escape" {
+                            root.close_timezone_popup(reference);
+                            cx.stop_propagation();
+                            cx.notify();
+                        }
+                    }))
+                    .child(
+                        row()
+                            .justify_between()
+                            .items_center()
+                            .child(
+                                column()
+                                    .gap_0()
+                                    .child(
+                                        div()
+                                            .text_size(px(16.))
+                                            .font_weight(gpui::FontWeight::SEMIBOLD)
+                                            .text_color(rgb(INK))
+                                            .child(title),
+                                    )
+                                    .child(caption(tz_summary)),
+                            )
+                            .child(button("Close", true, cx, move |root, cx| {
+                                root.close_timezone_popup(reference);
+                                cx.notify();
+                            })),
+                    )
+                    .child(self.render_timezone_panel(reference, effective_dt, cx)),
+            )
+            .into_any_element()
+    }
+
     fn render_timezone_panel(
         &self,
         reference: bool,
@@ -1385,7 +1483,7 @@ impl DesktopRoot {
         let tz_query = handles.location.tz_query.clone();
         let current_tz = handles.timezone.read(cx).value().trim().to_owned();
         let query_text = tz_query.read(cx).value().to_owned();
-        let matches = filter_timezones(&query_text, effective_dt, 12);
+        let matches = filter_timezones(&query_text, effective_dt, 24);
 
         panel()
             .bg(rgb(SOFT))

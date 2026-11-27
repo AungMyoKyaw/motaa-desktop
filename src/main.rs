@@ -1260,6 +1260,9 @@ impl Render for DesktopRoot {
             .when_some(self.active_map_popup(), |root, reference| {
                 root.child(self.location_map_overlay(reference, cx))
             })
+            .when_some(self.active_timezone_popup(), |root, reference| {
+                root.child(self.timezone_overlay(reference, cx))
+            })
             .when(self.palette_open, |root| {
                 root.child(self.palette_overlay(cx))
             })
