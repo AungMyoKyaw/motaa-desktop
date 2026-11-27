@@ -1,5 +1,8 @@
-use chrono::{Datelike, Days, NaiveDate, NaiveDateTime, Timelike};
 use gpui::{Context, Div, Entity, SharedString, div, prelude::*, px, rgb};
+use jiff::{
+    ToSpan,
+    civil::{Date, DateTime},
+};
 
 use crate::{
     DesktopRoot, GOLD, INK, LINE, MUTED, PAPER, SELECTED, action_control, button, caption, column,
@@ -30,31 +33,31 @@ pub const MONTH_SHORT: [&str; 12] = [
 const WEEKDAYS: [&str; 7] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 pub type PickerSelector = fn(&mut DesktopRoot) -> Option<&mut DateTimePicker>;
-pub type PickerChangeCallback = fn(&mut DesktopRoot, NaiveDateTime, &mut Context<DesktopRoot>);
+pub type PickerChangeCallback = fn(&mut DesktopRoot, DateTime, &mut Context<DesktopRoot>);
 pub type ToggleCallback = fn(&mut DesktopRoot, &mut Context<DesktopRoot>);
 
 pub fn days_in_month(year: i32, month: u32) -> u32 {
-    for day in (28..=31).rev() {
-        if NaiveDate::from_ymd_opt(year, month, day).is_some() {
-            return day;
-        }
-    }
-    30
+    let Ok(year) = i16::try_from(year) else {
+        return 30;
+    };
+    let Ok(month) = i8::try_from(month) else {
+        return 30;
+    };
+    Date::new(year, month, 1)
+        .map(|d| u32::from(d.days_in_month() as u8))
+        .unwrap_or(30)
 }
 
-pub fn parse_flexible_datetime(text: &str, allow_date_only: bool) -> Result<NaiveDateTime, String> {
+pub fn parse_flexible_datetime(text: &str, allow_date_only: bool) -> Result<DateTime, String> {
     let trimmed = text.trim();
-    if let Ok(dt) = NaiveDateTime::parse_from_str(trimmed, "%Y-%m-%d %H:%M:%S") {
+    if let Ok(dt) = DateTime::strptime("%Y-%m-%d %H:%M:%S", trimmed) {
         return Ok(dt);
     }
-    if let Ok(dt) = NaiveDateTime::parse_from_str(trimmed, "%Y-%m-%d %H:%M") {
+    if let Ok(dt) = DateTime::strptime("%Y-%m-%d %H:%M", trimmed) {
         return Ok(dt);
     }
-    if allow_date_only
-        && let Ok(date) = NaiveDate::parse_from_str(trimmed, "%Y-%m-%d")
-        && let Some(dt) = date.and_hms_opt(0, 0, 0)
-    {
-        return Ok(dt);
+    if allow_date_only && let Ok(date) = Date::strptime("%Y-%m-%d", trimmed) {
+        return Ok(date.at(0, 0, 0, 0));
     }
     Err("Enter a valid date and time as YYYY-MM-DD HH:MM:SS.".into())
 }
@@ -78,7 +81,7 @@ pub struct DateTimePicker {
 impl DateTimePicker {
     pub fn new(
         id_prefix: &'static str,
-        initial: NaiveDateTime,
+        initial: DateTime,
         open: bool,
         cx: &mut Context<DesktopRoot>,
     ) -> Self {
@@ -114,8 +117,8 @@ impl DateTimePicker {
             hour_input,
             minute_input,
             second_input,
-            view_year: initial.year(),
-            view_month: initial.month(),
+            view_year: i32::from(initial.year()),
+            view_month: u32::from(initial.month() as u8),
             open,
             last_datetime_text: formatted,
             last_parts_text: parts,
@@ -123,7 +126,7 @@ impl DateTimePicker {
         }
     }
 
-    fn format_parts(dt: NaiveDateTime) -> [String; 5] {
+    fn format_parts(dt: DateTime) -> [String; 5] {
         [
             format!("{:04}", dt.year()),
             format!("{:02}", dt.day()),
@@ -133,7 +136,7 @@ impl DateTimePicker {
         ]
     }
 
-    pub fn current_datetime(&self, cx: &gpui::App) -> NaiveDateTime {
+    pub fn current_datetime(&self, cx: &gpui::App) -> DateTime {
         parse_flexible_datetime(self.datetime.read(cx).value(), true).unwrap_or_else(|_| {
             let year = self
                 .year_input
@@ -176,20 +179,17 @@ impl DateTimePicker {
                 .parse::<u32>()
                 .unwrap_or(0)
                 .min(59);
-            NaiveDate::from_ymd_opt(year, self.view_month, day)
-                .and_then(|d| d.and_hms_opt(hour, minute, second))
-                .unwrap_or_else(|| {
-                    NaiveDate::from_ymd_opt(2000, 1, 1)
-                        .unwrap()
-                        .and_hms_opt(12, 0, 0)
-                        .unwrap()
-                })
+            i16::try_from(year)
+                .ok()
+                .and_then(|y| Date::new(y, self.view_month as i8, day as i8).ok())
+                .map(|d| d.at(hour as i8, minute as i8, second as i8, 0))
+                .unwrap_or_else(|| DateTime::constant(2000, 1, 1, 12, 0, 0, 0))
         })
     }
 
-    pub fn set_datetime(&mut self, dt: NaiveDateTime, cx: &mut Context<DesktopRoot>) {
-        self.view_year = dt.year();
-        self.view_month = dt.month();
+    pub fn set_datetime(&mut self, dt: DateTime, cx: &mut Context<DesktopRoot>) {
+        self.view_year = i32::from(dt.year());
+        self.view_month = u32::from(dt.month() as u8);
         self.parts_error = None;
         let formatted = format_time(dt);
         let parts = Self::format_parts(dt);
@@ -219,8 +219,8 @@ impl DateTimePicker {
         if dt_text != self.last_datetime_text {
             self.last_datetime_text = dt_text.clone();
             if let Ok(dt) = parse_flexible_datetime(&dt_text, true) {
-                self.view_year = dt.year();
-                self.view_month = dt.month();
+                self.view_year = i32::from(dt.year());
+                self.view_month = u32::from(dt.month() as u8);
                 self.parts_error = None;
                 let parts = Self::format_parts(dt);
                 self.last_parts_text = parts.clone();
@@ -254,7 +254,7 @@ impl DateTimePicker {
         }
         self.last_parts_text = parts.clone();
 
-        let parsed = (|| -> Result<NaiveDateTime, String> {
+        let parsed = (|| -> Result<DateTime, String> {
             let year: i32 = parts[0]
                 .trim()
                 .parse()
@@ -294,14 +294,16 @@ impl DateTimePicker {
             if second > 59 {
                 return Err("Second must be between 00 and 59.".into());
             }
-            NaiveDate::from_ymd_opt(year, self.view_month, day)
-                .and_then(|d| d.and_hms_opt(hour, minute, second))
+            i16::try_from(year)
+                .ok()
+                .and_then(|y| Date::new(y, self.view_month as i8, day as i8).ok())
+                .map(|d| d.at(hour as i8, minute as i8, second as i8, 0))
                 .ok_or_else(|| "Enter a valid calendar date and time.".into())
         })();
 
         match parsed {
             Ok(dt) => {
-                self.view_year = dt.year();
+                self.view_year = i32::from(dt.year());
                 self.parts_error = None;
                 let formatted = format_time(dt);
                 self.last_datetime_text = formatted.clone();
@@ -327,11 +329,14 @@ impl DateTimePicker {
         let current = self.current_datetime(cx);
         let year = year.clamp(1, 9999);
         let month = month.clamp(1, 12);
-        let day = current.day().min(days_in_month(year, month));
-        if let Some(date) = NaiveDate::from_ymd_opt(year, month, day)
-            && let Some(dt) = date.and_hms_opt(current.hour(), current.minute(), current.second())
+        let day = u32::from(current.day() as u8).min(days_in_month(year, month));
+        if let Ok(y) = i16::try_from(year)
+            && let Ok(date) = Date::new(y, month as i8, day as i8)
         {
-            self.set_datetime(dt, cx);
+            self.set_datetime(
+                date.at(current.hour(), current.minute(), current.second(), 0),
+                cx,
+            );
         }
     }
 
@@ -342,21 +347,23 @@ impl DateTimePicker {
         self.set_year_month(year, month, cx);
     }
 
-    pub fn select_calendar_date(&mut self, date: NaiveDate, cx: &mut Context<DesktopRoot>) {
+    pub fn select_calendar_date(&mut self, date: Date, cx: &mut Context<DesktopRoot>) {
         let current = self.current_datetime(cx);
-        if let Some(dt) = date.and_hms_opt(current.hour(), current.minute(), current.second()) {
-            self.set_datetime(dt, cx);
-        }
+        self.set_datetime(
+            date.at(current.hour(), current.minute(), current.second(), 0),
+            cx,
+        );
     }
 
     pub fn set_hms(&mut self, hour: u32, minute: u32, second: u32, cx: &mut Context<DesktopRoot>) {
         let current = self.current_datetime(cx);
-        if let Some(dt) = current
-            .date()
-            .and_hms_opt(hour.min(23), minute.min(59), second.min(59))
-        {
-            self.set_datetime(dt, cx);
-        }
+        let dt = current.date().at(
+            hour.min(23) as i8,
+            minute.min(59) as i8,
+            second.min(59) as i8,
+            0,
+        );
+        self.set_datetime(dt, cx);
     }
 
     pub fn step_field(
@@ -393,7 +400,7 @@ impl DateTimePicker {
         let summary = if unknown_time {
             format!(
                 "{} · {:02} {} {:04} · Birth time unknown",
-                current.format("%a"),
+                current.strftime("%a"),
                 current.day(),
                 MONTH_SHORT[(current.month() - 1) as usize],
                 current.year()
@@ -401,7 +408,7 @@ impl DateTimePicker {
         } else {
             format!(
                 "{} · {:02} {} {:04} · {:02}:{:02}:{:02} {} ({:02}:{:02}:{:02})",
-                current.format("%a"),
+                current.strftime("%a"),
                 current.day(),
                 MONTH_SHORT[(current.month() - 1) as usize],
                 current.year(),
@@ -425,14 +432,10 @@ impl DateTimePicker {
                     let now = view.session.read(cx).now();
                     if let Some(picker) = get_mut(view) {
                         let cur = picker.current_datetime(cx);
-                        if let Some(dt) =
-                            now.date()
-                                .and_hms_opt(cur.hour(), cur.minute(), cur.second())
-                        {
-                            picker.set_datetime(dt, cx);
-                            if let Some(cb) = on_change {
-                                cb(view, dt, cx);
-                            }
+                        let dt = now.date().at(cur.hour(), cur.minute(), cur.second(), 0);
+                        picker.set_datetime(dt, cx);
+                        if let Some(cb) = on_change {
+                            cb(view, dt, cx);
                         }
                     }
                 },
@@ -556,9 +559,9 @@ impl DateTimePicker {
                                         let cur = picker.current_datetime(cx);
                                         if cur.hour() >= 12 {
                                             picker.set_hms(
-                                                cur.hour() - 12,
-                                                cur.minute(),
-                                                cur.second(),
+                                                (cur.hour() - 12) as u32,
+                                                cur.minute() as u32,
+                                                cur.second() as u32,
                                                 cx,
                                             );
                                             let dt = picker.current_datetime(cx);
@@ -579,9 +582,9 @@ impl DateTimePicker {
                                         let cur = picker.current_datetime(cx);
                                         if cur.hour() < 12 {
                                             picker.set_hms(
-                                                cur.hour() + 12,
-                                                cur.minute(),
-                                                cur.second(),
+                                                (cur.hour() + 12) as u32,
+                                                cur.minute() as u32,
+                                                cur.second() as u32,
                                                 cx,
                                             );
                                             let dt = picker.current_datetime(cx);
@@ -650,7 +653,7 @@ impl DateTimePicker {
 
     fn render_expanded_picker(
         &self,
-        current: NaiveDateTime,
+        current: DateTime,
         unknown_time: bool,
         on_toggle_unknown: Option<ToggleCallback>,
         on_change: Option<PickerChangeCallback>,
@@ -662,19 +665,22 @@ impl DateTimePicker {
         let view_month = self.view_month;
 
         // Build 42-day calendar grid (6 rows x 7 cols) starting on Sunday
-        let first_of_month = NaiveDate::from_ymd_opt(view_year, view_month, 1)
-            .unwrap_or_else(|| NaiveDate::from_ymd_opt(2000, 1, 1).unwrap());
-        let start_offset = first_of_month.weekday().num_days_from_sunday();
+        let first_of_month = i16::try_from(view_year)
+            .ok()
+            .and_then(|y| Date::new(y, view_month as i8, 1).ok())
+            .unwrap_or_else(|| Date::constant(2000, 1, 1));
+        let start_offset = first_of_month.weekday().to_sunday_zero_offset();
         let grid_start = first_of_month
-            .checked_sub_days(Days::new(u64::from(start_offset)))
+            .checked_sub(i32::from(start_offset).days())
             .unwrap_or(first_of_month);
 
         let calendar_cells = (0..42)
             .map(|index| {
                 let cell_date = grid_start
-                    .checked_add_days(Days::new(index as u64))
+                    .checked_add((index as i32).days())
                     .unwrap_or(first_of_month);
-                let in_month = cell_date.month() == view_month && cell_date.year() == view_year;
+                let in_month = u32::from(cell_date.month() as u8) == view_month
+                    && i32::from(cell_date.year()) == view_year;
                 let is_selected = cell_date == current.date();
                 let day_label = format!("{}", cell_date.day());
 
@@ -894,7 +900,7 @@ impl DateTimePicker {
                 .grid_cols(6)
                 .gap_1()
                 .children((0..24u32).map(|h| {
-                    let active = h == selected_hour;
+                    let active = h == selected_hour as u32;
                     action_control(
                         (
                             SharedString::from(format!("{prefix}-hour-cell")),
@@ -904,7 +910,7 @@ impl DateTimePicker {
                         move |view, cx| {
                             if let Some(picker) = get_mut(view) {
                                 let cur = picker.current_datetime(cx);
-                                picker.set_hms(h, cur.minute(), cur.second(), cx);
+                                picker.set_hms(h, cur.minute() as u32, cur.second() as u32, cx);
                                 let dt = picker.current_datetime(cx);
                                 if let Some(cb) = on_change {
                                     cb(view, dt, cx);
@@ -928,14 +934,14 @@ impl DateTimePicker {
                 [0u32, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
                     .into_iter()
                     .map(|m| {
-                        let active = m == selected_minute && current.second() == 0;
+                        let active = m == selected_minute as u32 && current.second() == 0;
                         action_control(
                             (SharedString::from(format!("{prefix}-min-cell")), m as usize),
                             cx,
                             move |view, cx| {
                                 if let Some(picker) = get_mut(view) {
                                     let cur = picker.current_datetime(cx);
-                                    picker.set_hms(cur.hour(), m, 0, cx);
+                                    picker.set_hms(cur.hour() as u32, m, 0, cx);
                                     let dt = picker.current_datetime(cx);
                                     if let Some(cb) = on_change {
                                         cb(view, dt, cx);
@@ -966,8 +972,9 @@ impl DateTimePicker {
                 .into_iter()
                 .enumerate()
                 .map(|(idx, (p_label, h, m))| {
-                    let active =
-                        current.hour() == h && current.minute() == m && current.second() == 0;
+                    let active = current.hour() == h as i8
+                        && current.minute() == m as i8
+                        && current.second() == 0;
                     action_control(
                         (SharedString::from(format!("{prefix}-preset")), idx),
                         cx,
@@ -1055,7 +1062,7 @@ fn small_action_button(
 
 fn step_cb(
     get_mut: fn(&mut DesktopRoot) -> Option<&mut DateTimePicker>,
-    on_change: Option<fn(&mut DesktopRoot, NaiveDateTime, &mut Context<DesktopRoot>)>,
+    on_change: Option<fn(&mut DesktopRoot, DateTime, &mut Context<DesktopRoot>)>,
     step: crate::model::Step,
     delta: i32,
 ) -> impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static {
@@ -1074,7 +1081,7 @@ fn shift_month_and_notify(
     view: &mut DesktopRoot,
     delta: i32,
     get_mut: fn(&mut DesktopRoot) -> Option<&mut DateTimePicker>,
-    on_change: Option<fn(&mut DesktopRoot, NaiveDateTime, &mut Context<DesktopRoot>)>,
+    on_change: Option<fn(&mut DesktopRoot, DateTime, &mut Context<DesktopRoot>)>,
     cx: &mut Context<DesktopRoot>,
 ) {
     if let Some(picker) = get_mut(view) {

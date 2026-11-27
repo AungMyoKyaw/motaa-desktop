@@ -939,7 +939,7 @@ impl DesktopRoot {
                 let end = from_day_number(period.end);
                 let label = start.map_or_else(
                     || "Unavailable".into(),
-                    |value| value.format("%d %b %Y").to_string(),
+                    |value| value.strftime("%d %b %Y").to_string(),
                 );
                 let code = planet_code(period.name());
                 let display_code = match code_prefix.as_deref() {
@@ -1010,7 +1010,7 @@ impl DesktopRoot {
                     div()
                         .px_2()
                         .pt_1()
-                        .child(caption(format!("Ends {}", end_date.format("%d %b %Y")))),
+                        .child(caption(format!("Ends {}", end_date.strftime("%d %b %Y")))),
                 )
             })
     }
@@ -1022,7 +1022,8 @@ impl DesktopRoot {
             .calendar
             .numbered_day(s.natal.year, s.natal.month, s.natal.day);
         let date = motaa_engine::myanmar_calendar::from_julian_day_number(jdn)?;
-        let weekday = chrono::Weekday::try_from(jdn.rem_euclid(7) as u8).ok()?;
+        let weekday =
+            jiff::civil::Weekday::from_monday_zero_offset(jdn.rem_euclid(7) as i8).ok()?;
         let burmese = date.format_burmese_birth_line(weekday, moon_longitude);
         let mut english = format!(
             "ME {} {} {} {} · {} · Dragon {}",

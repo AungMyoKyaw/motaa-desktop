@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use jiff::{SignedDuration, civil::DateTime};
 use motaa_engine::ChartRequest;
 
 use crate::{model, recovered};
@@ -43,17 +43,18 @@ pub struct Report {
 
 pub fn calculate(
     profile: ChartRequest,
-    start: NaiveDateTime,
+    start: DateTime,
     tropical: bool,
     ayanamsha: usize,
 ) -> Result<Report, String> {
-    use chrono::Datelike;
     const DAYS: f64 = 30.;
     const STEP: f64 = 0.25;
     let end_time = start
-        .checked_add_signed(chrono::TimeDelta::days(DAYS as i64))
-        .ok_or("Invalid transit search range.")?;
-    if !(1800..=2100).contains(&start.year()) || !(1800..=2100).contains(&end_time.year()) {
+        .checked_add(SignedDuration::from_hours(DAYS as i64 * 24))
+        .map_err(|_| "Invalid transit search range.")?;
+    if !(1800..=2100).contains(&i32::from(start.year()))
+        || !(1800..=2100).contains(&i32::from(end_time.year()))
+    {
         return Err("Choose a date whose following 30 days fit in 1800–2100.".into());
     }
     let start_jd = model::julian_at(&profile, start)?;
@@ -61,7 +62,7 @@ pub fn calculate(
     let sample = |jd| {
         let mut ephemeris = motaa_engine::reference_ephemeris::calculate(
             jd,
-            start.year(),
+            i32::from(start.year()),
             start.month() as u8,
             profile.latitude,
             profile.longitude,
@@ -178,10 +179,7 @@ mod tests {
             timezone_offset_minutes: 0,
             ..Default::default()
         };
-        let start = chrono::NaiveDate::from_ymd_opt(2024, 3, 15)
-            .unwrap()
-            .and_hms_opt(0, 0, 0)
-            .unwrap();
+        let start = jiff::civil::Date::constant(2024, 3, 15).at(0, 0, 0, 0);
         let report = calculate(profile, start, true, 0).unwrap();
         let event = report
             .events
@@ -205,10 +203,7 @@ mod tests {
             timezone_offset_minutes: 0,
             ..Default::default()
         };
-        let start = chrono::NaiveDate::from_ymd_opt(2024, 4, 1)
-            .unwrap()
-            .and_hms_opt(0, 0, 0)
-            .unwrap();
+        let start = jiff::civil::Date::constant(2024, 4, 1).at(0, 0, 0, 0);
         let aries = |ayanamsha| {
             let report = calculate(profile.clone(), start, false, ayanamsha).unwrap();
             assert_eq!(report.ayanamsha, ayanamsha);
@@ -237,10 +232,9 @@ mod tests {
             (4, 1, 0, 1, 80_040., Change::StationRetrograde),
             (3, 26, 13, 25, 46_440., Change::StationDirect),
         ] {
-            let start = chrono::NaiveDate::from_ymd_opt(2024, month, day)
+            let start = jiff::civil::Date::new(2024, month as i8, day as i8)
                 .unwrap()
-                .and_hms_opt(hour, 0, 0)
-                .unwrap();
+                .at(hour as i8, 0, 0, 0);
             let report = calculate(profile.clone(), start, true, 0).unwrap();
             let event = report
                 .events

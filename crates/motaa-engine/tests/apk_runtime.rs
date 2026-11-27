@@ -511,7 +511,7 @@ fn dasha_three_levels_match_visible_motaa_first_launch() {
             motaa_engine::dasha::from_day_number(period.start)
                 .unwrap()
                 .date()
-                .format("%Y-%m-%d")
+                .to_string()
                 .to_string()
         })
         .collect();
@@ -544,7 +544,7 @@ fn dasha_three_levels_match_visible_motaa_first_launch() {
                 motaa_engine::dasha::from_day_number(period.start)
                     .unwrap()
                     .date()
-                    .format("%Y-%m-%d")
+                    .to_string()
                     .to_string()
             })
             .collect::<Vec<_>>()
@@ -639,14 +639,14 @@ fn myanmar_calendar_and_observances_match_shipped_motaa_runtime() {
             other => unreachable!("unexpected phase {other}"),
         }
     };
-    let burmese_weekday = |weekday: chrono::Weekday| match weekday {
-        chrono::Weekday::Sun => "တနင်္ဂနွေနေ့",
-        chrono::Weekday::Mon => "တနင်္လာနေ့",
-        chrono::Weekday::Tue => "အင်္ဂါနေ့",
-        chrono::Weekday::Wed => "ဗုဒ္ဓဟူးနေ့",
-        chrono::Weekday::Thu => "ကြာသပတေးနေ့",
-        chrono::Weekday::Fri => "သောကြာနေ့",
-        chrono::Weekday::Sat => "စနေနေ့",
+    let burmese_weekday = |weekday: jiff::civil::Weekday| match weekday {
+        jiff::civil::Weekday::Sunday => "တနင်္ဂနွေနေ့",
+        jiff::civil::Weekday::Monday => "တနင်္လာနေ့",
+        jiff::civil::Weekday::Tuesday => "အင်္ဂါနေ့",
+        jiff::civil::Weekday::Wednesday => "ဗုဒ္ဓဟူးနေ့",
+        jiff::civil::Weekday::Thursday => "ကြာသပတေးနေ့",
+        jiff::civil::Weekday::Friday => "သောကြာနေ့",
+        jiff::civil::Weekday::Saturday => "စနေနေ့",
     };
     let burmese_dragon = |head: &str| -> &'static str {
         match head {
@@ -693,7 +693,8 @@ fn myanmar_calendar_and_observances_match_shipped_motaa_runtime() {
             motaa_engine::myanmar_calendar::CivilCalendar::Hybrid.numbered_day(year, month, day);
         let mm = motaa_engine::myanmar_calendar::from_julian_day_number(jdn)
             .expect("supported Myanmar date");
-        let weekday = chrono::Weekday::try_from(jdn.rem_euclid(7) as u8).unwrap();
+        let weekday =
+            jiff::civil::Weekday::from_monday_zero_offset(jdn.rem_euclid(7) as i8).unwrap();
         let observances = mm.observances(weekday);
         let has = |label: &str| observances.contains(&label);
         let mut rendered = format!(

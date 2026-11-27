@@ -31,13 +31,13 @@ use std::{
     sync::{Arc, OnceLock},
 };
 
-use chrono::{NaiveDateTime, Utc};
 use gpui::{
     AnyElement, App, Application, Bounds, ClickEvent, Context, Div, Entity, FocusHandle, Image,
     ImageFormat, KeyBinding, Window, WindowBounds, WindowOptions, actions, div, img, prelude::*,
     px, rgb, size,
 };
 use input::TextInput;
+use jiff::civil::DateTime;
 use model::{AYANAMSHAS, HOUSES, Settings, Step, Workspace, WorkspaceSession};
 use motaa_engine::ChartRequest;
 pub(crate) use theme::*;
@@ -405,7 +405,13 @@ fn directory_link(
 impl DesktopRoot {
     fn new(store: Result<rusqlite::Connection, String>, cx: &mut Context<Self>) -> Self {
         let session = cx.new(|_| {
-            let mut session = WorkspaceSession::new(store, Utc::now().naive_utc());
+            let mut session = WorkspaceSession::new(
+                store,
+                jiff::Timestamp::now()
+                    .in_tz("UTC")
+                    .map(|z| z.datetime())
+                    .unwrap_or_else(|_| DateTime::constant(2000, 1, 1, 0, 0, 0, 0)),
+            );
             session.time = session.now();
             session.anchor = session.time;
             session
@@ -559,12 +565,8 @@ impl DesktopRoot {
             "{:04}-{:02}-{:02} {:02}:{:02}:{:02}",
             request.year, request.month, request.day, request.hour, request.minute, request.second
         );
-        let initial_dt = parse_time(&timestamp).unwrap_or_else(|_| {
-            chrono::NaiveDate::from_ymd_opt(2000, 1, 1)
-                .unwrap()
-                .and_hms_opt(12, 0, 0)
-                .unwrap()
-        });
+        let initial_dt =
+            parse_time(&timestamp).unwrap_or_else(|_| DateTime::constant(2000, 1, 1, 12, 0, 0, 0));
         let picker = datetime_picker::DateTimePicker::new("profile-dt", initial_dt, true, cx);
         let datetime = picker.datetime.clone();
         self.draft = Some(ProfileDraft {
@@ -601,7 +603,6 @@ impl DesktopRoot {
     }
 
     fn form_request(&self, cx: &App) -> Result<ChartRequest, String> {
-        use chrono::{Datelike, Timelike};
         let draft = self.draft.as_ref().ok_or("Open a profile draft first.")?;
         draft.picker.validate()?;
         let mut request = draft.original.clone();
@@ -614,7 +615,7 @@ impl DesktopRoot {
             timestamp.to_owned()
         };
         let time = parse_time(&timestamp)?;
-        request.year = time.year();
+        request.year = i32::from(time.year());
         request.month = time.month() as u8;
         request.day = time.day() as u8;
         request.hour = time.hour() as u8;
@@ -673,7 +674,7 @@ impl DesktopRoot {
         });
     }
 
-    fn set_time(&mut self, time: NaiveDateTime, reset_anchor: bool, cx: &mut Context<Self>) {
+    fn set_time(&mut self, time: DateTime, reset_anchor: bool, cx: &mut Context<Self>) {
         self.time_picker.set_datetime(time, cx);
         if reset_anchor {
             self.scrub_offset = 0;
@@ -864,7 +865,7 @@ impl Render for DesktopRoot {
         let route = session_ref.workspace;
         let status = session_ref.status.clone();
         let active_natal = session_ref.natal.name.clone();
-        let ref_time_label = session_ref.time.format("%d %b %Y · %H:%M").to_string();
+        let ref_time_label = session_ref.time.strftime("%d %b %Y · %H:%M").to_string();
         let settings = session_ref.settings;
         let ayanamsha_label = if settings.ayanamsha == 0 {
             "Lahiri"
@@ -1341,10 +1342,18 @@ fn settings_strip(settings: Settings) -> Div {
         )
 }
 
-fn format_time(time: NaiveDateTime) -> String {
-    time.format("%Y-%m-%d %H:%M:%S").to_string()
+fn format_time(time: DateTime) -> String {
+    format!(
+        "{:04}-{:02}-{:02} {:02}:{:02}:{:02}",
+        time.year(),
+        time.month(),
+        time.day(),
+        time.hour(),
+        time.minute(),
+        time.second()
+    )
 }
-fn parse_time(text: &str) -> Result<NaiveDateTime, String> {
+fn parse_time(text: &str) -> Result<DateTime, String> {
     datetime_picker::parse_flexible_datetime(text, false)
 }
 
@@ -1708,10 +1717,11 @@ fn main() {
                             root.sync_datetime_pickers(cx);
                             assert_eq!(root.draft.as_ref().unwrap().picker.view_year, 1992);
                             assert_eq!(root.draft.as_ref().unwrap().picker.view_month, 8);
-                            root.draft.as_mut().unwrap().picker.select_calendar_date(
-                                chrono::NaiveDate::from_ymd_opt(1992, 8, 14).unwrap(),
-                                cx,
-                            );
+                            root.draft
+                                .as_mut()
+                                .unwrap()
+                                .picker
+                                .select_calendar_date(jiff::civil::Date::constant(1992, 8, 14), cx);
                             root.draft.as_mut().unwrap().unknown = true;
                             root.save_draft(cx);
                             assert!(root.draft.is_none());

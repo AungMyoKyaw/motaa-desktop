@@ -7,12 +7,14 @@ use std::{
     time::Duration,
 };
 
-use chrono::{NaiveDateTime, TimeZone};
-use chrono_tz::{OffsetComponents, OffsetName, TZ_VARIANTS, Tz};
 use gpui::{
     AnyElement, Bounds, Context, Div, Entity, Image, ImageFormat, MouseButton, MouseDownEvent,
     MouseMoveEvent, MouseUpEvent, Pixels, Point, ScrollDelta, ScrollWheelEvent, canvas, div, img,
     prelude::*, px, rgb,
+};
+use jiff::{
+    civil::DateTime,
+    tz::{TimeZone, db},
 };
 use serde::Deserialize;
 
@@ -44,6 +46,15 @@ pub const COMMON_TIMEZONES: [&str; 7] = [
 ];
 
 static TZ_FINDER: OnceLock<tzf_rs::DefaultFinder> = OnceLock::new();
+static ALL_TIMEZONES: OnceLock<Vec<&'static str>> = OnceLock::new();
+
+fn all_timezones() -> &'static [&'static str] {
+    ALL_TIMEZONES.get_or_init(|| {
+        db().available()
+            .map(|n| &*Box::leak(n.as_str().to_owned().into_boxed_str()))
+            .collect()
+    })
+}
 
 #[derive(Clone)]
 pub enum TileState {
@@ -126,7 +137,7 @@ pub fn timezone_for_coords(lat: f64, lon: f64) -> Option<String> {
     let finder = TZ_FINDER.get_or_init(tzf_rs::DefaultFinder::new);
     // CRITICAL: tzf-rs takes (longitude, latitude).
     let tz = finder.get_tz_name(lon, lat).trim();
-    if tz.is_empty() || tz.parse::<Tz>().is_err() {
+    if tz.is_empty() || TimeZone::get(tz).is_err() {
         None
     } else {
         Some(tz.to_owned())
@@ -143,22 +154,22 @@ pub fn format_utc_offset(offset_seconds: i32) -> String {
     )
 }
 
-fn tz_offset_and_abbr_at(tz: Tz, dt: NaiveDateTime) -> (i32, String) {
-    let mapped = tz
-        .from_local_datetime(&dt)
-        .earliest()
-        .unwrap_or_else(|| tz.from_utc_datetime(&dt));
-    let offset = mapped.offset();
-    let total_seconds =
-        offset.base_utc_offset().num_seconds() as i32 + offset.dst_offset().num_seconds() as i32;
-    let abbr = offset
-        .abbreviation()
-        .map(str::to_owned)
-        .unwrap_or_else(|| format_utc_offset(total_seconds));
-    (total_seconds, abbr)
+fn tz_offset_and_abbr_at(tz: &TimeZone, dt: DateTime) -> (i32, String) {
+    if let Ok(zdt) = tz.to_ambiguous_zoned_datetime(dt).compatible() {
+        let total_seconds = zdt.offset().seconds();
+        let abbr = zdt.strftime("%Z").to_string();
+        let abbr = if abbr.is_empty() {
+            format_utc_offset(total_seconds)
+        } else {
+            abbr
+        };
+        (total_seconds, abbr)
+    } else {
+        (0, "UTC".into())
+    }
 }
 
-pub fn describe_timezone_at(value: &str, dt: NaiveDateTime) -> Result<String, String> {
+pub fn describe_timezone_at(value: &str, dt: DateTime) -> Result<String, String> {
     let trimmed = value.trim();
     if trimmed.is_empty() {
         return Err(
@@ -172,21 +183,23 @@ pub fn describe_timezone_at(value: &str, dt: NaiveDateTime) -> Result<String, St
         let formatted = format_utc_offset(minutes * 60);
         return Ok(format!("Fixed offset · {formatted} ({minutes} min)"));
     }
-    let tz: Tz = trimmed.parse().map_err(|_| {
+    let tz = TimeZone::get(trimmed).map_err(|_| {
         "Unknown IANA timezone or UTC offset in minutes — pick from the list.".to_owned()
     })?;
-    let (seconds, abbr) = tz_offset_and_abbr_at(tz, dt);
+    let (seconds, abbr) = tz_offset_and_abbr_at(&tz, dt);
     let offset_label = format_utc_offset(seconds);
-    let date_label = dt.format("%Y-%m-%d");
+    let date_label = dt.date();
     Ok(format!("{offset_label} · {abbr} on {date_label}"))
 }
 
-pub fn filter_timezones(query: &str, dt: NaiveDateTime, limit: usize) -> Vec<TimezoneOption> {
+pub fn filter_timezones(query: &str, dt: DateTime, limit: usize) -> Vec<TimezoneOption> {
     let q = query.trim().to_ascii_lowercase();
     let mut ranked: Vec<(u8, TimezoneOption)> = Vec::new();
-    for &tz in TZ_VARIANTS.iter() {
-        let name = tz.name();
-        let (seconds, abbr) = tz_offset_and_abbr_at(tz, dt);
+    for &name in all_timezones() {
+        let Ok(tz) = TimeZone::get(name) else {
+            continue;
+        };
+        let (seconds, abbr) = tz_offset_and_abbr_at(&tz, dt);
         let offset_label = format_utc_offset(seconds);
         let rank = if q.is_empty() {
             if COMMON_TIMEZONES.contains(&name) {
@@ -502,7 +515,7 @@ impl DesktopRoot {
     pub(super) fn location_and_timezone_section(
         &self,
         reference: bool,
-        effective_dt: NaiveDateTime,
+        effective_dt: DateTime,
         cx: &mut Context<Self>,
     ) -> Div {
         let Some(handles) = self.draft_handles(reference) else {
@@ -1267,7 +1280,7 @@ impl DesktopRoot {
     fn render_timezone_panel(
         &self,
         reference: bool,
-        effective_dt: NaiveDateTime,
+        effective_dt: DateTime,
         cx: &mut Context<Self>,
     ) -> Div {
         let Some(handles) = self.draft_handles(reference) else {
@@ -1345,7 +1358,7 @@ impl DesktopRoot {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::NaiveDate;
+    use jiff::civil::Date;
 
     #[test]
     fn mercator_round_trip_and_clamping() {
@@ -1394,10 +1407,7 @@ mod tests {
 
     #[test]
     fn filter_timezones_matches_name_and_offset() {
-        let dt = NaiveDate::from_ymd_opt(2024, 6, 12)
-            .unwrap()
-            .and_hms_opt(10, 30, 0)
-            .unwrap();
+        let dt = Date::constant(2024, 6, 12).at(10, 30, 0, 0);
         let ny = filter_timezones("new york", dt, 10);
         assert!(ny.iter().any(|opt| opt.name == "America/New_York"));
 
@@ -1410,10 +1420,7 @@ mod tests {
 
     #[test]
     fn describe_timezone_at_formats_historical_and_fixed_offsets() {
-        let dt = NaiveDate::from_ymd_opt(1924, 6, 12)
-            .unwrap()
-            .and_hms_opt(10, 30, 0)
-            .unwrap();
+        let dt = Date::constant(1924, 6, 12).at(10, 30, 0, 0);
         let ny = describe_timezone_at("America/New_York", dt).unwrap();
         assert!(ny.contains("UTC-04:00"), "unexpected summary: {ny}");
 

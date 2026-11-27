@@ -3,7 +3,7 @@ use super::*;
 impl DesktopRoot {
     pub(super) fn time_controls(&self, cx: &mut Context<Self>) -> AnyElement {
         let s = self.session.read(cx);
-        let display = s.time.format("%d %b %Y · %H:%M:%S").to_string();
+        let display = s.time.strftime("%d %b %Y · %H:%M:%S").to_string();
         let unit = s.step.label();
         row()
             .h_full()
@@ -292,13 +292,15 @@ impl DesktopRoot {
     pub(super) fn time_view(&self, cx: &mut Context<Self>) -> AnyElement {
         let s = self.session.read(cx);
         let step = s.step;
-        use chrono::Datelike;
         let calendar = s.settings.calendar;
-        let day_number =
-            calendar.numbered_day(s.time.year(), s.time.month() as u8, s.time.day() as u8);
+        let day_number = calendar.numbered_day(
+            i32::from(s.time.year()),
+            s.time.month() as u8,
+            s.time.day() as u8,
+        );
         let today = motaa_engine::myanmar_calendar::from_julian_day_number(day_number);
-        let weekday =
-            chrono::Weekday::try_from(day_number.rem_euclid(7) as u8).expect("valid weekday");
+        let weekday = jiff::civil::Weekday::from_monday_zero_offset(day_number.rem_euclid(7) as i8)
+            .expect("valid weekday");
         column()
             .child(heading("Explore time"))
             .child(caption(

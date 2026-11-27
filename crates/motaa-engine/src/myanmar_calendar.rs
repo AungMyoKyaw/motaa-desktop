@@ -291,8 +291,8 @@ impl MyanmarDate {
         ["West", "North", "East", "South"][((self.base_month() % 12) / 3) as usize]
     }
 
-    pub fn birth_lord(&self, weekday: chrono::Weekday) -> &'static str {
-        let android_weekday = ((weekday.num_days_from_sunday() + 1) % 7) as i32;
+    pub fn birth_lord(&self, weekday: jiff::civil::Weekday) -> &'static str {
+        let android_weekday = i32::from((weekday.to_sunday_zero_offset() + 1) % 7);
         [
             "Binga", "Atun", "Yaza", "Adipati", "Marana", "Thike", "Puti",
         ][(self.year - android_weekday).rem_euclid(7) as usize]
@@ -320,8 +320,8 @@ impl MyanmarDate {
     }
 
     /// Daily classifications transcribed from MOTAA V31.1 `main.A0` and `C0025a`.
-    pub fn observances(&self, weekday: chrono::Weekday) -> Vec<&'static str> {
-        let weekday = ((weekday.num_days_from_sunday() + 1) % 7) as usize;
+    pub fn observances(&self, weekday: jiff::civil::Weekday) -> Vec<&'static str> {
+        let weekday = ((weekday.to_sunday_zero_offset() + 1) % 7) as usize;
         let month = self.base_month();
         let day = self.day;
         let fortnight = self.fortnight_day;
@@ -388,7 +388,7 @@ impl MyanmarDate {
 
     pub fn format_burmese_birth_line(
         &self,
-        weekday: chrono::Weekday,
+        weekday: jiff::civil::Weekday,
         moon_longitude: Option<f64>,
     ) -> String {
         let phase_text = match self.phase.as_str() {
@@ -399,13 +399,13 @@ impl MyanmarDate {
             other => other.into(),
         };
         let weekday_text = match weekday {
-            chrono::Weekday::Sun => "တနင်္ဂနွေနေ့",
-            chrono::Weekday::Mon => "တနင်္လာနေ့",
-            chrono::Weekday::Tue => "အင်္ဂါနေ့",
-            chrono::Weekday::Wed => "ဗုဒ္ဓဟူးနေ့",
-            chrono::Weekday::Thu => "ကြာသပတေးနေ့",
-            chrono::Weekday::Fri => "သောကြာနေ့",
-            chrono::Weekday::Sat => "စနေနေ့",
+            jiff::civil::Weekday::Sunday => "တနင်္ဂနွေနေ့",
+            jiff::civil::Weekday::Monday => "တနင်္လာနေ့",
+            jiff::civil::Weekday::Tuesday => "အင်္ဂါနေ့",
+            jiff::civil::Weekday::Wednesday => "ဗုဒ္ဓဟူးနေ့",
+            jiff::civil::Weekday::Thursday => "ကြာသပတေးနေ့",
+            jiff::civil::Weekday::Friday => "သောကြာနေ့",
+            jiff::civil::Weekday::Saturday => "စနေနေ့",
         };
         let lord_text = match self.birth_lord(weekday) {
             "Binga" => "ဘင်္ဂ",
@@ -518,14 +518,14 @@ mod tests {
         date.month = 4;
         date.day = 15;
         date.fortnight_day = 15;
-        let labels = date.observances(chrono::Weekday::Wed);
+        let labels = date.observances(jiff::civil::Weekday::Wednesday);
         assert!(labels.contains(&"Sabbath"));
         assert!(labels.contains(&"Afternoon Pyathada"));
         assert!(!labels.contains(&"Sabbath Eve"));
         date.day = 14;
         date.fortnight_day = 14;
         assert!(
-            date.observances(chrono::Weekday::Tue)
+            date.observances(jiff::civil::Weekday::Tuesday)
                 .contains(&"Sabbath Eve")
         );
     }
@@ -557,11 +557,11 @@ mod tests {
         assert_eq!(date.month, 13);
         assert_eq!(date.base_month(), 1);
         assert_eq!(date.dragon_head(), "West");
-        assert_eq!(date.birth_lord(chrono::Weekday::Sun), "Puti");
+        assert_eq!(date.birth_lord(jiff::civil::Weekday::Sunday), "Puti");
         assert_eq!(date.nat_class(), "Orc");
         assert_eq!(date.sasana_year(), 2568);
         assert_eq!(
-            date.observances(chrono::Weekday::Sun),
+            date.observances(jiff::civil::Weekday::Sunday),
             vec!["Thamanyo", "Warameittugyi", "Yatpote", "Thamaphyu"]
         );
 
@@ -571,17 +571,17 @@ mod tests {
         assert_eq!(waso.month_english, "Second Waso");
         assert_eq!(waso.month_burmese, "ဒုဝါဆို");
         assert_eq!(waso.dragon_head(), "North");
-        assert_eq!(waso.birth_lord(chrono::Weekday::Tue), "Adipati");
+        assert_eq!(waso.birth_lord(jiff::civil::Weekday::Tuesday), "Adipati");
 
         // 1984-01-03 (Tuesday): Pakhangyi sample.
         let birth_jdn = (crate::julian_midnight(1984, 1, 3) + 0.5).round() as i64;
         let birth = from_julian_day_number(birth_jdn).unwrap();
         assert_eq!(birth.year, 1345);
         assert_eq!(birth.year_name_burmese(), "မာခနှစ်");
-        assert_eq!(birth.birth_lord(chrono::Weekday::Tue), "Thike");
+        assert_eq!(birth.birth_lord(jiff::civil::Weekday::Tuesday), "Thike");
         assert_eq!(birth.dragon_head(), "South");
         assert_eq!(birth.nat_class(), "Elf");
-        assert!(birth.observances(chrono::Weekday::Tue).is_empty());
+        assert!(birth.observances(jiff::civil::Weekday::Tuesday).is_empty());
     }
 
     #[test]
@@ -612,7 +612,7 @@ mod tests {
     fn burmese_birth_line_matches_reference_capture() {
         let jdn = CivilCalendar::Hybrid.numbered_day(1984, 1, 3);
         let date = from_julian_day_number(jdn).unwrap();
-        let line = date.format_burmese_birth_line(chrono::Weekday::Tue, Some(182.08));
+        let line = date.format_burmese_birth_line(jiff::civil::Weekday::Tuesday, Some(182.08));
         assert!(line.contains("၁၃၄၅"));
         assert!(line.contains("အင်္ဂါနေ့"));
     }

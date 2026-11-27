@@ -1,5 +1,5 @@
 //! Recovered MOTAA main.W/X/Y period timing, driven by a supplied natal Moon longitude.
-use chrono::{Datelike, NaiveDate, NaiveDateTime, TimeDelta, Timelike};
+use jiff::{SignedDuration, civil::DateTime};
 
 use crate::{ChartRequest, original_geometry::original_p0};
 
@@ -70,16 +70,17 @@ pub fn calculate(birth: &ChartRequest, moon_longitude: f64) -> Result<Timeline, 
     if !(1800..=2100).contains(&birth.year) || !(0. ..360.).contains(&moon_longitude) {
         return Err("Dasha requires a supported birth date and Moon longitude.".into());
     }
-    let birth_date =
-        NaiveDate::from_ymd_opt(birth.year, u32::from(birth.month), u32::from(birth.day))
-            .and_then(|date| {
-                date.and_hms_opt(
-                    u32::from(birth.hour),
-                    u32::from(birth.minute),
-                    u32::from(birth.second),
-                )
-            })
-            .ok_or("Invalid civil birth timestamp.")?;
+    let year = i16::try_from(birth.year).map_err(|_| "Invalid civil birth timestamp.")?;
+    let birth_date = DateTime::new(
+        year,
+        birth.month as i8,
+        birth.day as i8,
+        birth.hour as i8,
+        birth.minute as i8,
+        birth.second as i8,
+        0,
+    )
+    .map_err(|_| "Invalid civil birth timestamp.")?;
     let mansion = moon_longitude / (360. / 27.);
     let lord = mansion.floor() as usize % LORDS.len();
     let progress = mansion.fract();
@@ -94,9 +95,9 @@ pub fn calculate(birth: &ChartRequest, moon_longitude: f64) -> Result<Timeline, 
         let years = LORDS[lord].1;
         elapsed += years;
         let end = original_p0(
-            civil.day() as i32,
-            civil.month() as i32,
-            civil.year() + elapsed,
+            i32::from(civil.day()),
+            i32::from(civil.month()),
+            i32::from(civil.year()) + elapsed,
         );
         let period = Period {
             lord,
@@ -114,18 +115,23 @@ pub fn calculate(birth: &ChartRequest, moon_longitude: f64) -> Result<Timeline, 
 }
 
 /// MOTAA's civil day number, with midnight as the start of the numbered day.
-pub fn day_number(time: NaiveDateTime) -> f64 {
-    original_p0(time.day() as i32, time.month() as i32, time.year())
-        + f64::from(time.num_seconds_from_midnight()) / 86_400.
+pub fn day_number(time: DateTime) -> f64 {
+    let seconds_from_midnight =
+        i32::from(time.hour()) * 3600 + i32::from(time.minute()) * 60 + i32::from(time.second());
+    original_p0(
+        i32::from(time.day()),
+        i32::from(time.month()),
+        i32::from(time.year()),
+    ) + f64::from(seconds_from_midnight) / 86_400.
 }
 
-pub fn from_day_number(day: f64) -> Option<NaiveDateTime> {
+pub fn from_day_number(day: f64) -> Option<DateTime> {
     if !day.is_finite() {
         return None;
     }
-    let origin = NaiveDate::from_ymd_opt(2000, 1, 1)?.and_hms_opt(0, 0, 0)?;
+    let origin = DateTime::constant(2000, 1, 1, 0, 0, 0, 0);
     let seconds = ((day - original_p0(1, 1, 2000)) * 86_400.).round() as i64;
-    origin.checked_add_signed(TimeDelta::try_seconds(seconds)?)
+    origin.checked_add(SignedDuration::from_secs(seconds)).ok()
 }
 
 /// KP star, sub and sub-sub lords. Each subdivision starts from its parent's

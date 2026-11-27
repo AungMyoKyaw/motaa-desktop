@@ -1,4 +1,4 @@
-use chrono::{Datelike, Months, NaiveDate, NaiveDateTime};
+use jiff::civil::{Date, DateTime};
 use motaa_engine::{
     ChartRequest, dasha, original_colors::original_c0, original_strengths::original_d0,
 };
@@ -8,7 +8,7 @@ use crate::{ashtakavarga, model, model::Settings, recovered, ten_pillars};
 #[derive(Debug)]
 pub struct Sample {
     pub age: u8,
-    pub when: NaiveDateTime,
+    pub when: DateTime,
     pub sign_class: u8,
     pub mansion_class: i32,
     pub natal_points: u8,
@@ -36,19 +36,17 @@ pub fn calculate(
         return Err("The lifetime timeline requires a known natal time.".into());
     }
     settings.tropical = false;
-    let birth = NaiveDate::from_ymd_opt(
-        profile.year,
-        u32::from(profile.month),
-        u32::from(profile.day),
-    )
-    .and_then(|date| {
-        date.and_hms_opt(
-            u32::from(profile.hour),
-            u32::from(profile.minute),
-            u32::from(profile.second),
-        )
-    })
-    .ok_or("Birth date is outside the supported civil calendar.")?;
+    let year = i16::try_from(profile.year).map_err(|_| "Invalid birth date for timeline.")?;
+    let birth = Date::new(year, profile.month as i8, profile.day as i8)
+        .map(|date| {
+            date.at(
+                profile.hour as i8,
+                profile.minute as i8,
+                profile.second as i8,
+                0,
+            )
+        })
+        .map_err(|_| "Invalid birth date for timeline.")?;
     let mut natal = motaa_engine::calculate(profile)?
         .reference_ephemeris
         .ok_or("Birth date is outside the reference ephemeris.")?;
@@ -62,8 +60,8 @@ pub fn calculate(
     let mut samples = Vec::new();
     for age in 0..=95_u8 {
         let when = birth
-            .checked_add_months(Months::new(u32::from(age) * 12))
-            .ok_or("Invalid birth anniversary.")?;
+            .checked_add(jiff::Span::new().months(i32::from(age) * 12))
+            .map_err(|_| "Invalid birth anniversary.")?;
         if when.year() > 2100 {
             break;
         }

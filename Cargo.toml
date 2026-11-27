@@ -16,14 +16,13 @@ resolver = "2"
 
 [dependencies]
 gpui = "=0.2.2"
-chrono = "0.4"
+jiff = { version = "1.0.3", features = ["tzdb-bundle-always"] }
 motaa-engine = { path = "crates/motaa-engine" }
 motaa-store = { path = "crates/motaa-store" }
 rusqlite = "0.37"
 serde_json = { version = "1", features = ["float_roundtrip"] }
 unicode-segmentation = "1"
 serde = { version = "1", features = ["derive"] }
-chrono-tz = "0.10"
 tzf-rs = "2"
 ureq = { version = "3", features = ["json"] }
 

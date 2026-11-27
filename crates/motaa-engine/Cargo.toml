@@ -7,8 +7,7 @@ repository = "https://github.com/AungMyoKyaw/motaa-desktop"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
-chrono = { version = "0.4", default-features = false, features = ["std"] }
-chrono-tz = "0.10"
+jiff = { version = "1.0.3", features = ["tzdb-bundle-always"] }
 astro = "2.0.0"
 
 [dev-dependencies]

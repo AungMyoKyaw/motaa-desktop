@@ -197,7 +197,6 @@ fn parse(fields: &[&str]) -> Result<Record, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::NaiveDate;
 
     #[test]
     fn recovers_unescaped_spaces_in_android_saved_profiles() {
@@ -348,10 +347,7 @@ mod tests {
         assert_eq!(records[1].settings.ayanamsha, 3);
         let mut session = crate::model::WorkspaceSession::new(
             motaa_store::open(Path::new(":memory:")),
-            NaiveDate::from_ymd_opt(2026, 1, 1)
-                .unwrap()
-                .and_hms_opt(0, 0, 0)
-                .unwrap(),
+            jiff::civil::Date::constant(2026, 1, 1).at(0, 0, 0, 0),
         );
         assert_eq!(super::super::restore(&session, &records).unwrap(), (2, 0));
         assert_eq!(super::super::restore(&session, &records).unwrap(), (0, 2));

@@ -167,7 +167,7 @@ fn validate(record: &Record) -> Result<(), String> {
     }
     for revision in &record.revisions {
         validate_chart(&revision.chart)?;
-        chrono::NaiveDateTime::parse_from_str(&revision.recorded_at, "%Y-%m-%d %H:%M:%S")
+        jiff::civil::DateTime::strptime("%Y-%m-%d %H:%M:%S", &revision.recorded_at)
             .map_err(|_| "Invalid profile revision time.".to_owned())?;
     }
     Ok(())
@@ -246,10 +246,7 @@ mod tests {
         motaa_store::migrate(&db).unwrap();
         WorkspaceSession::new(
             Ok(db),
-            chrono::NaiveDate::from_ymd_opt(2000, 1, 1)
-                .unwrap()
-                .and_hms_opt(0, 0, 0)
-                .unwrap(),
+            jiff::civil::DateTime::constant(2000, 1, 1, 0, 0, 0, 0),
         )
     }
 

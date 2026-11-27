@@ -1,8 +1,8 @@
 //! MOTAA domain engine: evidence-backed calendar algorithm and nakshatra metadata.
 //! Source: reversed APK motaa.myanmar.main.w0 and Q3, motaa-circle/circle.tex.
 //! No fabricated ephemeris positions: Moon can be classified ONLY from manual longitude.
-use chrono::{LocalResult, NaiveDate, NaiveTime, Offset, TimeZone};
-use chrono_tz::Tz;
+use jiff::civil::DateTime;
+use jiff::tz::{AmbiguousOffset, TimeZone};
 use serde::{Deserialize, Serialize};
 pub mod ayanamsha;
 pub mod dasha;
@@ -224,8 +224,7 @@ pub fn validate(r: &ChartRequest) -> Result<(), String> {
         return Err("Profile text too long".into());
     }
     if let Some(id) = &r.timezone_id {
-        id.parse::<Tz>()
-            .map_err(|_| "Unknown IANA timezone".to_string())?;
+        TimeZone::get(id).map_err(|_| "Unknown IANA timezone".to_string())?;
     }
     Ok(())
 }
@@ -250,18 +249,23 @@ pub fn effective_utc_offset(r: &ChartRequest) -> Result<i32, String> {
     if r.unknown_birth_time {
         return Ok(r.timezone_offset_minutes);
     }
-    let tz: Tz = zone
-        .parse()
-        .map_err(|_| format!("Unknown timezone {zone}"))?;
-    let date = NaiveDate::from_ymd_opt(r.year, r.month as u32, r.day as u32)
-        .ok_or("Invalid local date")?;
-    let time = NaiveTime::from_hms_opt(r.hour as u32, r.minute as u32, r.second as u32)
-        .ok_or("Invalid time")?;
-    match tz.from_local_datetime(&date.and_time(time)){
-  LocalResult::Single(dt)=>Ok(dt.offset().fix().local_minus_utc()/60),
-  LocalResult::Ambiguous(_,_)=>Err("Ambiguous local time at daylight-saving transition; choose a numeric UTC offset and clear the timezone ID".into()),
-  LocalResult::None=>Err("Local time does not exist in the selected timezone; choose a valid time or a numeric offset".into())
- }
+    let tz = TimeZone::get(zone).map_err(|_| format!("Unknown timezone {zone}"))?;
+    let year = i16::try_from(r.year).map_err(|_| "Invalid local date".to_string())?;
+    let dt = DateTime::new(
+        year,
+        r.month as i8,
+        r.day as i8,
+        r.hour as i8,
+        r.minute as i8,
+        r.second as i8,
+        0,
+    )
+    .map_err(|_| "Invalid local date or time".to_string())?;
+    match tz.to_ambiguous_zoned_datetime(dt).offset() {
+        AmbiguousOffset::Unambiguous { offset } => Ok(offset.seconds() / 60),
+        AmbiguousOffset::Fold { .. } => Err("Ambiguous local time at daylight-saving transition; choose a numeric UTC offset and clear the timezone ID".into()),
+        AmbiguousOffset::Gap { .. } => Err("Local time does not exist in the selected timezone; choose a valid time or a numeric offset".into()),
+    }
 }
 pub fn calculate(r: &ChartRequest) -> Result<ChartResult, String> {
     validate(r)?;

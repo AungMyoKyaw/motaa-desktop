@@ -2,7 +2,6 @@ use super::*;
 
 impl DesktopRoot {
     pub(super) fn load_ephemeris_month(&mut self, cx: &mut Context<Self>) {
-        use chrono::Datelike;
         if self.ephemeris_progress {
             return;
         }
@@ -26,11 +25,13 @@ impl DesktopRoot {
                 let mut planets = Vec::new();
                 for day in 1..=31 {
                     let Some(midnight) =
-                        date.with_day(day).and_then(|day| day.and_hms_opt(0, 0, 0))
+                        jiff::civil::Date::new(date.year(), date.month(), day as i8)
+                            .ok()
+                            .map(|d| d.at(0, 0, 0, 0))
                     else {
                         break;
                     };
-                    let civil_date = midnight.date().format("%Y-%m-%d").to_string();
+                    let civil_date = midnight.date().to_string();
                     let result = (|| {
                         let mut positions = model::calculate_at(&profile, midnight)?
                             .reference_ephemeris
@@ -42,7 +43,7 @@ impl DesktopRoot {
                                 .map_or("—".into(), |angle| format!("{angle:.3}°"))
                         };
                         let jdn = settings.calendar.numbered_day(
-                            date.year(),
+                            i32::from(date.year()),
                             date.month() as u8,
                             day as u8,
                         );
@@ -57,7 +58,7 @@ impl DesktopRoot {
                                 .iter()
                                 .filter_map(|(instant, label)| {
                                     model::reference_datetime(&profile, *instant)
-                                        .map(|time| format!("{} · {label}", time.format("%H:%M")))
+                                        .map(|time| format!("{} · {label}", time.strftime("%H:%M")))
                                 })
                                 .collect::<Vec<_>>();
                             if entries.is_empty() {
@@ -74,7 +75,7 @@ impl DesktopRoot {
                         )?
                         .and_then(|(instant, sign)| {
                             model::reference_datetime(&profile, instant).map(|time| {
-                                format!("{} · {}", time.format("%H:%M"), varga::SIGNS[sign])
+                                format!("{} · {}", time.strftime("%H:%M"), varga::SIGNS[sign])
                             })
                         })
                         .unwrap_or_else(|| "—".into());
@@ -121,7 +122,7 @@ impl DesktopRoot {
                 }
 
                 Ok::<_, String>(EphemerisMonth {
-                    title: date.format("%B %Y").to_string(),
+                    title: date.strftime("%B %Y").to_string(),
                     rows,
                     planets,
                     settings,
@@ -462,8 +463,7 @@ impl DesktopRoot {
                             let target = model::reference_datetime(
                                 self.session.read(cx).reference_profile(),
                                 julian,
-                            )
-                            .map(|time| time.naive_local());
+                            );
                             row()
                                 .id(index)
                                 .child(
@@ -500,17 +500,13 @@ impl DesktopRoot {
     }
 
     fn daily_tatkalika_view(&self, cx: &mut Context<Self>) -> AnyElement {
-        use chrono::Datelike;
         let session = self.session.read(cx);
         let profile = session.reference_profile();
         let selection = session.time;
         let settings = session.settings;
         let result = (|| {
             let (bounds, timing) = model::daily_timing(profile, selection, settings.ayanamsha)?;
-            let noon = selection
-                .date()
-                .and_hms_opt(12, 0, 0)
-                .ok_or("Invalid civil date.")?;
+            let noon = selection.date().at(12, 0, 0, 0);
             let noon = model::julian_at(profile, noon)?;
             let anchors = [
                 Some(bounds[0]),
@@ -524,7 +520,7 @@ impl DesktopRoot {
                     .map(|jd| {
                         let mut chart = motaa_engine::reference_ephemeris::calculate(
                             jd,
-                            selection.year(),
+                            i32::from(selection.year()),
                             selection.month() as u8,
                             profile.latitude,
                             profile.longitude,
@@ -711,7 +707,6 @@ impl DesktopRoot {
     }
 
     fn eclipses_view(&self, cx: &mut Context<Self>) -> AnyElement {
-        use chrono::Datelike;
         use motaa_engine::eclipses::{catalog, local};
         let session = self.session.read(cx);
         let profile = session.reference_profile().clone();
@@ -720,7 +715,7 @@ impl DesktopRoot {
         let lunar = self.eclipse_lunar;
         let visible_only = self.eclipse_visible_only;
         let events: Vec<_> = catalog()
-            .filter(|event| event.lunar == lunar && range.contains(&event.year))
+            .filter(|event| event.lunar == lunar && range.contains(&(event.year as i16)))
             .filter(|&event| {
                 !visible_only || local(event, profile.latitude, profile.longitude).is_some()
             })
@@ -1675,7 +1670,6 @@ impl DesktopRoot {
     }
 
     fn ten_pillars_view(&self, cx: &mut Context<Self>) -> AnyElement {
-        use chrono::Datelike;
         let session = self.session.read(cx);
         let mut settings = session.settings;
         settings.tropical = false;
@@ -1697,12 +1691,13 @@ impl DesktopRoot {
                 session.natal.day,
             )
             .unwrap_or(session.natal.year - 638);
-            let weekday_iso = chrono::NaiveDate::from_ymd_opt(
-                session.natal.year,
-                u32::from(session.natal.month),
-                u32::from(session.natal.day),
-            )
-            .map_or(0, |d| d.weekday().num_days_from_sunday() as usize);
+            let weekday_iso = i16::try_from(session.natal.year)
+                .ok()
+                .and_then(|y| {
+                    jiff::civil::Date::new(y, session.natal.month as i8, session.natal.day as i8)
+                        .ok()
+                })
+                .map_or(0, |d| d.weekday().to_sunday_zero_offset() as usize);
             let report =
                 ten_pillars::calculate(myanmar_year, weekday_iso, birth, current, settings);
             Ok::<_, String>(

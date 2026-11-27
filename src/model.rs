@@ -1,6 +1,10 @@
 use std::cell::RefCell;
 
-use chrono::{FixedOffset, Months, NaiveDateTime, TimeDelta, Utc};
+use jiff::{
+    Timestamp,
+    civil::DateTime,
+    tz::{Offset, TimeZone},
+};
 use motaa_engine::{ChartRequest, ChartResult};
 use motaa_store::Profile;
 use rusqlite::Connection;
@@ -65,20 +69,32 @@ impl Step {
         }
     }
 
-    pub fn offset(self, time: NaiveDateTime, count: i32) -> Option<NaiveDateTime> {
+    pub fn offset(self, time: DateTime, count: i32) -> Option<DateTime> {
         let months = match self {
-            Self::Year => count.unsigned_abs().checked_mul(12)?,
-            Self::Month => count.unsigned_abs(),
-            Self::Day => return time.checked_add_signed(TimeDelta::days(i64::from(count))),
-            Self::Hour => return time.checked_add_signed(TimeDelta::hours(i64::from(count))),
-            Self::Minute => return time.checked_add_signed(TimeDelta::minutes(i64::from(count))),
-            Self::Second => return time.checked_add_signed(TimeDelta::seconds(i64::from(count))),
+            Self::Year => count.checked_mul(12)?,
+            Self::Month => count,
+            Self::Day => {
+                return time
+                    .checked_add(jiff::SignedDuration::from_hours(i64::from(count) * 24))
+                    .ok();
+            }
+            Self::Hour => {
+                return time
+                    .checked_add(jiff::SignedDuration::from_hours(i64::from(count)))
+                    .ok();
+            }
+            Self::Minute => {
+                return time
+                    .checked_add(jiff::SignedDuration::from_mins(i64::from(count)))
+                    .ok();
+            }
+            Self::Second => {
+                return time
+                    .checked_add(jiff::SignedDuration::from_secs(i64::from(count)))
+                    .ok();
+            }
         };
-        if count < 0 {
-            time.checked_sub_months(Months::new(months))
-        } else {
-            time.checked_add_months(Months::new(months))
-        }
+        time.checked_add(jiff::Span::new().months(months)).ok()
     }
 }
 
@@ -135,11 +151,11 @@ struct ChartCacheKey {
     longitude_bits: u64,
     unknown_birth_time: bool,
     ayanamsha: usize,
-    time: Option<NaiveDateTime>,
+    time: Option<DateTime>,
 }
 
 impl ChartCacheKey {
-    fn new(profile: &ChartRequest, ayanamsha: usize, time: Option<NaiveDateTime>) -> Self {
+    fn new(profile: &ChartRequest, ayanamsha: usize, time: Option<DateTime>) -> Self {
         Self {
             year: profile.year,
             month: profile.month,
@@ -170,8 +186,8 @@ pub struct WorkspaceSession {
     pub ascendant_transit: bool,
     pub settings: Settings,
     pub settings_draft: Settings,
-    pub anchor: NaiveDateTime,
-    pub time: NaiveDateTime,
+    pub anchor: DateTime,
+    pub time: DateTime,
     pub step: Step,
     pub mode: &'static str,
     pub tool: Option<&'static str>,
@@ -181,7 +197,7 @@ pub struct WorkspaceSession {
 }
 
 impl WorkspaceSession {
-    pub fn new(store: Result<Connection, String>, now: NaiveDateTime) -> Self {
+    pub fn new(store: Result<Connection, String>, now: DateTime) -> Self {
         let (store, status) = match store {
             Ok(store) => (Some(store), String::new()),
             Err(error) => (None, format!("Profile library unavailable: {error}")),
@@ -248,19 +264,19 @@ impl WorkspaceSession {
         self.transit.as_ref().unwrap_or(&self.natal)
     }
 
-    pub fn now(&self) -> NaiveDateTime {
+    pub fn now(&self) -> DateTime {
         let profile = self.reference_profile();
-        let now = Utc::now();
+        let now = Timestamp::now();
         if let Some(zone) = profile
             .timezone_id
             .as_ref()
-            .and_then(|zone| zone.parse::<chrono_tz::Tz>().ok())
+            .and_then(|zone| TimeZone::get(zone).ok())
         {
-            return now.with_timezone(&zone).naive_local();
+            return zone.to_datetime(now);
         }
-        FixedOffset::east_opt(profile.timezone_offset_minutes * 60)
-            .map_or(now.naive_utc(), |offset| {
-                now.with_timezone(&offset).naive_local()
+        Offset::from_seconds(profile.timezone_offset_minutes * 60)
+            .map_or(TimeZone::UTC.to_datetime(now), |offset| {
+                TimeZone::fixed(offset).to_datetime(now)
             })
     }
 
@@ -341,10 +357,9 @@ impl WorkspaceSession {
     }
 }
 
-pub fn chart_request_at(profile: &ChartRequest, time: NaiveDateTime) -> ChartRequest {
-    use chrono::{Datelike, Timelike};
+pub fn chart_request_at(profile: &ChartRequest, time: DateTime) -> ChartRequest {
     let mut request = profile.clone();
-    request.year = time.year();
+    request.year = i32::from(time.year());
     request.month = time.month() as u8;
     request.day = time.day() as u8;
     request.hour = time.hour() as u8;
@@ -354,63 +369,78 @@ pub fn chart_request_at(profile: &ChartRequest, time: NaiveDateTime) -> ChartReq
     request
 }
 
-pub fn calculate_at(profile: &ChartRequest, time: NaiveDateTime) -> Result<ChartResult, String> {
+pub fn calculate_at(profile: &ChartRequest, time: DateTime) -> Result<ChartResult, String> {
     motaa_engine::calculate(&chart_request_at(profile, time))
 }
 
-pub fn julian_at(profile: &ChartRequest, time: NaiveDateTime) -> Result<f64, String> {
-    use chrono::{Datelike, Timelike};
-
+pub fn julian_at(profile: &ChartRequest, time: DateTime) -> Result<f64, String> {
     let request = chart_request_at(profile, time);
     let offset = motaa_engine::effective_utc_offset(&request)?;
-    let midnight = motaa_engine::julian_midnight(time.year(), time.month() as u8, time.day() as u8);
-    Ok(
-        midnight + f64::from(time.num_seconds_from_midnight()) / 86_400.
-            - f64::from(offset) / 1440.,
-    )
+    let midnight =
+        motaa_engine::julian_midnight(i32::from(time.year()), time.month() as u8, time.day() as u8);
+    let seconds_from_midnight =
+        i32::from(time.hour()) * 3600 + i32::from(time.minute()) * 60 + i32::from(time.second());
+    Ok(midnight + f64::from(seconds_from_midnight) / 86_400. - f64::from(offset) / 1440.)
 }
 
-pub fn reference_datetime(
-    profile: &ChartRequest,
-    jdut: f64,
-) -> Option<chrono::DateTime<chrono::FixedOffset>> {
+pub fn reference_datetime(profile: &ChartRequest, jdut: f64) -> Option<DateTime> {
     if !jdut.is_finite() {
         return None;
     }
     let seconds = ((jdut - 2_440_587.5) * 86_400.).round() as i64;
-    let time = chrono::DateTime::from_timestamp(seconds, 0)?;
-    if let Some(zone) = profile.timezone_id.as_deref() {
-        return Some(
-            time.with_timezone(&zone.parse::<chrono_tz::Tz>().ok()?)
-                .fixed_offset(),
-        );
-    }
-    let offset = chrono::FixedOffset::east_opt(profile.timezone_offset_minutes.checked_mul(60)?)?;
-    Some(time.with_timezone(&offset))
+    let time = Timestamp::from_second(seconds).ok()?;
+    let tz = if let Some(zone) = profile.timezone_id.as_deref() {
+        TimeZone::get(zone).ok()?
+    } else {
+        TimeZone::fixed(
+            Offset::from_seconds(profile.timezone_offset_minutes.checked_mul(60)?).ok()?,
+        )
+    };
+    Some(tz.to_datetime(time))
 }
 
 pub fn display_reference_time(profile: &ChartRequest, jdut: f64) -> Option<String> {
-    Some(
-        reference_datetime(profile, jdut)?
-            .format("%Y-%m-%d %H:%M:%S %:z")
-            .to_string(),
-    )
+    if !jdut.is_finite() {
+        return None;
+    }
+    let seconds = ((jdut - 2_440_587.5) * 86_400.).round() as i64;
+    let time = Timestamp::from_second(seconds).ok()?;
+    let tz = if let Some(zone) = profile.timezone_id.as_deref() {
+        TimeZone::get(zone).ok()?
+    } else {
+        TimeZone::fixed(
+            Offset::from_seconds(profile.timezone_offset_minutes.checked_mul(60)?).ok()?,
+        )
+    };
+    let dt = tz.to_datetime(time);
+    let offset_secs = tz.to_offset(time).seconds();
+    let sign = if offset_secs < 0 { '-' } else { '+' };
+    let abs_mins = offset_secs.abs() / 60;
+    Some(format!(
+        "{:04}-{:02}-{:02} {:02}:{:02}:{:02} {}{:02}:{:02}",
+        dt.year(),
+        dt.month(),
+        dt.day(),
+        dt.hour(),
+        dt.minute(),
+        dt.second(),
+        sign,
+        abs_mins / 60,
+        abs_mins % 60
+    ))
 }
 
 pub fn daily_timing(
     profile: &ChartRequest,
-    selection: NaiveDateTime,
+    selection: DateTime,
     ayanamsha: usize,
 ) -> Result<([f64; 2], motaa_engine::panchanga::DailyTiming), String> {
-    let start = selection
-        .date()
-        .and_hms_opt(0, 0, 0)
-        .ok_or("Invalid civil date.")?;
+    let start = selection.date().at(0, 0, 0, 0);
     let end = selection
         .date()
-        .succ_opt()
-        .and_then(|date| date.and_hms_opt(0, 0, 0))
-        .ok_or("Invalid next civil date.")?;
+        .tomorrow()
+        .map_err(|_| "Invalid next civil date.")?
+        .at(0, 0, 0, 0);
     let request = chart_request_at(profile, selection);
     let bounds = [julian_at(profile, start)?, julian_at(profile, end)?];
     let timing = motaa_engine::panchanga::calculate_with_ayanamsha(
