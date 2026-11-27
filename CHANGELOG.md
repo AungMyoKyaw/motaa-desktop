@@ -2,6 +2,11 @@
 
 All notable changes to MOTAA Desktop are documented in this file.
 
+## [0.2.3] - 2026-11-28
+
+### Changed
+- **Updated Windows Store & MSIX App Icons**: Regenerated all Windows tile, splash screen, and Store icon assets from the new `motaa-icon-1024.png` artwork.
+
 ## [0.2.2] - 2026-11-28
 
 ### Added

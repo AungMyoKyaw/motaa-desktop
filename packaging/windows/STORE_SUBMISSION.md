@@ -19,8 +19,8 @@ To build locally on Windows:
 ```powershell
 .\packaging\windows\build-msix.ps1 `
   -ExePath .\target\release\motaa-desktop.exe `
-  -Version 0.2.2 `
-  -OutputMsix .\dist\motaa-desktop-v0.2.2-windows-x64.msix
+  -Version 0.2.3 `
+  -OutputMsix .\dist\motaa-desktop-v0.2.3-windows-x64.msix
 
 .\packaging\windows\capture-store-screenshots.ps1 `
   -ExePath .\target\release\motaa-desktop.exe `
