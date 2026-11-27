@@ -226,35 +226,6 @@ impl DesktopRoot {
                     )
                 },
             )
-            .child(
-                column()
-                    .gap_2()
-                    .child(section_label("CHART PALETTE"))
-                    .child(
-                        row()
-                            .flex_wrap()
-                            .gap_1()
-                            .children(PALETTES.into_iter().enumerate().map(
-                                |(index, (label, swatch))| {
-                                    let active = self.chart_palette == index;
-                                    action_control(("insp-palette", index), cx, move |view, _| {
-                                        view.chart_palette = index;
-                                    })
-                                    .px_2()
-                                    .h(px(28.))
-                                    .gap_1()
-                                    .rounded(px(RADIUS_CONTROL))
-                                    .border_1()
-                                    .border_color(rgb(if active { GOLD } else { LINE }))
-                                    .bg(rgb(if active { SELECTED } else { PAPER }))
-                                    .child(
-                                        div().w(px(10.)).h(px(10.)).rounded(px(5.)).bg(rgb(swatch)),
-                                    )
-                                    .child(div().text_size(px(12.)).child(label))
-                                },
-                            )),
-                    ),
-            )
             .into_any_element()
     }
 }

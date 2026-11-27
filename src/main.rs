@@ -83,12 +83,6 @@ const TOOLS: [[&str; 4]; 4] = [
         "Nakshatra groups",
     ],
 ];
-const PALETTES: [(&str, u32); 4] = [
-    ("Gold", GOLD),
-    ("Pink", 0x9b486b),
-    ("Blue", 0x315f9d),
-    ("Monochrome", INK),
-];
 
 actions!(
     motaa,
@@ -215,7 +209,6 @@ struct DesktopRoot {
     circular_detail: bool,
     split_comparison: bool,
     compact: bool,
-    chart_palette: usize,
     show_birth: bool,
     chart_zoom: f32,
     chart_scroll: gpui::ScrollHandle,
@@ -466,7 +459,6 @@ impl DesktopRoot {
             circular_detail: false,
             split_comparison: false,
             compact: false,
-            chart_palette: 0,
             show_birth: false,
             chart_zoom: 1.,
             chart_scroll: gpui::ScrollHandle::new(),
@@ -849,13 +841,6 @@ impl DesktopRoot {
                     }
                 }))
             })
-            .child(panel().child("Chart palette").child(row().children(
-                PALETTES.into_iter().enumerate().map(|(index, (name, _))| {
-                    button(name, self.chart_palette == index, cx, move |view, _| {
-                        view.chart_palette = index
-                    })
-                }),
-            )))
             .into_any_element()
     }
 }

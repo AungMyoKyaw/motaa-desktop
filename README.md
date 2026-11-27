@@ -6,7 +6,7 @@ MOTAA Desktop is an offline-first Myanmar astrology workspace built with Rust an
 
 ## Workspaces & Features
 
-- **Charts (`Cmd+1`)**: 12 chart modes including Rasi, Tricakka, Traditional aspects, Nakshatra traversal, LatLon, Western aspects, Natal + transit, Dasha periods, Circular chart (with 27-nakshatra detail view), Rahu wheel (27/28 divisions), Rasi strengths, and Rasi aspects, across 4 chart-only color palettes.
+- **Charts (`Cmd+1`)**: 12 chart modes including Rasi, Tricakka, Traditional aspects, Nakshatra traversal, LatLon, Western aspects, Natal + transit, Dasha periods, Circular chart (with 27-nakshatra detail view), Rahu wheel (27/28 divisions), Rasi strengths, and Rasi aspects.
 - **Profiles (`Cmd+2`)**: Local SQLite birth profile library with JSON backup export/import, Android v31.1 profile import, interactive date/time picker, 534-town offline Myanmar directory, **OpenStreetMap place search & interactive tile map**, and a **searchable IANA timezone selector** with offline coordinate-to-timezone detection and historical offset preview.
 - **Calculations (`Cmd+3`)**: Tropical/Sidereal toggle, Ayanamsha selection, and House system configuration.
 - **Time & Analysis (`Cmd+4`)**: Independent transit/reference time and location navigator with live scrubber (`‹` / `›` / `Now`).

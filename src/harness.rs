@@ -4,8 +4,8 @@ use gpui::{App, Window, WindowHandle, px, size};
 use motaa_engine::ChartRequest;
 
 use crate::{
-    DesktopRoot, Interpretation, LightboxTarget, MODES, PALETTES, RahuReference, backup,
-    model::Workspace, parse_time, primary_keybinding,
+    DesktopRoot, Interpretation, LightboxTarget, MODES, RahuReference, backup, model::Workspace,
+    parse_time, primary_keybinding,
 };
 
 pub(crate) fn run(
@@ -323,22 +323,12 @@ pub(crate) fn run(
                     .expect("exercise MUNP mode");
                 draw(cx);
             }
-            for palette in 0..PALETTES.len() {
-                window
-                    .update(cx, |root, _, cx| {
-                        root.chart_palette = palette;
-                        root.select_mode("Rasi", cx);
-                    })
-                    .expect("exercise chart palette");
-                draw(cx);
-            }
             window
                 .update(cx, |root, _, _| {
                     root.show_munp = false;
-                    root.chart_palette = 0;
                 })
                 .expect("restore default chart flags");
-            println!("Verified MUNP modes and chart palettes");
+            println!("Verified MUNP modes");
             window
                 .update(cx, |root, _, cx| {
                     root.navigate(Workspace::Time, cx);

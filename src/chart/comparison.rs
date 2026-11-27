@@ -44,11 +44,7 @@ impl DesktopRoot {
                 .child("Planet positions are unavailable for one of the epochs.")
                 .into_any_element();
         };
-        let palette_color = if self.chart_palette == 0 {
-            INK
-        } else {
-            crate::PALETTES[self.chart_palette].1
-        };
+        let palette_color = INK;
         let chart = if self.split_comparison {
             div()
                 .grid()

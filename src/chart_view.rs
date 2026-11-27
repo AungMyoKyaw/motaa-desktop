@@ -274,11 +274,7 @@ impl DesktopRoot {
         let asc_result = s.calculate(ascendant_transit);
         let transit = (mode == "Natal + transit").then(|| s.calculate(true));
 
-        let palette_color = if self.chart_palette == 0 {
-            INK
-        } else {
-            PALETTES[self.chart_palette].1
-        };
+        let palette_color = INK;
 
         if matches!(
             target,
@@ -439,11 +435,7 @@ impl DesktopRoot {
             rahu: None,
             houses,
             title,
-            color: if self.chart_palette == 0 && mode == "Rasi" {
-                INK
-            } else {
-                PALETTES[self.chart_palette].1
-            },
+            color: if mode == "Rasi" { INK } else { GOLD },
         };
         (title, self.render_scene(&scene, side, cx))
     }
@@ -1099,11 +1091,7 @@ impl DesktopRoot {
         } else {
             None
         };
-        let palette_color = if self.chart_palette == 0 {
-            INK
-        } else {
-            PALETTES[self.chart_palette].1
-        };
+        let palette_color = INK;
         if mode == "Western aspects" {
             return match ascendant.as_ref() {
                 Some(ascendant) => super::chart::western::render(
@@ -1235,11 +1223,7 @@ impl DesktopRoot {
             rahu: None,
             houses,
             title: mode_title(mode),
-            color: if self.chart_palette == 0 && mode == "Rasi" {
-                INK
-            } else {
-                PALETTES[self.chart_palette].1
-            },
+            color: if mode == "Rasi" { INK } else { GOLD },
         };
         if mode == "Circular chart" && self.circular_detail {
             let moon = ephemeris
@@ -1432,11 +1416,7 @@ impl DesktopRoot {
         if self.show_munp {
             rasi.extend(munp_labels(planets, ascendant, settings));
         }
-        let color = if self.chart_palette == 0 {
-            INK
-        } else {
-            PALETTES[self.chart_palette].1
-        };
+        let color = INK;
         Ok((
             [("Rasi", rasi), ("Bhava", bhava), ("Navamsa", navamsa)].map(|(title, labels)| {
                 chart::ChartScene {
@@ -1497,7 +1477,7 @@ impl DesktopRoot {
         chart::ChartScene {
             labels,
             circular: true,
-            color: PALETTES[self.chart_palette].1,
+            color: GOLD,
             rahu: Some(chart::RahuWheel {
                 use_28: self.rahu_28,
                 node,
@@ -1715,11 +1695,7 @@ impl DesktopRoot {
                     circular: false,
                     rahu: None,
                     houses: None,
-                    color: if self.chart_palette == 0 {
-                        INK
-                    } else {
-                        PALETTES[self.chart_palette].1
-                    },
+                    color: INK,
                 }
                 .render(218.),
             );

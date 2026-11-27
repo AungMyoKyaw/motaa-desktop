@@ -265,7 +265,7 @@ impl DesktopRoot {
                         circular: false,
                         rahu: None,
                         houses: None,
-                        color: PALETTES[self.chart_palette].1,
+                        color: GOLD,
                     };
                     view = view.child(
                         row().items_start().gap_4().child(scene.render(350.)).child(
@@ -1321,7 +1321,7 @@ impl DesktopRoot {
             circular: true,
             rahu: None,
             houses: None,
-            color: PALETTES[self.chart_palette].1,
+            color: GOLD,
         };
         let epochs = [
             ("Natal", session.calculate(false)),
