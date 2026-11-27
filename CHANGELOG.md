@@ -2,6 +2,12 @@
 
 All notable changes to MOTAA Desktop are documented in this file.
 
+## [0.2.4] - 2026-11-28
+
+### Changed
+- **Apple macOS HIG App Icon Redesign**: Redrew the `motaa-desktop` app icon in VectorCraft with an `824×824` continuous-curve squircle, layered Dock drop shadow, top specular rim, metallic gold astrolabe bezel, obsidian lacquer dial, 12-house zodiac wheel with luminous champagne-gold planetary glyphs, and a 3D-faceted golden celestial compass emblem.
+- **Unified App Icon Regeneration**: Updated `scripts/build-icon.sh` (`make icon`) to regenerate and sync all macOS `.icns`, GPUI in-app `256px` PNG, landing page favicon/icon, and Windows Store/MSIX tile and splash assets from the single VectorCraft master.
+
 ## [0.2.3] - 2026-11-28
 
 ### Changed

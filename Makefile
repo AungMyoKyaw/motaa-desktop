@@ -22,7 +22,7 @@ check: ## Run rustfmt check and strict clippy
 ralph: ## Run full verification and APK oracle parity loop
 	bash docs/gpui/ralph.sh
 
-icon: ## Regenerate VectorCraft icon, 256px PNG, and macOS AppIcon.icns
+icon: ## Regenerate VectorCraft icon and all macOS, web, and Windows app icon assets
 	bash scripts/build-icon.sh
 
 bundle: ## Build ad-hoc signed macOS MOTAA Desktop.app bundle
