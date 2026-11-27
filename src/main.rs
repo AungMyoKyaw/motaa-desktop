@@ -101,6 +101,7 @@ actions!(
         StepTimeForward,
         JumpNow,
         NewProfile,
+        About,
         Quit
     ]
 );
@@ -190,6 +191,7 @@ struct DesktopRoot {
     sidebar_collapsed: bool,
     inspector_open: bool,
     palette_open: bool,
+    about_open: bool,
     palette_query: Entity<TextInput>,
     palette_index: usize,
     date: Entity<TextInput>,
@@ -440,6 +442,7 @@ impl DesktopRoot {
             sidebar_collapsed: false,
             inspector_open: true,
             palette_open: false,
+            about_open: false,
             palette_query,
             palette_index: 0,
             date,
@@ -911,7 +914,7 @@ impl Render for DesktopRoot {
                 |view, cx| view.open_draft(ChartRequest::default(), None, cx),
             ))
             .child(div().h(px(10.)))
-            .children(Workspace::ALL.into_iter().enumerate().map(|(idx, entry)| {
+            .children(Workspace::ALL.into_iter().map(|entry| {
                 let selected = entry == route;
                 let item = action_control(("workspace", entry as usize), cx, move |view, cx| {
                     view.navigate(entry, cx)
@@ -953,7 +956,6 @@ impl Render for DesktopRoot {
                             })
                             .child(entry.label()),
                     )
-                    .child(caption(shortcut_label(&(idx + 1).to_string())))
                 }
             }))
             .child(div().flex_1())
@@ -973,9 +975,9 @@ impl Render for DesktopRoot {
                         .justify_center()
                         .hover(|s| s.bg(rgb(SURFACE_HOVER)))
                         .child(caption(if collapsed {
-                            "»".to_owned()
+                            "»"
                         } else {
-                            format!("« Collapse {}", shortcut_label("B"))
+                            "« Collapse"
                         })),
                     ),
             );
@@ -1172,8 +1174,7 @@ impl Render for DesktopRoot {
                                             .border_color(rgb(LINE))
                                             .bg(rgb(PAPER))
                                             .hover(|s| s.bg(rgb(SOFT)))
-                                            .child(caption("Quick jump"))
-                                            .child(badge(shortcut_label("K"), Tone::Neutral)),
+                                            .child(caption("Quick jump")),
                                     )
                                     .when(
                                         viewport_w >= 1060.
@@ -1186,9 +1187,9 @@ impl Render for DesktopRoot {
                                         |bar| {
                                             bar.child(button(
                                                 if self.inspector_open {
-                                                    "Hide inspector".to_owned()
+                                                    "Hide inspector"
                                                 } else {
-                                                    format!("Inspector {}", shortcut_label("I"))
+                                                    "Inspector"
                                                 },
                                                 self.inspector_open,
                                                 cx,
@@ -1262,10 +1263,77 @@ impl Render for DesktopRoot {
             .when(self.palette_open, |root| {
                 root.child(self.palette_overlay(cx))
             })
+            .when(self.about_open, |root| {
+                root.child(self.about_overlay(cx))
+            })
     }
 }
 
 impl DesktopRoot {
+    pub(crate) fn about_overlay(&self, cx: &mut Context<Self>) -> AnyElement {
+        div()
+            .id("about-backdrop")
+            .absolute()
+            .inset_0()
+            .bg(gpui::rgba(0x28251f70))
+            .flex()
+            .items_center()
+            .justify_center()
+            .p_6()
+            .on_click(cx.listener(|root, _, _, cx| {
+                root.about_open = false;
+                cx.notify();
+            }))
+            .child(
+                div()
+                    .id("about-dialog")
+                    .w(px(420.))
+                    .max_w_full()
+                    .bg(rgb(PAPER))
+                    .rounded(px(12.))
+                    .border_1()
+                    .border_color(rgb(LINE))
+                    .shadow_lg()
+                    .p_6()
+                    .flex()
+                    .flex_col()
+                    .items_center()
+                    .gap_3()
+                    .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
+                    .on_click(|_, _, cx| cx.stop_propagation())
+                    .on_key_down(cx.listener(|root, event: &gpui::KeyDownEvent, _, cx| {
+                        if event.keystroke.key == "escape" {
+                            root.about_open = false;
+                            cx.stop_propagation();
+                            cx.notify();
+                        }
+                    }))
+                    .child(img(app_icon()).w(px(56.)).h(px(56.)).rounded(px(12.)))
+                    .child(
+                        div()
+                            .text_size(px(18.))
+                            .font_weight(gpui::FontWeight::SEMIBOLD)
+                            .text_color(rgb(INK))
+                            .child("MOTAA Desktop"),
+                    )
+                    .child(caption(format!("Version {}", env!("CARGO_PKG_VERSION"))))
+                    .child(div().text_size(px(13.)).text_color(rgb(INK)).child(
+                        "Offline-first Myanmar astrology workspace built with Rust and GPUI.",
+                    ))
+                    .child(caption(
+                        "License: GNU Affero General Public License v3.0 (AGPL-3.0)",
+                    ))
+                    .child(caption(
+                        "Local-first SQLite storage · No accounts or telemetry",
+                    ))
+                    .child(div().pt_2().child(button("Close", true, cx, |root, cx| {
+                        root.about_open = false;
+                        cx.notify();
+                    }))),
+            )
+            .into_any_element()
+    }
+
     pub(crate) fn birth_details_button(&self, cx: &mut Context<Self>) -> AnyElement {
         button(
             if self.show_birth {
@@ -1506,6 +1574,14 @@ fn main() {
     Application::new()
         .with_assets(DesktopAssets)
         .run(move |cx: &mut App| {
+            cx.set_menus(vec![gpui::Menu {
+                name: "MOTAA Desktop".into(),
+                items: vec![
+                    gpui::MenuItem::action("About MOTAA Desktop", About),
+                    gpui::MenuItem::separator(),
+                    gpui::MenuItem::action("Quit MOTAA Desktop", Quit),
+                ],
+            }]);
             input::bind_keys(cx);
             cx.bind_keys([
                 KeyBinding::new(&primary_keybinding("1"), Charts, None),
@@ -1562,6 +1638,14 @@ fn main() {
             if !smoke {
                 cx.activate(true);
             }
+            cx.on_action(|_: &Quit, cx| cx.quit());
+            let about_window = window;
+            cx.on_action(move |_: &About, cx| {
+                let _ = about_window.update(cx, |root, _, cx| {
+                    root.about_open = true;
+                    cx.notify();
+                });
+            });
             #[cfg(target_os = "macos")]
             if !smoke
                 && !visual_capture

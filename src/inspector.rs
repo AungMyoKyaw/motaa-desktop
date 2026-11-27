@@ -109,14 +109,9 @@ impl DesktopRoot {
                         row()
                             .justify_between()
                             .child(section_label("CALCULATION"))
-                            .child(button(
-                                format!("Setup {}", shortcut_label("3")),
-                                false,
-                                cx,
-                                |view, cx| {
-                                    view.navigate(Workspace::Calculations, cx);
-                                },
-                            )),
+                            .child(button("Setup", false, cx, |view, cx| {
+                                view.navigate(Workspace::Calculations, cx);
+                            })),
                     )
                     .child(
                         row()

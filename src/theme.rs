@@ -52,28 +52,6 @@ pub fn primary_keybinding(key: &str) -> String {
     }
 }
 
-pub fn shortcut_label(key: &str) -> String {
-    #[cfg(target_os = "macos")]
-    {
-        format!("⌘{key}")
-    }
-    #[cfg(not(target_os = "macos"))]
-    {
-        format!("Ctrl+{key}")
-    }
-}
-
-pub fn shift_shortcut_label(key: &str) -> String {
-    #[cfg(target_os = "macos")]
-    {
-        format!("⌘⇧{key}")
-    }
-    #[cfg(not(target_os = "macos"))]
-    {
-        format!("Ctrl+Shift+{key}")
-    }
-}
-
 pub fn zoom_scroll_hint() -> &'static str {
     #[cfg(target_os = "macos")]
     {

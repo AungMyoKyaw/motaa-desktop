@@ -89,11 +89,11 @@ impl DesktopRoot {
             }
         }
 
-        for (index, workspace) in Workspace::ALL.into_iter().enumerate() {
+        for workspace in Workspace::ALL {
             entries.push(PaletteEntry {
                 category: "Workspace",
                 label: workspace.label().to_owned(),
-                hint: shortcut_label(&(index + 1).to_string()),
+                hint: String::new(),
                 action: PaletteAction::Workspace(workspace),
             });
         }
@@ -102,25 +102,25 @@ impl DesktopRoot {
             PaletteEntry {
                 category: "Action",
                 label: "New birth chart".into(),
-                hint: shortcut_label("N"),
+                hint: String::new(),
                 action: PaletteAction::NewBirthChart,
             },
             PaletteEntry {
                 category: "Action",
                 label: "Jump to current time (Now)".into(),
-                hint: shift_shortcut_label("N"),
+                hint: String::new(),
                 action: PaletteAction::JumpNow,
             },
             PaletteEntry {
                 category: "Action",
                 label: "Toggle sidebar rail".into(),
-                hint: shortcut_label("B"),
+                hint: String::new(),
                 action: PaletteAction::ToggleSidebar,
             },
             PaletteEntry {
                 category: "Action",
                 label: "Toggle contextual inspector".into(),
-                hint: shortcut_label("I"),
+                hint: String::new(),
                 action: PaletteAction::ToggleInspector,
             },
             PaletteEntry {
@@ -325,7 +325,7 @@ impl DesktopRoot {
                             .bg(rgb(SOFT))
                             .justify_between()
                             .child(caption("↑↓ Navigate · Enter Open · Esc Close"))
-                            .child(caption(format!("{} Quick Jump", shortcut_label("K")))),
+                            .child(caption("Quick Jump")),
                     ),
             )
             .into_any_element()
