@@ -29,6 +29,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
   background-color: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
@@ -37,7 +38,7 @@ html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
-body { margin: 0; background-color: var(--bg); color: var(--ink); min-height: 100vh; }
+body { margin: 0; overflow-x: clip; background-color: var(--bg); color: var(--ink); min-height: 100vh; }
 ::selection { background-color: var(--selected); color: var(--ink); }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--rail); }
