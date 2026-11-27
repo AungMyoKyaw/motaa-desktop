@@ -29,8 +29,8 @@ const USER_AGENT: &str = concat!(
     env!("CARGO_PKG_VERSION"),
     " (https://github.com/AungMyoKyaw/motaa-desktop)"
 );
-const MAP_HEIGHT: f32 = 280.;
-const DEFAULT_MAP_WIDTH: f32 = 560.;
+const MAP_HEIGHT: f32 = 380.;
+const DEFAULT_MAP_WIDTH: f32 = 720.;
 const MAX_MERCATOR_LAT: f64 = 85.051_128_78;
 const MIN_ZOOM: u8 = 2;
 const MAX_ZOOM: u8 = 16;
@@ -542,21 +542,6 @@ impl DesktopRoot {
             row()
                 .flex_wrap()
                 .child(
-                    action_control((prefix, 100usize), cx, move |view, cx| {
-                        view.toggle_osm_search(reference, cx);
-                    })
-                    .px_3()
-                    .h(px(34.))
-                    .rounded(px(RADIUS_CONTROL))
-                    .border_1()
-                    .border_color(rgb(if osm_open { GOLD } else { LINE }))
-                    .bg(rgb(if osm_open { SELECTED } else { PAPER }))
-                    .text_size(px(13.))
-                    .text_color(rgb(INK))
-                    .hover(|s| s.bg(rgb(SOFT)))
-                    .child("Search OpenStreetMap"),
-                )
-                .child(
                     action_control((prefix, 101usize), cx, move |view, cx| {
                         view.toggle_map_picker(reference, cx);
                     })
@@ -564,12 +549,16 @@ impl DesktopRoot {
                     .h(px(34.))
                     .rounded(px(RADIUS_CONTROL))
                     .border_1()
-                    .border_color(rgb(if map_open { GOLD } else { LINE }))
-                    .bg(rgb(if map_open { SELECTED } else { PAPER }))
+                    .border_color(rgb(if map_open || osm_open { GOLD } else { LINE }))
+                    .bg(rgb(if map_open || osm_open {
+                        SELECTED
+                    } else {
+                        PAPER
+                    }))
                     .text_size(px(13.))
                     .text_color(rgb(INK))
                     .hover(|s| s.bg(rgb(SOFT)))
-                    .child("Pick on map"),
+                    .child("Search & pick on map"),
                 )
                 .child(
                     action_control((prefix, 102usize), cx, move |view, cx| {
@@ -588,12 +577,6 @@ impl DesktopRoot {
                 ),
         );
 
-        if osm_open {
-            section = section.child(self.render_osm_search_panel(reference, cx));
-        }
-        if map_open {
-            section = section.child(self.render_osm_map_panel(reference, cx));
-        }
         if handles.town_search.is_some() {
             section = section.child(self.town_picker_panel(reference, cx));
         }
@@ -665,46 +648,63 @@ impl DesktopRoot {
         section
     }
 
-    pub(super) fn toggle_osm_search(&mut self, reference: bool, cx: &mut Context<Self>) {
-        let Some(handles) = self.draft_handles_mut(reference) else {
-            return;
-        };
-        let next = !handles.location.osm_open;
-        handles.location.osm_open = next;
-        if next {
-            let place = handles.place.read(cx).value().trim().to_owned();
-            if handles
-                .location
-                .osm_query
-                .read(cx)
-                .value()
-                .trim()
-                .is_empty()
-                && !place.is_empty()
-            {
-                handles
-                    .location
-                    .osm_query
-                    .update(cx, |input, cx| input.set_value(place, cx));
-            }
+    pub(super) fn active_map_popup(&self) -> Option<bool> {
+        if self.draft.as_ref().is_some_and(|d| d.location.map_open) {
+            Some(false)
+        } else if self
+            .reference_location_draft
+            .as_ref()
+            .is_some_and(|d| d.location.map_open)
+        {
+            Some(true)
+        } else {
+            None
+        }
+    }
+
+    pub(super) fn close_map_popup(&mut self, reference: bool) {
+        if let Some(handles) = self.draft_handles_mut(reference) {
+            handles.location.map_open = false;
+            handles.location.osm_open = false;
         }
     }
 
     pub(super) fn toggle_map_picker(&mut self, reference: bool, cx: &mut Context<Self>) {
-        let (lat, lon) = {
+        let (lat, lon, place) = {
             let Some(handles) = self.draft_handles(reference) else {
                 return;
             };
             let lat = parse_coordinate(handles.latitude.read(cx).value(), true).unwrap_or(16.8409);
             let lon =
                 parse_coordinate(handles.longitude.read(cx).value(), false).unwrap_or(96.1735);
-            (lat, lon)
+            let place = handles.place.read(cx).value().trim().to_owned();
+            (lat, lon, place)
         };
+        if let Some(other) = self.draft_handles_mut(!reference) {
+            other.location.map_open = false;
+            other.location.osm_open = false;
+        }
         if let Some(handles) = self.draft_handles_mut(reference) {
-            handles.location.map_open = !handles.location.map_open;
-            if handles.location.map_open {
+            let open = !handles.location.map_open;
+            handles.location.map_open = open;
+            handles.location.osm_open = open;
+            if open {
                 handles.location.map_center_lat = lat.clamp(-MAX_MERCATOR_LAT, MAX_MERCATOR_LAT);
                 handles.location.map_center_lon = lon.clamp(-180., 180.);
+                if handles
+                    .location
+                    .osm_query
+                    .read(cx)
+                    .value()
+                    .trim()
+                    .is_empty()
+                    && !place.is_empty()
+                {
+                    handles
+                        .location
+                        .osm_query
+                        .update(cx, |input, cx| input.set_value(place, cx));
+                }
             }
         }
     }
@@ -792,7 +792,9 @@ impl DesktopRoot {
         }
         handles.location.map_center_lat = place.lat.clamp(-MAX_MERCATOR_LAT, MAX_MERCATOR_LAT);
         handles.location.map_center_lon = place.lon.clamp(-180., 180.);
-        handles.location.osm_open = false;
+        handles.location.map_zoom = handles.location.map_zoom.max(12);
+        handles.location.osm_results.clear();
+        handles.location.map_open = true;
     }
 
     pub(super) fn autodetect_timezone(&mut self, reference: bool, cx: &mut Context<Self>) {
@@ -1275,6 +1277,99 @@ impl DesktopRoot {
             .child(caption(
                 "Click anywhere to drop pin · Drag to pan · Scroll or +/− to zoom",
             ))
+    }
+
+    pub(super) fn location_map_overlay(
+        &self,
+        reference: bool,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        let title = if reference {
+            "Pick Reference Location on Map"
+        } else {
+            "Pick Birthplace on Map"
+        };
+        let (pin_summary, tz_summary) = if let Some(handles) = self.draft_handles(reference) {
+            let lat = parse_coordinate(handles.latitude.read(cx).value(), true)
+                .unwrap_or(handles.location.map_center_lat);
+            let lon = parse_coordinate(handles.longitude.read(cx).value(), false)
+                .unwrap_or(handles.location.map_center_lon);
+            let tz = handles.timezone.read(cx).value().trim().to_owned();
+            (
+                format!("{lat:.4}°, {lon:.4}°"),
+                if tz.is_empty() {
+                    "Timezone: unset".to_owned()
+                } else {
+                    format!("Timezone: {tz}")
+                },
+            )
+        } else {
+            ("0.0000°, 0.0000°".to_owned(), String::new())
+        };
+
+        div()
+            .id("location-map-backdrop")
+            .absolute()
+            .inset_0()
+            .bg(gpui::rgba(0x28251f70))
+            .flex()
+            .items_center()
+            .justify_center()
+            .p_6()
+            .on_click(cx.listener(move |root, _, _, cx| {
+                root.close_map_popup(reference);
+                cx.notify();
+            }))
+            .child(
+                div()
+                    .id("location-map-dialog")
+                    .w(px(760.))
+                    .max_w_full()
+                    .max_h(px(760.))
+                    .overflow_y_scroll()
+                    .bg(rgb(PAPER))
+                    .rounded(px(12.))
+                    .border_1()
+                    .border_color(rgb(LINE))
+                    .shadow_lg()
+                    .p_5()
+                    .flex()
+                    .flex_col()
+                    .gap_3()
+                    .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
+                    .on_click(|_, _, cx| cx.stop_propagation())
+                    .on_key_down(cx.listener(move |root, event: &gpui::KeyDownEvent, _, cx| {
+                        if event.keystroke.key == "escape" {
+                            root.close_map_popup(reference);
+                            cx.stop_propagation();
+                            cx.notify();
+                        }
+                    }))
+                    .child(
+                        row()
+                            .justify_between()
+                            .items_center()
+                            .child(
+                                column()
+                                    .gap_0()
+                                    .child(
+                                        div()
+                                            .text_size(px(16.))
+                                            .font_weight(gpui::FontWeight::SEMIBOLD)
+                                            .text_color(rgb(INK))
+                                            .child(title),
+                                    )
+                                    .child(caption(format!("{pin_summary} · {tz_summary}"))),
+                            )
+                            .child(button("Done", true, cx, move |root, cx| {
+                                root.close_map_popup(reference);
+                                cx.notify();
+                            })),
+                    )
+                    .child(self.render_osm_search_panel(reference, cx))
+                    .child(self.render_osm_map_panel(reference, cx)),
+            )
+            .into_any_element()
     }
 
     fn render_timezone_panel(

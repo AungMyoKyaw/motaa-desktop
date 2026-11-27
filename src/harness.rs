@@ -381,8 +381,10 @@ pub(crate) fn run(
             window
                 .update(cx, |root, _, cx| {
                     root.open_draft(ChartRequest::default(), None, cx);
-                    root.toggle_osm_search(false, cx);
                     root.toggle_map_picker(false, cx);
+                    assert_eq!(root.active_map_popup(), Some(false));
+                    root.close_map_popup(false);
+                    assert_eq!(root.active_map_popup(), None);
                     if let Some(draft) = &mut root.draft {
                         draft.location.tz_open = true;
                         draft

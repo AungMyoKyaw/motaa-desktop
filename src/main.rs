@@ -1256,6 +1256,9 @@ impl Render for DesktopRoot {
             .when_some(self.chart_lightbox, |root, target| {
                 root.child(self.chart_lightbox_overlay(target, window, cx))
             })
+            .when_some(self.active_map_popup(), |root, reference| {
+                root.child(self.location_map_overlay(reference, cx))
+            })
             .when(self.palette_open, |root| {
                 root.child(self.palette_overlay(cx))
             })
