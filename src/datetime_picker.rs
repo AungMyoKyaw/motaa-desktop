@@ -36,6 +36,20 @@ pub type PickerSelector = fn(&mut DesktopRoot) -> Option<&mut DateTimePicker>;
 pub type PickerChangeCallback = fn(&mut DesktopRoot, DateTime, &mut Context<DesktopRoot>);
 pub type ToggleCallback = fn(&mut DesktopRoot, &mut Context<DesktopRoot>);
 
+fn parse_time_only(text: &str) -> Result<jiff::civil::Time, String> {
+    let trimmed = text.trim();
+    if trimmed.is_empty() {
+        return Ok(jiff::civil::Time::constant(0, 0, 0, 0));
+    }
+    if let Ok(time) = jiff::civil::Time::strptime("%H:%M:%S", trimmed) {
+        return Ok(time);
+    }
+    if let Ok(time) = jiff::civil::Time::strptime("%H:%M", trimmed) {
+        return Ok(time);
+    }
+    Err("Enter time as HH:MM:SS.".into())
+}
+
 pub fn days_in_month(year: i32, month: u32) -> u32 {
     let Ok(year) = i16::try_from(year) else {
         return 30;
@@ -62,28 +76,17 @@ pub fn parse_flexible_datetime(text: &str, allow_date_only: bool) -> Result<Date
     Err("Enter a valid date and time as YYYY-MM-DD HH:MM:SS.".into())
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum TimeDropdown {
-    Hour,
-    Minute,
-    Second,
-}
-
 pub struct DateTimePicker {
     pub id_prefix: &'static str,
     pub datetime: Entity<TextInput>,
-    pub year_input: Entity<TextInput>,
-    pub day_input: Entity<TextInput>,
-    pub hour_input: Entity<TextInput>,
-    pub minute_input: Entity<TextInput>,
-    pub second_input: Entity<TextInput>,
+    pub date_input: Entity<TextInput>,
+    pub time_input: Entity<TextInput>,
     pub view_year: i32,
     pub view_month: u32,
     pub open: bool,
-    pub open_dropdown: Option<TimeDropdown>,
-    dropdown_scroll: gpui::ScrollHandle,
     last_datetime_text: String,
-    last_parts_text: [String; 5],
+    last_date_text: String,
+    last_time_text: String,
     parts_error: Option<String>,
 }
 
@@ -95,22 +98,12 @@ impl DateTimePicker {
         cx: &mut Context<DesktopRoot>,
     ) -> Self {
         let formatted = format_time(initial);
-        let parts = Self::format_parts(initial);
+        let (date_text, time_text) = Self::format_date_time(initial);
         let datetime = text_input(&formatted, "YYYY-MM-DD HH:MM:SS", cx);
-        let year_input = text_input(&parts[0], "YYYY", cx);
-        let day_input = text_input(&parts[1], "DD", cx);
-        let hour_input = text_input(&parts[2], "HH", cx);
-        let minute_input = text_input(&parts[3], "MM", cx);
-        let second_input = text_input(&parts[4], "SS", cx);
+        let date_input = text_input(&date_text, "YYYY-MM-DD", cx);
+        let time_input = text_input(&time_text, "HH:MM:SS", cx);
 
-        for input in [
-            &datetime,
-            &year_input,
-            &day_input,
-            &hour_input,
-            &minute_input,
-            &second_input,
-        ] {
+        for input in [&datetime, &date_input, &time_input] {
             cx.observe(input, |root, _, cx| {
                 root.sync_datetime_pickers(cx);
                 cx.notify();
@@ -121,95 +114,50 @@ impl DateTimePicker {
         Self {
             id_prefix,
             datetime,
-            year_input,
-            day_input,
-            hour_input,
-            minute_input,
-            second_input,
+            date_input,
+            time_input,
             view_year: i32::from(initial.year()),
             view_month: u32::from(initial.month() as u8),
             open,
-            open_dropdown: None,
-            dropdown_scroll: gpui::ScrollHandle::new(),
             last_datetime_text: formatted,
-            last_parts_text: parts,
+            last_date_text: date_text,
+            last_time_text: time_text,
             parts_error: None,
         }
     }
 
-    fn format_parts(dt: DateTime) -> [String; 5] {
-        [
-            format!("{:04}", dt.year()),
-            format!("{:02}", dt.day()),
-            format!("{:02}", dt.hour()),
-            format!("{:02}", dt.minute()),
-            format!("{:02}", dt.second()),
-        ]
+    fn format_date_time(dt: DateTime) -> (String, String) {
+        (
+            format!("{:04}-{:02}-{:02}", dt.year(), dt.month(), dt.day()),
+            format!("{:02}:{:02}:{:02}", dt.hour(), dt.minute(), dt.second()),
+        )
     }
 
     pub fn current_datetime(&self, cx: &gpui::App) -> DateTime {
         parse_flexible_datetime(self.datetime.read(cx).value(), true).unwrap_or_else(|_| {
-            let year = self
-                .year_input
-                .read(cx)
-                .value()
-                .trim()
-                .parse::<i32>()
-                .unwrap_or(self.view_year)
-                .clamp(1, 9999);
-            let max_day = days_in_month(year, self.view_month);
-            let day = self
-                .day_input
-                .read(cx)
-                .value()
-                .trim()
-                .parse::<u32>()
-                .unwrap_or(1)
-                .clamp(1, max_day);
-            let hour = self
-                .hour_input
-                .read(cx)
-                .value()
-                .trim()
-                .parse::<u32>()
-                .unwrap_or(12)
-                .min(23);
-            let minute = self
-                .minute_input
-                .read(cx)
-                .value()
-                .trim()
-                .parse::<u32>()
-                .unwrap_or(0)
-                .min(59);
-            let second = self
-                .second_input
-                .read(cx)
-                .value()
-                .trim()
-                .parse::<u32>()
-                .unwrap_or(0)
-                .min(59);
-            i16::try_from(year)
-                .ok()
-                .and_then(|y| Date::new(y, self.view_month as i8, day as i8).ok())
-                .map(|d| d.at(hour as i8, minute as i8, second as i8, 0))
-                .unwrap_or_else(|| DateTime::constant(2000, 1, 1, 12, 0, 0, 0))
+            let date = Date::strptime("%Y-%m-%d", self.date_input.read(cx).value().trim())
+                .unwrap_or_else(|_| Date::constant(2000, 1, 1));
+            let time = parse_time_only(self.time_input.read(cx).value())
+                .unwrap_or_else(|_| jiff::civil::Time::constant(12, 0, 0, 0));
+            date.to_datetime(time)
         })
     }
 
-    fn sync_part_inputs(&self, parts: &[String; 5], cx: &mut Context<DesktopRoot>) {
-        for (entity, value) in [
-            (&self.year_input, &parts[0]),
-            (&self.day_input, &parts[1]),
-            (&self.hour_input, &parts[2]),
-            (&self.minute_input, &parts[3]),
-            (&self.second_input, &parts[4]),
-        ] {
-            if entity.read(cx).value() != value {
-                let next = value.clone();
-                entity.update(cx, |input, cx| input.set_value(next, cx));
-            }
+    fn sync_date_time_inputs(
+        &self,
+        date_text: &str,
+        time_text: &str,
+        cx: &mut Context<DesktopRoot>,
+    ) {
+        if self.date_input.read(cx).value() != date_text {
+            let next = date_text.to_owned();
+            self.date_input
+                .update(cx, |input, cx| input.set_value(next, cx));
+        }
+        if self.time_input.read(cx).value() != time_text {
+            let next = time_text.to_owned();
+            self.time_input
+                .update(cx, |input, cx| input.set_value(next, cx));
         }
     }
 
@@ -218,15 +166,16 @@ impl DateTimePicker {
         self.view_month = u32::from(dt.month() as u8);
         self.parts_error = None;
         let formatted = format_time(dt);
-        let parts = Self::format_parts(dt);
+        let (date_text, time_text) = Self::format_date_time(dt);
         self.last_datetime_text = formatted.clone();
-        self.last_parts_text = parts.clone();
+        self.last_date_text = date_text.clone();
+        self.last_time_text = time_text.clone();
 
         if self.datetime.read(cx).value() != formatted {
             self.datetime
                 .update(cx, |input, cx| input.set_value(formatted, cx));
         }
-        self.sync_part_inputs(&parts, cx);
+        self.sync_date_time_inputs(&date_text, &time_text, cx);
     }
 
     pub fn sync_from_inputs(&mut self, cx: &mut Context<DesktopRoot>) {
@@ -237,77 +186,35 @@ impl DateTimePicker {
                 self.view_year = i32::from(dt.year());
                 self.view_month = u32::from(dt.month() as u8);
                 self.parts_error = None;
-                let parts = Self::format_parts(dt);
-                self.last_parts_text = parts.clone();
-                self.sync_part_inputs(&parts, cx);
+                let (date_text, time_text) = Self::format_date_time(dt);
+                self.last_date_text = date_text.clone();
+                self.last_time_text = time_text.clone();
+                self.sync_date_time_inputs(&date_text, &time_text, cx);
             } else {
                 self.parts_error = None;
             }
             return;
         }
 
-        let parts = [
-            self.year_input.read(cx).value().to_owned(),
-            self.day_input.read(cx).value().to_owned(),
-            self.hour_input.read(cx).value().to_owned(),
-            self.minute_input.read(cx).value().to_owned(),
-            self.second_input.read(cx).value().to_owned(),
-        ];
-        if parts == self.last_parts_text {
+        let date_text = self.date_input.read(cx).value().to_owned();
+        let time_text = self.time_input.read(cx).value().to_owned();
+        if date_text == self.last_date_text && time_text == self.last_time_text {
             return;
         }
-        self.last_parts_text = parts.clone();
+        self.last_date_text = date_text.clone();
+        self.last_time_text = time_text.clone();
 
         let parsed = (|| -> Result<DateTime, String> {
-            let year: i32 = parts[0]
-                .trim()
-                .parse()
-                .map_err(|_| "Enter a valid 4-digit year.".to_owned())?;
-            if !(1..=9999).contains(&year) {
-                return Err("Year must be between 0001 and 9999.".into());
-            }
-            let max_day = days_in_month(year, self.view_month);
-            let day: u32 = parts[1]
-                .trim()
-                .parse()
-                .map_err(|_| "Enter a valid day of the month.".to_owned())?;
-            if !(1..=max_day).contains(&day) {
-                return Err(format!(
-                    "{} {year} has {max_day} days.",
-                    MONTH_NAMES[(self.view_month - 1) as usize]
-                ));
-            }
-            let hour: u32 = parts[2]
-                .trim()
-                .parse()
-                .map_err(|_| "Enter an hour from 00 to 23.".to_owned())?;
-            if hour > 23 {
-                return Err("Hour must be between 00 and 23.".into());
-            }
-            let minute: u32 = parts[3]
-                .trim()
-                .parse()
-                .map_err(|_| "Enter minutes from 00 to 59.".to_owned())?;
-            if minute > 59 {
-                return Err("Minute must be between 00 and 59.".into());
-            }
-            let second: u32 = parts[4]
-                .trim()
-                .parse()
-                .map_err(|_| "Enter seconds from 00 to 59.".to_owned())?;
-            if second > 59 {
-                return Err("Second must be between 00 and 59.".into());
-            }
-            i16::try_from(year)
-                .ok()
-                .and_then(|y| Date::new(y, self.view_month as i8, day as i8).ok())
-                .map(|d| d.at(hour as i8, minute as i8, second as i8, 0))
-                .ok_or_else(|| "Enter a valid calendar date and time.".into())
+            let date = Date::strptime("%Y-%m-%d", date_text.trim())
+                .map_err(|_| "Enter date as YYYY-MM-DD.".to_owned())?;
+            let time = parse_time_only(&time_text)?;
+            Ok(date.to_datetime(time))
         })();
 
         match parsed {
             Ok(dt) => {
                 self.view_year = i32::from(dt.year());
+                self.view_month = u32::from(dt.month() as u8);
                 self.parts_error = None;
                 let formatted = format_time(dt);
                 self.last_datetime_text = formatted.clone();
@@ -370,18 +277,6 @@ impl DateTimePicker {
         self.set_datetime(dt, cx);
     }
 
-    pub fn step_field(
-        &mut self,
-        unit: crate::model::Step,
-        delta: i32,
-        cx: &mut Context<DesktopRoot>,
-    ) {
-        let current = self.current_datetime(cx);
-        if let Some(next) = unit.offset(current, delta) {
-            self.set_datetime(next, cx);
-        }
-    }
-
     pub fn render(
         &self,
         label: &'static str,
@@ -393,74 +288,26 @@ impl DateTimePicker {
     ) -> Div {
         let prefix = self.id_prefix;
         let current = self.current_datetime(cx);
-
         let hour24 = current.hour();
         let is_pm = hour24 >= 12;
-        let hour12 = match hour24 % 12 {
-            0 => 12,
-            h => h,
-        };
-        let am_pm = if is_pm { "PM" } else { "AM" };
-        let summary = if unknown_time {
-            format!(
-                "{} · {:02} {} {:04} · Birth time unknown",
-                current.strftime("%a"),
-                current.day(),
-                MONTH_SHORT[(current.month() - 1) as usize],
-                current.year()
-            )
-        } else {
-            format!(
-                "{} · {:02} {} {:04} · {:02}:{:02}:{:02} {} ({:02}:{:02}:{:02})",
-                current.strftime("%a"),
-                current.day(),
-                MONTH_SHORT[(current.month() - 1) as usize],
-                current.year(),
-                hour12,
-                current.minute(),
-                current.second(),
-                am_pm,
-                hour24,
-                current.minute(),
-                current.second()
-            )
-        };
 
-        let mut header_actions = row()
-            .child(small_action_button(
-                (prefix, "today"),
-                "Today",
+        let mut header_actions = row().when(!unknown_time, |bar| {
+            bar.child(small_action_button(
+                (prefix, "now"),
+                "Now",
                 false,
                 cx,
                 move |view, cx| {
                     let now = view.session.read(cx).now();
                     if let Some(picker) = get_mut(view) {
-                        let cur = picker.current_datetime(cx);
-                        let dt = now.date().at(cur.hour(), cur.minute(), cur.second(), 0);
-                        picker.set_datetime(dt, cx);
+                        picker.set_datetime(now, cx);
                         if let Some(cb) = on_change {
-                            cb(view, dt, cx);
+                            cb(view, now, cx);
                         }
                     }
                 },
             ))
-            .when(!unknown_time, |bar| {
-                bar.child(small_action_button(
-                    (prefix, "now"),
-                    "Now",
-                    false,
-                    cx,
-                    move |view, cx| {
-                        let now = view.session.read(cx).now();
-                        if let Some(picker) = get_mut(view) {
-                            picker.set_datetime(now, cx);
-                            if let Some(cb) = on_change {
-                                cb(view, now, cx);
-                            }
-                        }
-                    },
-                ))
-            });
+        });
 
         if let Some(toggle_unknown) = on_toggle_unknown {
             header_actions = header_actions.child(small_action_button(
@@ -472,126 +319,58 @@ impl DateTimePicker {
             ));
         }
 
-        header_actions = header_actions.child(small_action_button(
-            (prefix, "toggle-open"),
-            "Calendar",
-            self.open,
-            cx,
-            move |view, _| {
-                if let Some(picker) = get_mut(view) {
-                    picker.open = !picker.open;
-                }
-            },
-        ));
+        let date_col = column().gap_1().child(caption("Date (YYYY-MM-DD)")).child(
+            row()
+                .w_full()
+                .gap_2()
+                .child(div().flex_1().min_w(px(0.)).child(self.date_input.clone()))
+                .child(
+                    action_control(
+                        SharedString::from(format!("{prefix}-toggle-open")),
+                        cx,
+                        move |view, _| {
+                            if let Some(picker) = get_mut(view) {
+                                picker.open = !picker.open;
+                            }
+                        },
+                    )
+                    .px_3()
+                    .h(px(36.))
+                    .justify_center()
+                    .rounded(px(5.))
+                    .border_1()
+                    .border_color(rgb(if self.open { GOLD } else { LINE }))
+                    .bg(rgb(if self.open { SELECTED } else { PAPER }))
+                    .text_color(rgb(INK))
+                    .text_size(px(12.5))
+                    .hover(|style| style.bg(rgb(SELECTED)))
+                    .child("Calendar"),
+                ),
+        );
 
-        let date_segments = row()
-            .flex_wrap()
-            .gap_3()
-            .child(stepper_input_group(
-                (prefix, "year"),
-                "Year",
-                self.year_input.clone(),
-                px(72.),
-                cx,
-                step_cb(get_mut, on_change, crate::model::Step::Year, -1),
-                step_cb(get_mut, on_change, crate::model::Step::Year, 1),
-            ))
-            .child(month_stepper_group(
-                (prefix, "month"),
-                self.view_month,
-                cx,
-                move |view, cx| shift_month_and_notify(view, -1, get_mut, on_change, cx),
-                move |view, _| {
-                    if let Some(picker) = get_mut(view) {
-                        picker.open = true;
-                    }
-                },
-                move |view, cx| shift_month_and_notify(view, 1, get_mut, on_change, cx),
-            ))
-            .child(stepper_input_group(
-                (prefix, "day"),
-                "Day",
-                self.day_input.clone(),
-                px(52.),
-                cx,
-                step_cb(get_mut, on_change, crate::model::Step::Day, -1),
-                step_cb(get_mut, on_change, crate::model::Step::Day, 1),
-            ))
-            .when(!unknown_time, |bar| {
-                bar.child(
-                    row()
-                        .items_end()
-                        .gap_1()
-                        .child(stepper_input_group(
-                            (prefix, "hour"),
-                            "Hour (0–23)",
-                            self.hour_input.clone(),
-                            px(52.),
-                            cx,
-                            step_cb(get_mut, on_change, crate::model::Step::Hour, -1),
-                            step_cb(get_mut, on_change, crate::model::Step::Hour, 1),
-                        ))
-                        .child(dropdown_toggle_button(
-                            (prefix, "hour-dd"),
-                            self.open_dropdown == Some(TimeDropdown::Hour),
-                            cx,
-                            move |view, _| {
-                                if let Some(picker) = get_mut(view) {
-                                    picker.toggle_dropdown(TimeDropdown::Hour);
-                                }
-                            },
-                        )),
-                )
-                .child(
-                    row()
-                        .items_end()
-                        .gap_1()
-                        .child(stepper_input_group(
-                            (prefix, "minute"),
-                            "Minute",
-                            self.minute_input.clone(),
-                            px(52.),
-                            cx,
-                            step_cb(get_mut, on_change, crate::model::Step::Minute, -1),
-                            step_cb(get_mut, on_change, crate::model::Step::Minute, 1),
-                        ))
-                        .child(dropdown_toggle_button(
-                            (prefix, "min-dd"),
-                            self.open_dropdown == Some(TimeDropdown::Minute),
-                            cx,
-                            move |view, _| {
-                                if let Some(picker) = get_mut(view) {
-                                    picker.toggle_dropdown(TimeDropdown::Minute);
-                                }
-                            },
-                        )),
-                )
-                .child(
-                    row()
-                        .items_end()
-                        .gap_1()
-                        .child(stepper_input_group(
-                            (prefix, "second"),
-                            "Second",
-                            self.second_input.clone(),
-                            px(52.),
-                            cx,
-                            step_cb(get_mut, on_change, crate::model::Step::Second, -1),
-                            step_cb(get_mut, on_change, crate::model::Step::Second, 1),
-                        ))
-                        .child(dropdown_toggle_button(
-                            (prefix, "sec-dd"),
-                            self.open_dropdown == Some(TimeDropdown::Second),
-                            cx,
-                            move |view, _| {
-                                if let Some(picker) = get_mut(view) {
-                                    picker.toggle_dropdown(TimeDropdown::Second);
-                                }
-                            },
-                        )),
-                )
-                .child(
-                    column().gap_1().child(caption("Period")).child(
+        let time_col = column()
+            .gap_1()
+            .child(caption("Time (HH:MM:SS)"))
+            .child(if unknown_time {
+                div()
+                    .h(px(36.))
+                    .px_3()
+                    .flex()
+                    .items_center()
+                    .rounded(px(5.))
+                    .border_1()
+                    .border_color(rgb(LINE))
+                    .bg(rgb(SOFT))
+                    .text_size(px(13.))
+                    .text_color(rgb(MUTED))
+                    .child("Birth time unknown")
+                    .into_any_element()
+            } else {
+                row()
+                    .w_full()
+                    .gap_2()
+                    .child(div().flex_1().min_w(px(0.)).child(self.time_input.clone()))
+                    .child(
                         row()
                             .gap_1()
                             .child(small_action_button(
@@ -640,8 +419,8 @@ impl DateTimePicker {
                                     }
                                 },
                             )),
-                    ),
-                )
+                    )
+                    .into_any_element()
             });
 
         column()
@@ -651,35 +430,17 @@ impl DateTimePicker {
                     .justify_between()
                     .flex_wrap()
                     .gap_2()
-                    .child(
-                        row().gap_3().child(caption(label)).child(
-                            div()
-                                .px_2()
-                                .py(px(2.))
-                                .rounded(px(4.))
-                                .bg(rgb(SOFT))
-                                .border_1()
-                                .border_color(rgb(LINE))
-                                .text_size(px(12.))
-                                .text_color(rgb(INK))
-                                .child(summary),
-                        ),
-                    )
+                    .child(caption(label))
                     .child(header_actions),
             )
             .child(
                 div()
-                    .p_3()
-                    .rounded(px(8.))
-                    .bg(rgb(SOFT))
-                    .border_1()
-                    .border_color(rgb(LINE))
-                    .child(date_segments),
+                    .grid()
+                    .grid_cols(2)
+                    .gap_3()
+                    .child(date_col)
+                    .child(time_col),
             )
-            .when(!unknown_time && self.open_dropdown.is_some(), |view| {
-                let kind = self.open_dropdown.unwrap_or(TimeDropdown::Hour);
-                view.child(self.render_time_dropdown(kind, current, on_change, get_mut, cx))
-            })
             .when_some(self.parts_error.clone(), |view, err| {
                 view.child(
                     div()
@@ -688,132 +449,6 @@ impl DateTimePicker {
                         .child(err),
                 )
             })
-    }
-
-    pub fn toggle_dropdown(&mut self, kind: TimeDropdown) {
-        if self.open_dropdown == Some(kind) {
-            self.open_dropdown = None;
-        } else {
-            self.open_dropdown = Some(kind);
-            self.dropdown_scroll.set_offset(gpui::point(px(0.), px(0.)));
-        }
-    }
-
-    fn render_time_dropdown(
-        &self,
-        kind: TimeDropdown,
-        current: DateTime,
-        on_change: Option<PickerChangeCallback>,
-        get_mut: PickerSelector,
-        cx: &mut Context<DesktopRoot>,
-    ) -> Div {
-        let prefix = self.id_prefix;
-        let (title, count, selected) = match kind {
-            TimeDropdown::Hour => ("Select Hour", 24u32, current.hour() as u32),
-            TimeDropdown::Minute => ("Select Minute", 60u32, current.minute() as u32),
-            TimeDropdown::Second => ("Select Second", 60u32, current.second() as u32),
-        };
-        let items: Vec<_> = (0..count)
-            .map(|val| {
-                let active = val == selected;
-                let label = match kind {
-                    TimeDropdown::Hour => {
-                        let h12 = match val % 12 {
-                            0 => 12,
-                            h => h,
-                        };
-                        let ampm = if val >= 12 { "PM" } else { "AM" };
-                        format!("{val:02} · {h12:02} {ampm}")
-                    }
-                    TimeDropdown::Minute | TimeDropdown::Second => format!(":{val:02}"),
-                };
-                action_control(
-                    (
-                        SharedString::from(format!("{prefix}-dd-item")),
-                        val as usize,
-                    ),
-                    cx,
-                    move |view, cx| {
-                        if let Some(picker) = get_mut(view) {
-                            let cur = picker.current_datetime(cx);
-                            match kind {
-                                TimeDropdown::Hour => {
-                                    picker.set_hms(
-                                        val,
-                                        cur.minute() as u32,
-                                        cur.second() as u32,
-                                        cx,
-                                    );
-                                }
-                                TimeDropdown::Minute => {
-                                    picker.set_hms(cur.hour() as u32, val, cur.second() as u32, cx);
-                                }
-                                TimeDropdown::Second => {
-                                    picker.set_hms(cur.hour() as u32, cur.minute() as u32, val, cx);
-                                }
-                            }
-                            picker.open_dropdown = None;
-                            let dt = picker.current_datetime(cx);
-                            if let Some(cb) = on_change {
-                                cb(view, dt, cx);
-                            }
-                        }
-                    },
-                )
-                .w_full()
-                .px_3()
-                .py(px(4.))
-                .rounded(px(4.))
-                .border_1()
-                .border_color(rgb(if active { GOLD } else { LINE }))
-                .bg(rgb(if active { SELECTED } else { PAPER }))
-                .text_size(px(12.5))
-                .text_color(rgb(INK))
-                .hover(|s| s.bg(rgb(SELECTED)))
-                .child(label)
-            })
-            .collect();
-
-        panel()
-            .bg(rgb(PAPER))
-            .gap_2()
-            .child(
-                row()
-                    .justify_between()
-                    .child(caption(title))
-                    .child(small_action_button(
-                        (prefix, "dd-close"),
-                        "Close",
-                        false,
-                        cx,
-                        move |view, _| {
-                            if let Some(picker) = get_mut(view) {
-                                picker.open_dropdown = None;
-                            }
-                        },
-                    )),
-            )
-            .child(
-                row()
-                    .w_full()
-                    .gap_2()
-                    .items_start()
-                    .child(
-                        div()
-                            .id(SharedString::from(format!("{prefix}-dd-scroll")))
-                            .flex_1()
-                            .min_w(px(0.))
-                            .h(px(192.))
-                            .overflow_y_scroll()
-                            .track_scroll(&self.dropdown_scroll)
-                            .on_scroll_wheel(cx.listener(|_, _, _, cx| {
-                                cx.stop_propagation();
-                                cx.notify();
-                            }))
-                            .child(column().gap_1().children(items)),
-                    )
-                    .child(crate::vertical_scrollbar(&self.dropdown_scroll, 192.)),
-            )
     }
 
     fn render_calendar_popup_body(
@@ -1234,26 +869,6 @@ impl DesktopRoot {
     }
 }
 
-fn dropdown_toggle_button(
-    id: (&'static str, &'static str),
-    active: bool,
-    cx: &mut Context<DesktopRoot>,
-    action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
-) -> gpui::Stateful<Div> {
-    action_control(SharedString::from(format!("{}-{}", id.0, id.1)), cx, action)
-        .w(px(26.))
-        .h(px(36.))
-        .justify_center()
-        .rounded(px(5.))
-        .border_1()
-        .border_color(rgb(if active { GOLD } else { LINE }))
-        .bg(rgb(if active { SELECTED } else { PAPER }))
-        .text_color(rgb(INK))
-        .text_size(px(11.))
-        .hover(|style| style.bg(rgb(SELECTED)))
-        .child("▾")
-}
-
 fn small_action_button(
     id: (&'static str, &'static str),
     label: &'static str,
@@ -1273,134 +888,6 @@ fn small_action_button(
         .text_size(px(12.))
         .hover(|style| style.opacity(0.85))
         .child(label)
-}
-
-fn step_cb(
-    get_mut: fn(&mut DesktopRoot) -> Option<&mut DateTimePicker>,
-    on_change: Option<fn(&mut DesktopRoot, DateTime, &mut Context<DesktopRoot>)>,
-    step: crate::model::Step,
-    delta: i32,
-) -> impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static {
-    move |view, cx| {
-        if let Some(picker) = get_mut(view) {
-            picker.step_field(step, delta, cx);
-            let dt = picker.current_datetime(cx);
-            if let Some(cb) = on_change {
-                cb(view, dt, cx);
-            }
-        }
-    }
-}
-
-fn shift_month_and_notify(
-    view: &mut DesktopRoot,
-    delta: i32,
-    get_mut: fn(&mut DesktopRoot) -> Option<&mut DateTimePicker>,
-    on_change: Option<fn(&mut DesktopRoot, DateTime, &mut Context<DesktopRoot>)>,
-    cx: &mut Context<DesktopRoot>,
-) {
-    if let Some(picker) = get_mut(view) {
-        picker.shift_month(delta, cx);
-        let dt = picker.current_datetime(cx);
-        if let Some(cb) = on_change {
-            cb(view, dt, cx);
-        }
-    }
-}
-
-fn stepper_button(
-    id: SharedString,
-    width: gpui::Pixels,
-    label: &'static str,
-    cx: &mut Context<DesktopRoot>,
-    action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
-) -> gpui::Stateful<Div> {
-    action_control(id, cx, action)
-        .w(width)
-        .h(px(34.))
-        .justify_center()
-        .rounded(px(5.))
-        .border_1()
-        .border_color(rgb(LINE))
-        .bg(rgb(PAPER))
-        .hover(|style| style.bg(rgb(SELECTED)))
-        .child(label)
-}
-
-fn stepper_input_group(
-    id: (&'static str, &'static str),
-    label: &'static str,
-    input: Entity<TextInput>,
-    width: gpui::Pixels,
-    cx: &mut Context<DesktopRoot>,
-    on_prev: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
-    on_next: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
-) -> Div {
-    column().gap_1().child(caption(label)).child(
-        row()
-            .gap_1()
-            .child(stepper_button(
-                format!("{}-{}-prev", id.0, id.1).into(),
-                px(28.),
-                "‹",
-                cx,
-                on_prev,
-            ))
-            .child(div().w(width).child(input))
-            .child(stepper_button(
-                format!("{}-{}-next", id.0, id.1).into(),
-                px(28.),
-                "›",
-                cx,
-                on_next,
-            )),
-    )
-}
-
-fn month_stepper_group(
-    id: (&'static str, &'static str),
-    view_month: u32,
-    cx: &mut Context<DesktopRoot>,
-    on_prev: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
-    on_open: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
-    on_next: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
-) -> Div {
-    let month_idx = (view_month.clamp(1, 12) - 1) as usize;
-    let label = format!("{:02} · {}", view_month, MONTH_SHORT[month_idx]);
-    column().gap_1().child(caption("Month")).child(
-        row()
-            .gap_1()
-            .child(stepper_button(
-                format!("{}-{}-prev", id.0, id.1).into(),
-                px(28.),
-                "‹",
-                cx,
-                on_prev,
-            ))
-            .child(
-                action_control(
-                    SharedString::from(format!("{}-{}-display", id.0, id.1)),
-                    cx,
-                    on_open,
-                )
-                .w(px(96.))
-                .h(px(34.))
-                .justify_center()
-                .rounded(px(5.))
-                .border_1()
-                .border_color(rgb(LINE))
-                .bg(rgb(PAPER))
-                .hover(|style| style.bg(rgb(SELECTED)))
-                .child(label),
-            )
-            .child(stepper_button(
-                format!("{}-{}-next", id.0, id.1).into(),
-                px(28.),
-                "›",
-                cx,
-                on_next,
-            )),
-    )
 }
 
 #[cfg(test)]
