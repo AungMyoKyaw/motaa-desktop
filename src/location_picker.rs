@@ -1424,8 +1424,6 @@ impl DesktopRoot {
                     .id("timezone-dialog")
                     .w(px(580.))
                     .max_w_full()
-                    .max_h(px(640.))
-                    .overflow_y_scroll()
                     .bg(rgb(PAPER))
                     .rounded(px(12.))
                     .border_1()
@@ -1483,7 +1481,7 @@ impl DesktopRoot {
         let tz_query = handles.location.tz_query.clone();
         let current_tz = handles.timezone.read(cx).value().trim().to_owned();
         let query_text = tz_query.read(cx).value().to_owned();
-        let matches = filter_timezones(&query_text, effective_dt, 24);
+        let matches = filter_timezones(&query_text, effective_dt, 100);
 
         panel()
             .bg(rgb(SOFT))
@@ -1513,36 +1511,54 @@ impl DesktopRoot {
             })
             .when(!matches.is_empty(), |p| {
                 p.child(
-                    column()
-                        .gap_1()
-                        .children(matches.into_iter().enumerate().map(|(idx, opt)| {
-                            let active = current_tz == opt.name;
-                            action_control((prefix, idx), cx, move |view, cx| {
-                                view.select_timezone_name(reference, opt.name, cx);
-                            })
-                            .w_full()
-                            .px_3()
-                            .py(px(6.))
-                            .rounded(px(RADIUS_FIELD))
-                            .border_1()
-                            .border_color(rgb(if active { GOLD } else { SUBTLE_LINE }))
-                            .bg(rgb(if active { SELECTED } else { PAPER }))
-                            .hover(|s| s.bg(rgb(SELECTED)))
-                            .justify_between()
-                            .child(
-                                div()
-                                    .text_size(px(13.))
-                                    .text_color(rgb(INK))
-                                    .child(opt.name),
-                            )
-                            .child(
-                                div()
-                                    .font_family("Menlo")
-                                    .text_size(px(12.))
-                                    .text_color(rgb(MUTED))
-                                    .child(format!("{} · {}", opt.offset_label, opt.abbr)),
-                            )
-                        })),
+                    row()
+                        .w_full()
+                        .gap_2()
+                        .items_start()
+                        .child(
+                            div()
+                                .id("tz-list-scroll")
+                                .flex_1()
+                                .min_w(px(0.))
+                                .h(px(340.))
+                                .overflow_y_scroll()
+                                .track_scroll(&self.tz_scroll)
+                                .on_scroll_wheel(cx.listener(|_, _, _, cx| cx.notify()))
+                                .child(column().gap_1().children(
+                                    matches.into_iter().enumerate().map(|(idx, opt)| {
+                                        let active = current_tz == opt.name;
+                                        action_control((prefix, idx), cx, move |view, cx| {
+                                            view.select_timezone_name(reference, opt.name, cx);
+                                        })
+                                        .w_full()
+                                        .px_3()
+                                        .py(px(6.))
+                                        .rounded(px(RADIUS_FIELD))
+                                        .border_1()
+                                        .border_color(rgb(if active { GOLD } else { SUBTLE_LINE }))
+                                        .bg(rgb(if active { SELECTED } else { PAPER }))
+                                        .hover(|s| s.bg(rgb(SELECTED)))
+                                        .justify_between()
+                                        .child(
+                                            div()
+                                                .text_size(px(13.))
+                                                .text_color(rgb(INK))
+                                                .child(opt.name),
+                                        )
+                                        .child(
+                                            div()
+                                                .font_family("Menlo")
+                                                .text_size(px(12.))
+                                                .text_color(rgb(MUTED))
+                                                .child(format!(
+                                                    "{} · {}",
+                                                    opt.offset_label, opt.abbr
+                                                )),
+                                        )
+                                    }),
+                                )),
+                        )
+                        .child(crate::vertical_scrollbar(&self.tz_scroll, 340.)),
                 )
             })
     }

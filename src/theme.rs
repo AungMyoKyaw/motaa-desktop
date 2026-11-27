@@ -103,6 +103,39 @@ pub fn panel() -> Div {
         .bg(rgb(PAPER))
 }
 
+pub fn vertical_scrollbar(handle: &gpui::ScrollHandle, track_height: f32) -> Div {
+    let max_y = f32::from(handle.max_offset().height).max(0.0);
+    let viewport_h = f32::from(handle.bounds().size.height).max(track_height);
+    let scroll_y = (-f32::from(handle.offset().y)).clamp(0.0, max_y);
+    let thumb_h = ((viewport_h / (viewport_h + max_y)) * track_height).clamp(28.0, track_height);
+    let thumb_y = if max_y > 0.5 {
+        (scroll_y / max_y) * (track_height - thumb_h)
+    } else {
+        0.0
+    };
+    let mut track = div()
+        .relative()
+        .w(px(8.))
+        .h(px(track_height))
+        .rounded(px(4.))
+        .bg(rgb(SOFT))
+        .border_1()
+        .border_color(rgb(SUBTLE_LINE));
+    if max_y > 0.5 {
+        track = track.child(
+            div()
+                .absolute()
+                .left(px(0.))
+                .top(px(thumb_y))
+                .w(px(6.))
+                .h(px(thumb_h))
+                .rounded(px(3.))
+                .bg(rgb(MUTED)),
+        );
+    }
+    track
+}
+
 pub fn badge(label: impl Into<SharedString>, tone: Tone) -> Div {
     let (bg, fg, border) = tone.colors();
     div()

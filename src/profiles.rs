@@ -418,6 +418,7 @@ impl DesktopRoot {
             } else {
                 let input = text_input("", "Town name in Myanmar script", cx);
                 cx.observe(&input, |_, _, cx| cx.notify()).detach();
+                self.town_scroll.set_offset(gpui::point(px(0.), px(0.)));
                 Some(input)
             };
         }
@@ -448,8 +449,6 @@ impl DesktopRoot {
                     .id("town-dialog")
                     .w(px(580.))
                     .max_w_full()
-                    .max_h(px(640.))
-                    .overflow_y_scroll()
                     .bg(rgb(PAPER))
                     .rounded(px(12.))
                     .border_1()
@@ -506,28 +505,75 @@ impl DesktopRoot {
             return panel();
         };
         let query = search.read(cx).value().trim().to_owned();
-        let mut matching = self
+        let matching: Vec<(usize, &crate::Town)> = self
             .towns
             .towns
             .iter()
             .enumerate()
             .filter(|(_, town)| town.name_my.contains(&query))
-            .take(8)
-            .peekable();
+            .collect();
+        let count = matching.len();
+        let total = self.towns.towns.len();
         panel()
             .bg(rgb(SOFT))
+            .gap_2()
             .child(field("Search Myanmar towns", search.clone()))
-            .when(matching.peek().is_none(), |panel| {
+            .child(caption(format!("{count} of {total} towns")))
+            .when(matching.is_empty(), |panel| {
                 panel.child(caption("No matching towns."))
             })
-            .children(matching.map(|(index, town)| {
-                div().id(("town", index)).child(button(
-                    town.name_my.clone(),
-                    false,
-                    cx,
-                    move |view, cx| view.select_town(index, reference, cx),
-                ))
-            }))
+            .when(!matching.is_empty(), |panel| {
+                panel.child(
+                    row()
+                        .w_full()
+                        .gap_2()
+                        .items_start()
+                        .child(
+                            div()
+                                .id("town-list-scroll")
+                                .flex_1()
+                                .min_w(px(0.))
+                                .h(px(400.))
+                                .overflow_y_scroll()
+                                .track_scroll(&self.town_scroll)
+                                .on_scroll_wheel(cx.listener(|_, _, _, cx| cx.notify()))
+                                .child(column().gap_1().children(matching.into_iter().map(
+                                    |(index, town)| {
+                                        let coords = format!(
+                                            "{:.2}°, {:.2}°",
+                                            town.latitude, town.longitude
+                                        );
+                                        action_control(("town", index), cx, move |view, cx| {
+                                            view.select_town(index, reference, cx);
+                                        })
+                                        .w_full()
+                                        .px_3()
+                                        .py(px(6.))
+                                        .rounded(px(RADIUS_FIELD))
+                                        .border_1()
+                                        .border_color(rgb(SUBTLE_LINE))
+                                        .bg(rgb(PAPER))
+                                        .hover(|s| s.bg(rgb(SELECTED)))
+                                        .justify_between()
+                                        .child(
+                                            div()
+                                                .text_size(px(13.))
+                                                .text_color(rgb(INK))
+                                                .child(town.name_my.clone()),
+                                        )
+                                        .child(
+                                            div()
+                                                .font_family("Menlo")
+                                                .text_size(px(11.5))
+                                                .text_color(rgb(MUTED))
+                                                .child(coords),
+                                        )
+                                    },
+                                ))),
+                        )
+                        .child(crate::vertical_scrollbar(&self.town_scroll, 400.)),
+                )
+            })
     }
 
     fn select_town(&mut self, index: usize, reference: bool, cx: &mut Context<Self>) {
