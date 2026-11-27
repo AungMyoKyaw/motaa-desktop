@@ -60,6 +60,6 @@ MOTAA Desktop uses an independent reference ephemeris engine and Myanmar calenda
 
 ## License & Privacy
 
-- **License**: MIT License — see [LICENSE](LICENSE). Third-party licenses and attributions live in [third_party/](third_party/).
+- **License**: GNU Affero General Public License v3.0 (AGPL-3.0) — see [LICENSE](LICENSE). Third-party licenses and attributions live in [third_party/](third_party/).
 - **Privacy**: Local-first storage with no telemetry — see [PRIVACY.md](PRIVACY.md) and [SECURITY.md](SECURITY.md).
 - **Windows Store Packaging**: MSIX manifest, store assets, and submission instructions live in [packaging/windows/STORE_SUBMISSION.md](packaging/windows/STORE_SUBMISSION.md).
