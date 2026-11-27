@@ -379,7 +379,32 @@ impl DesktopRoot {
         }
     }
 
+    pub(super) fn active_town_popup(&self) -> Option<bool> {
+        if self.draft.as_ref().is_some_and(|d| d.town_search.is_some()) {
+            Some(false)
+        } else if self
+            .reference_location_draft
+            .as_ref()
+            .is_some_and(|d| d.town_search.is_some())
+        {
+            Some(true)
+        } else {
+            None
+        }
+    }
+
+    pub(super) fn close_town_popup(&mut self, reference: bool) {
+        if reference {
+            if let Some(d) = &mut self.reference_location_draft {
+                d.town_search = None;
+            }
+        } else if let Some(d) = &mut self.draft {
+            d.town_search = None;
+        }
+    }
+
     pub(super) fn toggle_town_picker(&mut self, reference: bool, cx: &mut Context<Self>) {
+        self.close_town_popup(!reference);
         let field = if reference {
             self.reference_location_draft
                 .as_mut()
@@ -396,6 +421,77 @@ impl DesktopRoot {
                 Some(input)
             };
         }
+    }
+
+    pub(super) fn town_picker_overlay(
+        &self,
+        reference: bool,
+        cx: &mut Context<Self>,
+    ) -> AnyElement {
+        div()
+            .id("town-backdrop")
+            .occlude()
+            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
+            .absolute()
+            .inset_0()
+            .bg(gpui::rgba(0x28251f70))
+            .flex()
+            .items_center()
+            .justify_center()
+            .p_6()
+            .on_click(cx.listener(move |root, _, _, cx| {
+                root.close_town_popup(reference);
+                cx.notify();
+            }))
+            .child(
+                div()
+                    .id("town-dialog")
+                    .w(px(580.))
+                    .max_w_full()
+                    .max_h(px(640.))
+                    .overflow_y_scroll()
+                    .bg(rgb(PAPER))
+                    .rounded(px(12.))
+                    .border_1()
+                    .border_color(rgb(LINE))
+                    .shadow_lg()
+                    .p_5()
+                    .flex()
+                    .flex_col()
+                    .gap_3()
+                    .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
+                    .on_click(|_, _, cx| cx.stop_propagation())
+                    .on_key_down(cx.listener(move |root, event: &gpui::KeyDownEvent, _, cx| {
+                        if event.keystroke.key == "escape" {
+                            root.close_town_popup(reference);
+                            cx.stop_propagation();
+                            cx.notify();
+                        }
+                    }))
+                    .child(
+                        row()
+                            .justify_between()
+                            .items_center()
+                            .child(
+                                column()
+                                    .gap_0()
+                                    .child(
+                                        div()
+                                            .text_size(px(16.))
+                                            .font_weight(gpui::FontWeight::SEMIBOLD)
+                                            .text_color(rgb(INK))
+                                            .child("Myanmar Town Directory"),
+                                    )
+                                    .child(caption("534-town offline directory")),
+                            )
+                            .child(button("Close", true, cx, move |root, cx| {
+                                root.close_town_popup(reference);
+                                cx.notify();
+                            })),
+                    )
+                    .child(self.town_picker_panel(reference, cx)),
+            )
+            .into_any_element()
     }
 
     pub(super) fn town_picker_panel(&self, reference: bool, cx: &mut Context<Self>) -> Div {

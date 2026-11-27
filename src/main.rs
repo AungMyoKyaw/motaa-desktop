@@ -1263,6 +1263,9 @@ impl Render for DesktopRoot {
             .when_some(self.active_timezone_popup(), |root, reference| {
                 root.child(self.timezone_overlay(reference, cx))
             })
+            .when_some(self.active_town_popup(), |root, reference| {
+                root.child(self.town_picker_overlay(reference, cx))
+            })
             .when(self.palette_open, |root| {
                 root.child(self.palette_overlay(cx))
             })

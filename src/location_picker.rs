@@ -577,10 +577,6 @@ impl DesktopRoot {
                 ),
         );
 
-        if handles.town_search.is_some() {
-            section = section.child(self.town_picker_panel(reference, cx));
-        }
-
         section = section
             .child(
                 div()
