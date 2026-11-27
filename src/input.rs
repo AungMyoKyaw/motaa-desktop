@@ -15,10 +15,20 @@ actions!(
     [
         Backspace,
         Delete,
+        DeleteToBeginningOfLine,
+        DeleteToEndOfLine,
+        DeleteWordLeft,
+        DeleteWordRight,
         Left,
         Right,
+        MoveWordLeft,
+        MoveWordRight,
         SelectLeft,
         SelectRight,
+        SelectWordLeft,
+        SelectWordRight,
+        SelectToBeginningOfLine,
+        SelectToEndOfLine,
         SelectAll,
         Home,
         End,
@@ -120,17 +130,117 @@ impl TextInput {
         self.replace_text_in_range(None, "", window, cx)
     }
 
+    fn delete_to_beginning_of_line(
+        &mut self,
+        _: &DeleteToBeginningOfLine,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.selected_range.is_empty() {
+            self.selected_range = 0..self.cursor_offset();
+            self.selection_reversed = false;
+        }
+        self.replace_text_in_range(None, "", window, cx)
+    }
+
+    fn delete_to_end_of_line(
+        &mut self,
+        _: &DeleteToEndOfLine,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.selected_range.is_empty() {
+            self.selected_range = self.cursor_offset()..self.content.len();
+            self.selection_reversed = false;
+        }
+        self.replace_text_in_range(None, "", window, cx)
+    }
+
+    fn delete_word_left(
+        &mut self,
+        _: &DeleteWordLeft,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.selected_range.is_empty() {
+            self.select_to(self.previous_word_boundary(self.cursor_offset()), cx);
+        }
+        self.replace_text_in_range(None, "", window, cx)
+    }
+
+    fn delete_word_right(
+        &mut self,
+        _: &DeleteWordRight,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        if self.selected_range.is_empty() {
+            self.select_to(self.next_word_boundary(self.cursor_offset()), cx);
+        }
+        self.replace_text_in_range(None, "", window, cx)
+    }
+
+    fn move_word_left(&mut self, _: &MoveWordLeft, _: &mut Window, cx: &mut Context<Self>) {
+        if self.selected_range.is_empty() {
+            self.move_to(self.previous_word_boundary(self.cursor_offset()), cx);
+        } else {
+            self.move_to(self.selected_range.start, cx);
+        }
+    }
+
+    fn move_word_right(&mut self, _: &MoveWordRight, _: &mut Window, cx: &mut Context<Self>) {
+        if self.selected_range.is_empty() {
+            self.move_to(self.next_word_boundary(self.cursor_offset()), cx);
+        } else {
+            self.move_to(self.selected_range.end, cx);
+        }
+    }
+
+    fn select_word_left(&mut self, _: &SelectWordLeft, _: &mut Window, cx: &mut Context<Self>) {
+        self.select_to(self.previous_word_boundary(self.cursor_offset()), cx);
+    }
+
+    fn select_word_right(&mut self, _: &SelectWordRight, _: &mut Window, cx: &mut Context<Self>) {
+        self.select_to(self.next_word_boundary(self.cursor_offset()), cx);
+    }
+
+    fn select_to_beginning_of_line(
+        &mut self,
+        _: &SelectToBeginningOfLine,
+        _: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.select_to(0, cx);
+    }
+
+    fn select_to_end_of_line(
+        &mut self,
+        _: &SelectToEndOfLine,
+        _: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.select_to(self.content.len(), cx);
+    }
+
     fn on_mouse_down(
         &mut self,
         event: &MouseDownEvent,
         _window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        if event.click_count >= 2 {
+            self.is_selecting = false;
+            self.selection_reversed = false;
+            self.selected_range = 0..self.content.len();
+            cx.notify();
+            return;
+        }
         self.is_selecting = true;
 
         if event.modifiers.shift {
             self.select_to(self.index_for_mouse_position(event.position), cx);
         } else {
+            self.selection_reversed = false;
             self.move_to(self.index_for_mouse_position(event.position), cx)
         }
     }
@@ -272,6 +382,64 @@ impl TextInput {
             .find_map(|(idx, _)| (idx > offset).then_some(idx))
             .unwrap_or(self.content.len())
     }
+
+    fn previous_word_boundary(&self, offset: usize) -> usize {
+        previous_word_boundary_in(&self.content, offset)
+    }
+
+    fn next_word_boundary(&self, offset: usize) -> usize {
+        next_word_boundary_in(&self.content, offset)
+    }
+}
+
+fn is_word_grapheme(g: &str) -> bool {
+    g.chars().any(char::is_alphanumeric)
+}
+
+fn previous_word_boundary_in(text: &str, offset: usize) -> usize {
+    let offset = offset.min(text.len());
+    let mut iter = text[..offset].grapheme_indices(true).rev().peekable();
+    while let Some(&(_, g)) = iter.peek() {
+        if g.chars().all(char::is_whitespace) {
+            iter.next();
+        } else {
+            break;
+        }
+    }
+    let Some(&(last_idx, first_g)) = iter.peek() else {
+        return 0;
+    };
+    let word = is_word_grapheme(first_g);
+    let mut start = last_idx;
+    for (idx, g) in iter {
+        if g.chars().all(char::is_whitespace) || is_word_grapheme(g) != word {
+            break;
+        }
+        start = idx;
+    }
+    start
+}
+
+fn next_word_boundary_in(text: &str, offset: usize) -> usize {
+    let offset = offset.min(text.len());
+    let mut iter = text[offset..].grapheme_indices(true).peekable();
+    while let Some(&(_, g)) = iter.peek() {
+        if g.chars().all(char::is_whitespace) {
+            iter.next();
+        } else {
+            break;
+        }
+    }
+    let Some(&(_, first_g)) = iter.peek() else {
+        return text.len();
+    };
+    let word = is_word_grapheme(first_g);
+    for (idx, g) in iter {
+        if g.chars().all(char::is_whitespace) || is_word_grapheme(g) != word {
+            return offset + idx;
+        }
+    }
+    text.len()
 }
 
 impl TextInput {
@@ -591,10 +759,20 @@ impl Render for TextInput {
             .cursor(CursorStyle::IBeam)
             .on_action(cx.listener(Self::backspace))
             .on_action(cx.listener(Self::delete))
+            .on_action(cx.listener(Self::delete_to_beginning_of_line))
+            .on_action(cx.listener(Self::delete_to_end_of_line))
+            .on_action(cx.listener(Self::delete_word_left))
+            .on_action(cx.listener(Self::delete_word_right))
             .on_action(cx.listener(Self::left))
             .on_action(cx.listener(Self::right))
+            .on_action(cx.listener(Self::move_word_left))
+            .on_action(cx.listener(Self::move_word_right))
             .on_action(cx.listener(Self::select_left))
             .on_action(cx.listener(Self::select_right))
+            .on_action(cx.listener(Self::select_word_left))
+            .on_action(cx.listener(Self::select_word_right))
+            .on_action(cx.listener(Self::select_to_beginning_of_line))
+            .on_action(cx.listener(Self::select_to_end_of_line))
             .on_action(cx.listener(Self::select_all))
             .on_action(cx.listener(Self::home))
             .on_action(cx.listener(Self::end))
@@ -632,7 +810,7 @@ impl Focusable for TextInput {
 }
 
 pub fn bind_keys(cx: &mut App) {
-    cx.bind_keys([
+    let mut bindings = vec![
         KeyBinding::new("backspace", Backspace, Some("TextInput")),
         KeyBinding::new("delete", Delete, Some("TextInput")),
         KeyBinding::new("left", Left, Some("TextInput")),
@@ -649,7 +827,68 @@ pub fn bind_keys(cx: &mut App) {
         KeyBinding::new(&crate::primary_keybinding("x"), Cut, Some("TextInput")),
         KeyBinding::new("home", Home, Some("TextInput")),
         KeyBinding::new("end", End, Some("TextInput")),
-        #[cfg(target_os = "macos")]
+        KeyBinding::new("shift-home", SelectToBeginningOfLine, Some("TextInput")),
+        KeyBinding::new("shift-end", SelectToEndOfLine, Some("TextInput")),
+        KeyBinding::new("ctrl-u", DeleteToBeginningOfLine, Some("TextInput")),
+        KeyBinding::new("ctrl-k", DeleteToEndOfLine, Some("TextInput")),
+    ];
+    #[cfg(target_os = "macos")]
+    bindings.extend([
+        KeyBinding::new("cmd-backspace", DeleteToBeginningOfLine, Some("TextInput")),
+        KeyBinding::new("cmd-delete", DeleteToEndOfLine, Some("TextInput")),
+        KeyBinding::new("alt-backspace", DeleteWordLeft, Some("TextInput")),
+        KeyBinding::new("alt-delete", DeleteWordRight, Some("TextInput")),
+        KeyBinding::new("alt-left", MoveWordLeft, Some("TextInput")),
+        KeyBinding::new("alt-right", MoveWordRight, Some("TextInput")),
+        KeyBinding::new("alt-shift-left", SelectWordLeft, Some("TextInput")),
+        KeyBinding::new("alt-shift-right", SelectWordRight, Some("TextInput")),
+        KeyBinding::new("cmd-left", Home, Some("TextInput")),
+        KeyBinding::new("cmd-right", End, Some("TextInput")),
+        KeyBinding::new("ctrl-a", Home, Some("TextInput")),
+        KeyBinding::new("ctrl-e", End, Some("TextInput")),
+        KeyBinding::new("cmd-shift-left", SelectToBeginningOfLine, Some("TextInput")),
+        KeyBinding::new("cmd-shift-right", SelectToEndOfLine, Some("TextInput")),
         KeyBinding::new("ctrl-cmd-space", ShowCharacterPalette, Some("TextInput")),
     ]);
+    #[cfg(not(target_os = "macos"))]
+    bindings.extend([
+        KeyBinding::new("ctrl-backspace", DeleteWordLeft, Some("TextInput")),
+        KeyBinding::new("ctrl-delete", DeleteWordRight, Some("TextInput")),
+        KeyBinding::new(
+            "ctrl-shift-backspace",
+            DeleteToBeginningOfLine,
+            Some("TextInput"),
+        ),
+        KeyBinding::new("ctrl-shift-delete", DeleteToEndOfLine, Some("TextInput")),
+        KeyBinding::new("ctrl-left", MoveWordLeft, Some("TextInput")),
+        KeyBinding::new("ctrl-right", MoveWordRight, Some("TextInput")),
+        KeyBinding::new("ctrl-shift-left", SelectWordLeft, Some("TextInput")),
+        KeyBinding::new("ctrl-shift-right", SelectWordRight, Some("TextInput")),
+    ]);
+    cx.bind_keys(bindings);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn word_boundaries_handle_english_timestamps_and_burmese() {
+        let text = "Yangon, Myanmar 1984";
+        assert_eq!(previous_word_boundary_in(text, text.len()), 16);
+        assert_eq!(previous_word_boundary_in(text, 16), 8);
+        assert_eq!(previous_word_boundary_in(text, 8), 6);
+        assert_eq!(previous_word_boundary_in(text, 6), 0);
+
+        assert_eq!(next_word_boundary_in(text, 0), 6);
+        assert_eq!(next_word_boundary_in(text, 6), 7);
+        assert_eq!(next_word_boundary_in(text, 7), 15);
+        assert_eq!(next_word_boundary_in(text, 15), 20);
+
+        let mm = "ရန်ကုန် မြန်မာ";
+        let mid = "ရန်ကုန် ".len();
+        assert_eq!(previous_word_boundary_in(mm, mm.len()), mid);
+        assert_eq!(previous_word_boundary_in(mm, mid), 0);
+        assert_eq!(next_word_boundary_in(mm, 0), mid - 1);
+    }
 }
