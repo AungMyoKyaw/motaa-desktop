@@ -449,3 +449,36 @@ pub fn daily_timing(
     )?;
     Ok((bounds, timing))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reference_time_conversion_handles_fixed_iana_and_nan() {
+        let mut profile = ChartRequest {
+            timezone_offset_minutes: 390,
+            timezone_id: None,
+            ..ChartRequest::default()
+        };
+        let jdut = 2_451_545.0; // 2000-01-01 12:00:00 UTC
+        assert_eq!(
+            reference_datetime(&profile, jdut).unwrap(),
+            DateTime::constant(2000, 1, 1, 18, 30, 0, 0)
+        );
+        assert_eq!(
+            display_reference_time(&profile, jdut).unwrap(),
+            "2000-01-01 18:30:00 +06:30"
+        );
+
+        profile.timezone_id = Some("America/New_York".into());
+        let summer_jdut = 2_460_492.5; // 2024-07-01 00:00:00 UTC (EDT -04:00)
+        assert_eq!(
+            display_reference_time(&profile, summer_jdut).unwrap(),
+            "2024-06-30 20:00:00 -04:00"
+        );
+
+        assert!(reference_datetime(&profile, f64::NAN).is_none());
+        assert!(display_reference_time(&profile, f64::INFINITY).is_none());
+    }
+}
