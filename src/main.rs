@@ -1080,12 +1080,12 @@ impl Render for DesktopRoot {
                 view.open_draft(ChartRequest::default(), None, cx);
             }))
             .on_action(cx.listener(|view, _: &TabNext, window, _| {
-                if !view.palette_open {
+                if !view.palette_open && view.active_time_popup().is_none() {
                     window.focus_next();
                 }
             }))
             .on_action(cx.listener(|view, _: &TabPrevious, window, _| {
-                if !view.palette_open {
+                if !view.palette_open && view.active_time_popup().is_none() {
                     window.focus_prev();
                 }
             }))

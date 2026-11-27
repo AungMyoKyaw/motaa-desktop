@@ -36,7 +36,13 @@ if [[ $(uname -s) == Darwin ]]; then
     sips -z "$size" "$size" assets/icon/motaa-icon-1024.png --out "$appiconset/icon_${size}x${size}.png" >/dev/null
     sips -z "$double" "$double" assets/icon/motaa-icon-1024.png --out "$appiconset/icon_${size}x${size}@2x.png" >/dev/null
   done
-  iconutil -c icns "$appiconset" -o assets/AppIcon.icns
+  if ! iconutil -c icns "$appiconset" -o assets/AppIcon.icns 2>/dev/null; then
+    python3 -c '
+from PIL import Image
+img = Image.open("assets/icon/motaa-icon-1024.png").convert("RGBA")
+img.save("assets/AppIcon.icns", format="ICNS", sizes=[(16,16),(32,32),(64,64),(128,128),(256,256),(512,512),(1024,1024)])
+'
+  fi
 fi
 
 printf '%s\n' \

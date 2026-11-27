@@ -1,87 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
-    <radialGradient id="radial-gradient-1" cx="512" cy="410" r="550" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#332a1f"/>
-      <stop offset="0.58" stop-color="#211b14"/>
-      <stop offset="1" stop-color="#14100c"/>
+    <radialGradient id="radial-gradient-1" cx="512" cy="340" r="620" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fffefc"/>
+      <stop offset="0.56" stop-color="#f7f2e6"/>
+      <stop offset="1" stop-color="#e6dbc2"/>
     </radialGradient>
     <clipPath id="clip-path-1">
       <path d="M285 100 L739 100 C841.173 100 924 182.827 924 285 L924 739 C924 841.173 841.173 924 739 924 L285 924 C182.827 924 100 841.173 100 739 L100 285 C100 182.827 182.827 100 285 100 Z"/>
     </clipPath>
-    <linearGradient id="linear-gradient-1" x1="928" y1="928" x2="96" y2="96" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#e8ca7e"/>
-      <stop offset="0.5" stop-color="#9b7630"/>
-      <stop offset="1" stop-color="#5e4518"/>
+    <linearGradient id="linear-gradient-1" x1="929" y1="929" x2="95" y2="95" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d9b462"/>
+      <stop offset="0.48" stop-color="#9e772b"/>
+      <stop offset="1" stop-color="#694a17"/>
     </linearGradient>
     <clipPath id="clip-path-2">
-      <path d="M288 126 L736 126 C825.47 126 898 198.53 898 288 L898 736 C898 825.47 825.47 898 736 898 L288 898 C198.53 898 126 825.47 126 736 L126 288 C126 198.53 198.53 126 288 126 Z"/>
+      <path d="M288 124 L736 124 C826.575 124 900 197.425 900 288 L900 736 C900 826.575 826.575 900 736 900 L288 900 C197.425 900 124 826.575 124 736 L124 288 C124 197.425 197.425 124 288 124 Z"/>
     </clipPath>
-    <radialGradient id="radial-gradient-2" cx="512" cy="512" r="340" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#7c5b21" stop-opacity="0.34"/>
-      <stop offset="0.65" stop-color="#7c5b21" stop-opacity="0.12"/>
-      <stop offset="1" stop-color="#14100c" stop-opacity="0"/>
+    <radialGradient id="radial-gradient-2" cx="512" cy="512" r="368" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#c9a14a" stop-opacity="0.22"/>
+      <stop offset="0.68" stop-color="#c9a14a" stop-opacity="0.07"/>
+      <stop offset="1" stop-color="#f7f2e6" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="linear-gradient-2" x1="758.84" y1="864.525" x2="265.16" y2="159.475" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#f5df9f"/>
-      <stop offset="0.45" stop-color="#cfa54e"/>
-      <stop offset="1" stop-color="#8e6926"/>
+    <linearGradient id="linear-gradient-2" x1="788.597" y1="907.022" x2="235.403" y2="116.978" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#c79e46"/>
+      <stop offset="0.45" stop-color="#8e6822"/>
+      <stop offset="1" stop-color="#5e4313"/>
     </linearGradient>
-    <linearGradient id="linear-gradient-3" x1="679.5" y1="679.5" x2="344.5" y2="344.5" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#f3dc9b"/>
-      <stop offset="0.5" stop-color="#c99f49"/>
-      <stop offset="1" stop-color="#8e6a26"/>
+    <radialGradient id="radial-gradient-3" cx="512" cy="460" r="252" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fffefa"/>
+      <stop offset="0.65" stop-color="#f5edd8"/>
+      <stop offset="1" stop-color="#e5d5b0"/>
+    </radialGradient>
+    <linearGradient id="linear-gradient-3" x1="717.25" y1="717.25" x2="306.75" y2="306.75" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#caa149"/>
+      <stop offset="0.5" stop-color="#8e6822"/>
+      <stop offset="1" stop-color="#5c4112"/>
     </linearGradient>
-    <radialGradient id="radial-gradient-3" cx="512" cy="512" r="104" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#382c1b"/>
-      <stop offset="0.72" stop-color="#1e1811"/>
-      <stop offset="1" stop-color="#15110c"/>
-    </radialGradient>
-    <radialGradient id="radial-gradient-4" cx="512" cy="512" r="74" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#fff6d6"/>
-      <stop offset="0.45" stop-color="#e6c16c"/>
-      <stop offset="1" stop-color="#a37a2d"/>
-    </radialGradient>
   </defs>
   <title>MOTAA Desktop Icon</title>
   <g id="Layer_1" data-name="Layer 1">
     <g id="MacOS_Squircle_Base" data-name="MacOS Squircle Base">
       <path d="M285 100 L739 100 C841.173 100 924 182.827 924 285 L924 739 C924 841.173 841.173 924 739 924 L285 924 C182.827 924 100 841.173 100 739 L100 285 C100 182.827 182.827 100 285 100 Z" fill="url(#radial-gradient-1)"/>
-      <path d="M285 100 L739 100 C841.173 100 924 182.827 924 285 L924 739 C924 841.173 841.173 924 739 924 L285 924 C182.827 924 100 841.173 100 739 L100 285 C100 182.827 182.827 100 285 100 Z" fill="none" stroke="url(#linear-gradient-1)" stroke-width="16" stroke-miterlimit="10" clip-path="url(#clip-path-1)"/>
+      <path d="M285 100 L739 100 C841.173 100 924 182.827 924 285 L924 739 C924 841.173 841.173 924 739 924 L285 924 C182.827 924 100 841.173 100 739 L100 285 C100 182.827 182.827 100 285 100 Z" fill="none" stroke="url(#linear-gradient-1)" stroke-width="20" stroke-miterlimit="10" clip-path="url(#clip-path-1)"/>
     </g>
-    <g id="Inner_Gold_Bevel" data-name="Inner Gold Bevel" opacity="0.45">
-      <path d="M288 126 L736 126 C825.47 126 898 198.53 898 288 L898 736 C898 825.47 825.47 898 736 898 L288 898 C198.53 898 126 825.47 126 736 L126 288 C126 198.53 198.53 126 288 126 Z" fill="none" stroke="#c9a250" stroke-width="6" stroke-miterlimit="10" clip-path="url(#clip-path-2)"/>
+    <g id="Inner_Gold_Bevel" data-name="Inner Gold Bevel" opacity="0.42">
+      <path d="M288 124 L736 124 C826.575 124 900 197.425 900 288 L900 736 C900 826.575 826.575 900 736 900 L288 900 C197.425 900 124 826.575 124 736 L124 288 C124 197.425 197.425 124 288 124 Z" fill="none" stroke="#b8903d" stroke-width="5" stroke-miterlimit="10" clip-path="url(#clip-path-2)"/>
     </g>
-    <circle id="Celestial_Aura" data-name="Celestial Aura" cx="512" cy="512" r="340" fill="url(#radial-gradient-2)"/>
-    <circle id="Zodiac_Outer_Ring" data-name="Zodiac Outer Ring" cx="512" cy="512" r="304" fill="none" stroke="url(#linear-gradient-2)" stroke-width="10" stroke-miterlimit="10"/>
-    <circle id="Zodiac_Inner_Ring" data-name="Zodiac Inner Ring" cx="512" cy="512" r="246" fill="#1c1711" stroke="#b8903f" stroke-width="5" stroke-miterlimit="10"/>
-    <line id="Zodiac_Spoke_1" data-name="Zodiac Spoke 1" x1="758" y1="512" x2="816" y2="512" fill="none" stroke="#cfa650" stroke-width="5" stroke-linecap="round" stroke-miterlimit="10"/>
-    <line id="Zodiac_Spoke_2" data-name="Zodiac Spoke 2" x1="725.04" y1="635" x2="775.27" y2="664" fill="none" stroke="#cfa650" stroke-width="3.5" stroke-linecap="round" stroke-miterlimit="10"/>
-    <line id="Zodiac_Spoke_3" data-name="Zodiac Spoke 3" x1="635" y1="725.04" x2="664" y2="775.27" fill="none" stroke="#cfa650" stroke-width="3.5" stroke-linecap="round" stroke-miterlimit="10"/>
-    <line id="Zodiac_Spoke_4" data-name="Zodiac Spoke 4" x1="512" y1="758" x2="512" y2="816" fill="none" stroke="#cfa650" stroke-width="5" stroke-linecap="round" stroke-miterlimit="10"/>
-    <line id="Zodiac_Spoke_5" data-name="Zodiac Spoke 5" x1="389" y1="725.04" x2="360" y2="775.27" fill="none" stroke="#cfa650" stroke-width="3.5" stroke-linecap="round" stroke-miterlimit="10"/>
-    <line id="Zodiac_Spoke_6" data-name="Zodiac Spoke 6" x1="298.96" y1="635" x2="248.73" y2="664" fill="none" stroke="#cfa650" stroke-width="3.5" stroke-linecap="round" stroke-miterlimit="10"/>
-    <line id="Zodiac_Spoke_7" data-name="Zodiac Spoke 7" x1="266" y1="512" x2="208" y2="512" fill="none" stroke="#cfa650" stroke-width="5" stroke-linecap="round" stroke-miterlimit="10"/>
-    <line id="Zodiac_Spoke_8" data-name="Zodiac Spoke 8" x1="298.96" y1="389" x2="248.73" y2="360" fill="none" stroke="#cfa650" stroke-width="3.5" stroke-linecap="round" stroke-miterlimit="10"/>
-    <line id="Zodiac_Spoke_9" data-name="Zodiac Spoke 9" x1="389" y1="298.96" x2="360" y2="248.73" fill="none" stroke="#cfa650" stroke-width="3.5" stroke-linecap="round" stroke-miterlimit="10"/>
-    <line id="Zodiac_Spoke_10" data-name="Zodiac Spoke 10" x1="512" y1="266" x2="512" y2="208" fill="none" stroke="#cfa650" stroke-width="5" stroke-linecap="round" stroke-miterlimit="10"/>
-    <line id="Zodiac_Spoke_11" data-name="Zodiac Spoke 11" x1="635" y1="298.96" x2="664" y2="248.73" fill="none" stroke="#cfa650" stroke-width="3.5" stroke-linecap="round" stroke-miterlimit="10"/>
-    <line id="Zodiac_Spoke_12" data-name="Zodiac Spoke 12" x1="725.04" y1="389" x2="775.27" y2="360" fill="none" stroke="#cfa650" stroke-width="3.5" stroke-linecap="round" stroke-miterlimit="10"/>
-    <path id="Zata_Diamond_Frame" data-name="Zata Diamond Frame" d="M516.243 284.312 L739.688 507.757 C742.032 510.101 742.032 513.899 739.688 516.243 L516.243 739.688 C513.899 742.032 510.101 742.032 507.757 739.688 L284.312 516.243 C281.968 513.899 281.968 510.101 284.312 507.757 L507.757 284.312 C510.101 281.968 513.899 281.968 516.243 284.312 Z" fill="#261f16" stroke="#ba9240" stroke-width="6" stroke-linejoin="round"/>
-    <path id="Zata_Square_Frame" data-name="Zata Square Frame" d="M354 348 L670 348 C673.314 348 676 350.686 676 354 L676 670 C676 673.314 673.314 676 670 676 L354 676 C350.686 676 348 673.314 348 670 L348 354 C348 350.686 350.686 348 354 348 Z" fill="#2b2319" stroke="url(#linear-gradient-3)" stroke-width="7" stroke-linejoin="round"/>
-    <line id="Zata_Corner_Diagonal_1" data-name="Zata Corner Diagonal 1" x1="434" y1="434" x2="352" y2="352" fill="none" stroke="#c9a14e" stroke-width="4.5" stroke-linecap="round" stroke-miterlimit="10" opacity="0.85"/>
-    <line id="Zata_Corner_Diagonal_2" data-name="Zata Corner Diagonal 2" x1="590" y1="434" x2="672" y2="352" fill="none" stroke="#c9a14e" stroke-width="4.5" stroke-linecap="round" stroke-miterlimit="10" opacity="0.85"/>
-    <line id="Zata_Corner_Diagonal_3" data-name="Zata Corner Diagonal 3" x1="590" y1="590" x2="672" y2="672" fill="none" stroke="#c9a14e" stroke-width="4.5" stroke-linecap="round" stroke-miterlimit="10" opacity="0.85"/>
-    <line id="Zata_Corner_Diagonal_4" data-name="Zata Corner Diagonal 4" x1="434" y1="590" x2="352" y2="672" fill="none" stroke="#c9a14e" stroke-width="4.5" stroke-linecap="round" stroke-miterlimit="10" opacity="0.85"/>
-    <circle id="Central_Sanctuary_Ring" data-name="Central Sanctuary Ring" cx="512" cy="512" r="104" fill="url(#radial-gradient-3)" stroke="#e8ca7a" stroke-width="6" stroke-miterlimit="10"/>
-    <polygon id="Astral_Eight-Point_Star" data-name="Astral Eight-Point Star" points="512,438 521.95,487.979 564.326,459.674 536.021,502.05 586,512 536.021,521.95 564.326,564.326 521.95,536.021 512,586 502.05,536.021 459.674,564.326 487.979,521.95 438,512 487.979,502.05 459.674,459.674 502.05,487.979" fill="url(#radial-gradient-4)" stroke="#f8e7b4" stroke-width="2" stroke-linejoin="round"/>
-    <circle id="Solar_Core_Jewel" data-name="Solar Core Jewel" cx="512" cy="512" r="17" fill="#fff9e8" stroke="#b38834" stroke-width="3" stroke-miterlimit="10"/>
-    <polygon id="Cardinal_Marker_North" data-name="Cardinal Marker North" points="512,194 526,208 512,222 498,208" fill="#f5df9f" stroke="#211b14" stroke-width="3" stroke-miterlimit="10"/>
-    <polygon id="Cardinal_Marker_East" data-name="Cardinal Marker East" points="816,498 830,512 816,526 802,512" fill="#f5df9f" stroke="#211b14" stroke-width="3" stroke-miterlimit="10"/>
-    <polygon id="Cardinal_Marker_South" data-name="Cardinal Marker South" points="512,802 526,816 512,830 498,816" fill="#f5df9f" stroke="#211b14" stroke-width="3" stroke-miterlimit="10"/>
-    <polygon id="Cardinal_Marker_West" data-name="Cardinal Marker West" points="208,498 222,512 208,526 194,512" fill="#f5df9f" stroke="#211b14" stroke-width="3" stroke-miterlimit="10"/>
-    <circle id="Planet_Crimson" data-name="Planet Crimson" cx="706.45" cy="317.55" r="18" fill="#d94436" stroke="#f6e2a6" stroke-width="4" stroke-miterlimit="10"/>
-    <circle id="Planet_Jade" data-name="Planet Jade" cx="583.18" cy="777.63" r="16" fill="#3f8e65" stroke="#f6e2a6" stroke-width="4" stroke-miterlimit="10"/>
-    <circle id="Planet_Sapphire" data-name="Planet Sapphire" cx="246.37" cy="440.82" r="16" fill="#4a7ec2" stroke="#f6e2a6" stroke-width="4" stroke-miterlimit="10"/>
+    <circle id="Celestial_Aura" data-name="Celestial Aura" cx="512" cy="512" r="368" fill="url(#radial-gradient-2)"/>
+    <circle id="Outer_Astrolabe_Hairline" data-name="Outer Astrolabe Hairline" cx="512" cy="512" r="356" fill="none" stroke="#b38a38" stroke-width="2" stroke-miterlimit="10" opacity="0.45"/>
+    <circle id="Zodiac_Wheel_Background" data-name="Zodiac Wheel Background" cx="512" cy="512" r="340" fill="#fcf9f2"/>
+    <line id="Zodiac_House_Spoke_1" data-name="Zodiac House Spoke 1" x1="460.24" y1="318.81" x2="424" y2="183.59" fill="none" stroke="#9a742a" stroke-width="8" stroke-miterlimit="10"/>
+    <line id="Zodiac_House_Spoke_2" data-name="Zodiac House Spoke 2" x1="563.76" y1="318.81" x2="600" y2="183.59" fill="none" stroke="#9a742a" stroke-width="8" stroke-miterlimit="10"/>
+    <line id="Zodiac_House_Spoke_3" data-name="Zodiac House Spoke 3" x1="653.42" y1="370.58" x2="752.42" y2="271.58" fill="none" stroke="#9a742a" stroke-width="8" stroke-miterlimit="10"/>
+    <line id="Zodiac_House_Spoke_4" data-name="Zodiac House Spoke 4" x1="705.19" y1="460.24" x2="840.41" y2="424" fill="none" stroke="#9a742a" stroke-width="8" stroke-miterlimit="10"/>
+    <line id="Zodiac_House_Spoke_5" data-name="Zodiac House Spoke 5" x1="705.19" y1="563.76" x2="840.41" y2="600" fill="none" stroke="#9a742a" stroke-width="8" stroke-miterlimit="10"/>
+    <line id="Zodiac_House_Spoke_6" data-name="Zodiac House Spoke 6" x1="653.42" y1="653.42" x2="752.42" y2="752.42" fill="none" stroke="#9a742a" stroke-width="8" stroke-miterlimit="10"/>
+    <line id="Zodiac_House_Spoke_7" data-name="Zodiac House Spoke 7" x1="563.76" y1="705.19" x2="600" y2="840.41" fill="none" stroke="#9a742a" stroke-width="8" stroke-miterlimit="10"/>
+    <line id="Zodiac_House_Spoke_8" data-name="Zodiac House Spoke 8" x1="460.24" y1="705.19" x2="424" y2="840.41" fill="none" stroke="#9a742a" stroke-width="8" stroke-miterlimit="10"/>
+    <line id="Zodiac_House_Spoke_9" data-name="Zodiac House Spoke 9" x1="370.58" y1="653.42" x2="271.58" y2="752.42" fill="none" stroke="#9a742a" stroke-width="8" stroke-miterlimit="10"/>
+    <line id="Zodiac_House_Spoke_10" data-name="Zodiac House Spoke 10" x1="318.81" y1="563.76" x2="183.59" y2="600" fill="none" stroke="#9a742a" stroke-width="8" stroke-miterlimit="10"/>
+    <line id="Zodiac_House_Spoke_11" data-name="Zodiac House Spoke 11" x1="318.81" y1="460.24" x2="183.59" y2="424" fill="none" stroke="#9a742a" stroke-width="8" stroke-miterlimit="10"/>
+    <line id="Zodiac_House_Spoke_12" data-name="Zodiac House Spoke 12" x1="370.58" y1="370.58" x2="271.58" y2="271.58" fill="none" stroke="#9a742a" stroke-width="8" stroke-miterlimit="10"/>
+    <circle id="Zodiac_Outer_Ring" data-name="Zodiac Outer Ring" cx="512" cy="512" r="340" fill="none" stroke="url(#linear-gradient-2)" stroke-width="12.5" stroke-miterlimit="10"/>
+    <circle id="Central_Sanctuary_Ring" data-name="Central Sanctuary Ring" cx="512" cy="512" r="200" fill="url(#radial-gradient-3)" stroke="url(#linear-gradient-3)" stroke-width="10.5" stroke-miterlimit="10"/>
+    <circle id="Sanctuary_Inner_Filigree" data-name="Sanctuary Inner Filigree" cx="512" cy="512" r="182" fill="none" stroke="#b38a38" stroke-width="2" stroke-miterlimit="10" opacity="0.45"/>
+    <circle id="Glyph_Mars_Circle" data-name="Glyph Mars Circle" cx="502.5" cy="251.5" r="20.5" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <line id="Glyph_Mars_Shaft" data-name="Glyph Mars Shaft" x1="517.5" y1="236.5" x2="539.5" y2="214.5" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline id="Glyph_Mars_Arrowhead" data-name="Glyph Mars Arrowhead" points="521.5,214.5 539.5,214.5 539.5,232.5" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <line id="Glyph_Saturn_Stem" data-name="Glyph Saturn Stem" x1="731.83" y1="344" x2="731.83" y2="394" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <line id="Glyph_Saturn_Crossbar" data-name="Glyph Saturn Crossbar" x1="718.83" y1="357" x2="746.83" y2="357" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="Glyph_Saturn_Arch" data-name="Glyph Saturn Arch" d="M731.83 376 C741.83 361 762.83 361 762.83 379 C762.83 392 755.83 402 764.83 408 C768.83 410 773.83 407 775.83 402" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="Glyph_Jupiter_Hook" data-name="Glyph Jupiter Hook" d="M721.83 631 C722.83 614 744.83 612 744.83 632 C744.83 645 731.83 654 719.83 660 L771.83 660" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <line id="Glyph_Jupiter_Stem" data-name="Glyph Jupiter Stem" x1="757.83" y1="627" x2="757.83" y2="680" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle id="Glyph_Venus_Circle" data-name="Glyph Venus Circle" cx="512" cy="768" r="20.5" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <line id="Glyph_Venus_Stem" data-name="Glyph Venus Stem" x1="512" y1="789" x2="512" y2="818" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <line id="Glyph_Venus_Crossbar" data-name="Glyph Venus Crossbar" x1="496" y1="805" x2="528" y2="805" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="Glyph_Mercury_Horns" data-name="Glyph Mercury Horns" d="M360 711.83 C363 725.83 391 725.83 394 711.83" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle id="Glyph_Mercury_Circle" data-name="Glyph Mercury Circle" cx="377" cy="741.83" r="18" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <line id="Glyph_Mercury_Stem" data-name="Glyph Mercury Stem" x1="377" y1="759.83" x2="377" y2="783.83" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <line id="Glyph_Mercury_Crossbar" data-name="Glyph Mercury Crossbar" x1="362" y1="771.83" x2="392" y2="771.83" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle id="Glyph_Sun_Ring" data-name="Glyph Sun Ring" cx="278.17" cy="647" r="27.5" fill="none" stroke="#6e4e17" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle id="Glyph_Sun_Core" data-name="Glyph Sun Core" cx="278.17" cy="647" r="7" fill="#6e4e17"/>
+    <path id="Glyph_Moon_Crescent" data-name="Glyph Moon Crescent" d="M227 483 C253 482 269 498 269 512 C269 526 253 542 227 541 C243 533 250 523 250 512 C250 501 243 491 227 483 Z" fill="none" stroke="#6e4e17" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text id="MOTAA_Wordmark" data-name="MOTAA Wordmark" transform="matrix(1 0 0 1 512 539)" x="2.09" y="0" xml:space="preserve" font-family="&apos;Avenir Next&apos;, sans-serif" font-size="76" font-weight="bold" fill="#543b10" letter-spacing="4.18" text-anchor="middle"><tspan x="2.09" y="0">MOTAA</tspan></text>
   </g>
 </svg>
