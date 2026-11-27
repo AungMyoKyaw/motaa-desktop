@@ -62,6 +62,13 @@ pub fn parse_flexible_datetime(text: &str, allow_date_only: bool) -> Result<Date
     Err("Enter a valid date and time as YYYY-MM-DD HH:MM:SS.".into())
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum TimeDropdown {
+    Hour,
+    Minute,
+    Second,
+}
+
 pub struct DateTimePicker {
     pub id_prefix: &'static str,
     pub datetime: Entity<TextInput>,
@@ -73,6 +80,8 @@ pub struct DateTimePicker {
     pub view_year: i32,
     pub view_month: u32,
     pub open: bool,
+    pub open_dropdown: Option<TimeDropdown>,
+    dropdown_scroll: gpui::ScrollHandle,
     last_datetime_text: String,
     last_parts_text: [String; 5],
     parts_error: Option<String>,
@@ -120,6 +129,8 @@ impl DateTimePicker {
             view_year: i32::from(initial.year()),
             view_month: u32::from(initial.month() as u8),
             open,
+            open_dropdown: None,
+            dropdown_scroll: gpui::ScrollHandle::new(),
             last_datetime_text: formatted,
             last_parts_text: parts,
             parts_error: None,
@@ -507,33 +518,78 @@ impl DateTimePicker {
                 step_cb(get_mut, on_change, crate::model::Step::Day, 1),
             ))
             .when(!unknown_time, |bar| {
-                bar.child(stepper_input_group(
-                    (prefix, "hour"),
-                    "Hour (0–23)",
-                    self.hour_input.clone(),
-                    px(52.),
-                    cx,
-                    step_cb(get_mut, on_change, crate::model::Step::Hour, -1),
-                    step_cb(get_mut, on_change, crate::model::Step::Hour, 1),
-                ))
-                .child(stepper_input_group(
-                    (prefix, "minute"),
-                    "Minute",
-                    self.minute_input.clone(),
-                    px(52.),
-                    cx,
-                    step_cb(get_mut, on_change, crate::model::Step::Minute, -1),
-                    step_cb(get_mut, on_change, crate::model::Step::Minute, 1),
-                ))
-                .child(stepper_input_group(
-                    (prefix, "second"),
-                    "Second",
-                    self.second_input.clone(),
-                    px(52.),
-                    cx,
-                    step_cb(get_mut, on_change, crate::model::Step::Second, -1),
-                    step_cb(get_mut, on_change, crate::model::Step::Second, 1),
-                ))
+                bar.child(
+                    row()
+                        .items_end()
+                        .gap_1()
+                        .child(stepper_input_group(
+                            (prefix, "hour"),
+                            "Hour (0–23)",
+                            self.hour_input.clone(),
+                            px(52.),
+                            cx,
+                            step_cb(get_mut, on_change, crate::model::Step::Hour, -1),
+                            step_cb(get_mut, on_change, crate::model::Step::Hour, 1),
+                        ))
+                        .child(dropdown_toggle_button(
+                            (prefix, "hour-dd"),
+                            self.open_dropdown == Some(TimeDropdown::Hour),
+                            cx,
+                            move |view, _| {
+                                if let Some(picker) = get_mut(view) {
+                                    picker.toggle_dropdown(TimeDropdown::Hour);
+                                }
+                            },
+                        )),
+                )
+                .child(
+                    row()
+                        .items_end()
+                        .gap_1()
+                        .child(stepper_input_group(
+                            (prefix, "minute"),
+                            "Minute",
+                            self.minute_input.clone(),
+                            px(52.),
+                            cx,
+                            step_cb(get_mut, on_change, crate::model::Step::Minute, -1),
+                            step_cb(get_mut, on_change, crate::model::Step::Minute, 1),
+                        ))
+                        .child(dropdown_toggle_button(
+                            (prefix, "min-dd"),
+                            self.open_dropdown == Some(TimeDropdown::Minute),
+                            cx,
+                            move |view, _| {
+                                if let Some(picker) = get_mut(view) {
+                                    picker.toggle_dropdown(TimeDropdown::Minute);
+                                }
+                            },
+                        )),
+                )
+                .child(
+                    row()
+                        .items_end()
+                        .gap_1()
+                        .child(stepper_input_group(
+                            (prefix, "second"),
+                            "Second",
+                            self.second_input.clone(),
+                            px(52.),
+                            cx,
+                            step_cb(get_mut, on_change, crate::model::Step::Second, -1),
+                            step_cb(get_mut, on_change, crate::model::Step::Second, 1),
+                        ))
+                        .child(dropdown_toggle_button(
+                            (prefix, "sec-dd"),
+                            self.open_dropdown == Some(TimeDropdown::Second),
+                            cx,
+                            move |view, _| {
+                                if let Some(picker) = get_mut(view) {
+                                    picker.toggle_dropdown(TimeDropdown::Second);
+                                }
+                            },
+                        )),
+                )
                 .child(
                     column().gap_1().child(caption("Period")).child(
                         row()
@@ -620,6 +676,10 @@ impl DateTimePicker {
                     .border_color(rgb(LINE))
                     .child(date_segments),
             )
+            .when(!unknown_time && self.open_dropdown.is_some(), |view| {
+                let kind = self.open_dropdown.unwrap_or(TimeDropdown::Hour);
+                view.child(self.render_time_dropdown(kind, current, on_change, get_mut, cx))
+            })
             .when_some(self.parts_error.clone(), |view, err| {
                 view.child(
                     div()
@@ -628,6 +688,132 @@ impl DateTimePicker {
                         .child(err),
                 )
             })
+    }
+
+    pub fn toggle_dropdown(&mut self, kind: TimeDropdown) {
+        if self.open_dropdown == Some(kind) {
+            self.open_dropdown = None;
+        } else {
+            self.open_dropdown = Some(kind);
+            self.dropdown_scroll.set_offset(gpui::point(px(0.), px(0.)));
+        }
+    }
+
+    fn render_time_dropdown(
+        &self,
+        kind: TimeDropdown,
+        current: DateTime,
+        on_change: Option<PickerChangeCallback>,
+        get_mut: PickerSelector,
+        cx: &mut Context<DesktopRoot>,
+    ) -> Div {
+        let prefix = self.id_prefix;
+        let (title, count, selected) = match kind {
+            TimeDropdown::Hour => ("Select Hour", 24u32, current.hour() as u32),
+            TimeDropdown::Minute => ("Select Minute", 60u32, current.minute() as u32),
+            TimeDropdown::Second => ("Select Second", 60u32, current.second() as u32),
+        };
+        let items: Vec<_> = (0..count)
+            .map(|val| {
+                let active = val == selected;
+                let label = match kind {
+                    TimeDropdown::Hour => {
+                        let h12 = match val % 12 {
+                            0 => 12,
+                            h => h,
+                        };
+                        let ampm = if val >= 12 { "PM" } else { "AM" };
+                        format!("{val:02} · {h12:02} {ampm}")
+                    }
+                    TimeDropdown::Minute | TimeDropdown::Second => format!(":{val:02}"),
+                };
+                action_control(
+                    (
+                        SharedString::from(format!("{prefix}-dd-item")),
+                        val as usize,
+                    ),
+                    cx,
+                    move |view, cx| {
+                        if let Some(picker) = get_mut(view) {
+                            let cur = picker.current_datetime(cx);
+                            match kind {
+                                TimeDropdown::Hour => {
+                                    picker.set_hms(
+                                        val,
+                                        cur.minute() as u32,
+                                        cur.second() as u32,
+                                        cx,
+                                    );
+                                }
+                                TimeDropdown::Minute => {
+                                    picker.set_hms(cur.hour() as u32, val, cur.second() as u32, cx);
+                                }
+                                TimeDropdown::Second => {
+                                    picker.set_hms(cur.hour() as u32, cur.minute() as u32, val, cx);
+                                }
+                            }
+                            picker.open_dropdown = None;
+                            let dt = picker.current_datetime(cx);
+                            if let Some(cb) = on_change {
+                                cb(view, dt, cx);
+                            }
+                        }
+                    },
+                )
+                .w_full()
+                .px_3()
+                .py(px(4.))
+                .rounded(px(4.))
+                .border_1()
+                .border_color(rgb(if active { GOLD } else { LINE }))
+                .bg(rgb(if active { SELECTED } else { PAPER }))
+                .text_size(px(12.5))
+                .text_color(rgb(INK))
+                .hover(|s| s.bg(rgb(SELECTED)))
+                .child(label)
+            })
+            .collect();
+
+        panel()
+            .bg(rgb(PAPER))
+            .gap_2()
+            .child(
+                row()
+                    .justify_between()
+                    .child(caption(title))
+                    .child(small_action_button(
+                        (prefix, "dd-close"),
+                        "Close",
+                        false,
+                        cx,
+                        move |view, _| {
+                            if let Some(picker) = get_mut(view) {
+                                picker.open_dropdown = None;
+                            }
+                        },
+                    )),
+            )
+            .child(
+                row()
+                    .w_full()
+                    .gap_2()
+                    .items_start()
+                    .child(
+                        div()
+                            .id(SharedString::from(format!("{prefix}-dd-scroll")))
+                            .flex_1()
+                            .min_w(px(0.))
+                            .h(px(192.))
+                            .overflow_y_scroll()
+                            .track_scroll(&self.dropdown_scroll)
+                            .on_scroll_wheel(cx.listener(|_, _, _, cx| {
+                                cx.stop_propagation();
+                                cx.notify();
+                            }))
+                            .child(column().gap_1().children(items)),
+                    )
+                    .child(crate::vertical_scrollbar(&self.dropdown_scroll, 192.)),
+            )
     }
 
     fn render_calendar_popup_body(
@@ -1046,6 +1232,26 @@ impl DesktopRoot {
             )
             .into_any_element()
     }
+}
+
+fn dropdown_toggle_button(
+    id: (&'static str, &'static str),
+    active: bool,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
+) -> gpui::Stateful<Div> {
+    action_control(SharedString::from(format!("{}-{}", id.0, id.1)), cx, action)
+        .w(px(26.))
+        .h(px(36.))
+        .justify_center()
+        .rounded(px(5.))
+        .border_1()
+        .border_color(rgb(if active { GOLD } else { LINE }))
+        .bg(rgb(if active { SELECTED } else { PAPER }))
+        .text_color(rgb(INK))
+        .text_size(px(11.))
+        .hover(|style| style.bg(rgb(SELECTED)))
+        .child("▾")
 }
 
 fn small_action_button(
