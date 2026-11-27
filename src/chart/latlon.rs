@@ -222,9 +222,7 @@ pub(crate) fn render(
         });
     column()
         .gap_1()
-        .child(caption(
-            "Planetary coordinates · independent astronomical reference",
-        ))
+        .child(caption("Planetary longitudes and latitudes"))
         .child(map)
         .child(
             div()

@@ -1234,7 +1234,8 @@ impl DesktopRoot {
                 div()
                     .grid()
                     .grid_cols(2)
-                    .gap_6().pt_5()
+                    .gap_6()
+                    .pt_5()
                     .child(column().child("Zodiac").child(
                         row().children(["Sidereal", "Tropical"].into_iter().enumerate().map(
                             |(index, name)| {
@@ -1277,20 +1278,55 @@ impl DesktopRoot {
                         ),
                     )),
             )
-            .child(div().grid().grid_cols(2).gap_4()
-                .child(panel().child("Myanmar calendar convention")
-                    .child(row().children(motaa_engine::myanmar_calendar::CivilCalendar::OPTIONS.map(|calendar| {
-                        button(calendar.label(), draft.calendar == calendar, cx, move |view, cx| {
-                            view.update(cx, |s| s.settings_draft.calendar = calendar);
-                        })
-                    }))))
-                .child(panel().child("Original aspect display preference")
-                    .child(caption("Stored with the profile. The recovered aspect formulas use fixed orbs."))
-                    .child(row().children([("5D Aspect", false), ("15D Aspect", true)].map(|(label, choice)| {
-                        button(label, draft.fifteen_degree_display == choice, cx, move |view, cx| {
-                            view.update(cx, |s| s.settings_draft.fifteen_degree_display = choice);
-                        })
-                    })))))
+            .child(
+                div()
+                    .grid()
+                    .grid_cols(2)
+                    .gap_4()
+                    .child(
+                        panel()
+                            .child("Myanmar calendar convention")
+                            .child(row().children(
+                                motaa_engine::myanmar_calendar::CivilCalendar::OPTIONS.map(
+                                    |calendar| {
+                                        button(
+                                            calendar.label(),
+                                            draft.calendar == calendar,
+                                            cx,
+                                            move |view, cx| {
+                                                view.update(cx, |s| {
+                                                    s.settings_draft.calendar = calendar
+                                                });
+                                            },
+                                        )
+                                    },
+                                ),
+                            )),
+                    )
+                    .child(
+                        panel()
+                            .child("Aspect display preference")
+                            .child(caption(
+                                "Stored with the profile. Aspect formulas use fixed orbs.",
+                            ))
+                            .child(row().children(
+                                [("5D Aspect", false), ("15D Aspect", true)].map(
+                                    |(label, choice)| {
+                                        button(
+                                            label,
+                                            draft.fifteen_degree_display == choice,
+                                            cx,
+                                            move |view, cx| {
+                                                view.update(cx, |s| {
+                                                    s.settings_draft.fifteen_degree_display = choice
+                                                });
+                                            },
+                                        )
+                                    },
+                                ),
+                            )),
+                    ),
+            )
             .child(
                 row()
                     .child(button("Restore defaults", false, cx, |view, cx| {

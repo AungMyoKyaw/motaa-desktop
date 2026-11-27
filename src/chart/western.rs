@@ -88,9 +88,7 @@ pub(crate) fn render(
     };
 
     column()
-        .child(caption(
-            "W-Style · original angle rules applied to independent astronomical positions",
-        ))
+        .child(caption("W-Style geometric aspect matrix"))
         .child(
             div()
                 .grid()

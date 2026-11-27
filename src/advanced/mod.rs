@@ -103,14 +103,14 @@ impl DesktopRoot {
                                     ])
                                 })),
                         ),
-                    None => panel().child("Reference positions unavailable for this date."),
+                    None => panel().child("Planetary positions unavailable for this date."),
                 },
                 Err(error) => panel().child(error),
             };
             return column()
                 .child(tool_header(
                     "Sky map",
-                    "Geocentric ecliptic projection · unit sphere · independent reference",
+                    "Geocentric ecliptic projection · unit sphere",
                     cx,
                 ))
                 .child(
@@ -315,7 +315,7 @@ impl DesktopRoot {
                                 }),
                             ))
                     }
-                    None => panel().child("Reference positions unavailable for this date."),
+                    None => panel().child("Planetary positions unavailable for this date."),
                 },
                 Err(error) => panel().child(error),
             };
@@ -338,7 +338,6 @@ impl DesktopRoot {
                     Some(ephemeris) => panel()
                         .gap_0()
                         .child(section_label("TROPICAL GEOCENTRIC POSITIONS"))
-                        .child(caption("Desktop astronomical reference"))
                         .child(div().h(px(8.)))
                         .child(table_header_row(["Body", "Longitude", "Latitude"]))
                         .children(ephemeris.bodies.into_iter().enumerate().map(|(i, body)| {
@@ -351,7 +350,7 @@ impl DesktopRoot {
                                 i % 2 == 1,
                             )
                         })),
-                    None => panel().child("Reference positions unavailable for this date."),
+                    None => panel().child("Planetary positions unavailable for this date."),
                 },
                 Err(error) => error_banner(error),
             };

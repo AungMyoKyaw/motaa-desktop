@@ -49,7 +49,7 @@ pub fn calculate(
         .map_err(|_| "Invalid birth date for timeline.")?;
     let mut natal = motaa_engine::calculate(profile)?
         .reference_ephemeris
-        .ok_or("Birth date is outside the reference ephemeris.")?;
+        .ok_or("Birth date is outside the supported ephemeris range.")?;
     natal.select_ayanamsha(settings.ayanamsha)?;
     let natal_positions =
         recovered::positions(&natal, &natal, settings).ok_or("Natal positions unavailable.")?;
@@ -68,7 +68,7 @@ pub fn calculate(
         let result = model::calculate_at(profile, when)?;
         let mut ephemeris = result
             .reference_ephemeris
-            .ok_or("Reference positions unavailable for anniversary.")?;
+            .ok_or("Planetary positions unavailable for anniversary.")?;
         ephemeris.select_ayanamsha(settings.ayanamsha)?;
         let name = recovered::BODIES[body];
         let longitude = ephemeris

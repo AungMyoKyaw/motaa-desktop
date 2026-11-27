@@ -948,7 +948,7 @@ impl DesktopRoot {
                     )),
             )
             .child(caption(format!(
-                "Birth balance: {:.1} days · independent natal Moon position",
+                "Birth balance: {:.1} days · natal Moon position",
                 timeline.balance_days
             )))
             .into_any_element()
@@ -1302,9 +1302,7 @@ impl DesktopRoot {
                     "Black dots mark house cusps. Colored dots mark house midpoints.",
                 ));
             return column()
-                .child(caption(
-                    "108 divisions · 27 nakshatras · original chart notation",
-                ))
+                .child(caption("108 divisions · 27 nakshatras"))
                 .child(
                     row()
                         .items_start()
@@ -1404,12 +1402,7 @@ impl DesktopRoot {
                                     }),
                             ),
                         )
-                    })
-                    .child(
-                        div()
-                            .pt_2()
-                            .child(caption("Desktop astronomical reference")),
-                    ),
+                    }),
             );
         if mode == "Rasi" {
             let natal_moon = self
@@ -1705,13 +1698,11 @@ impl DesktopRoot {
         };
         let Some(positions) = ascendant.and_then(|asc| positions(ephemeris, asc, settings)) else {
             return panel()
-                .child("A supported reference Ascendant is required.")
+                .child("An Ascendant is required for this view.")
                 .into_any_element();
         };
-        let evidence = caption("Recovered MOTAA rules applied to independent reference positions.");
         if mode == "Rasi strengths" {
             return panel()
-                .child(evidence)
                 .child(data_row([
                     "Body".into(),
                     "Longitude".into(),
@@ -1732,7 +1723,7 @@ impl DesktopRoot {
         }
         let show_scores = mode == "Rasi aspects";
         let all = self.all_strengths;
-        let mut view = column().child(evidence);
+        let mut view = column();
         if matches!(mode, "Traditional aspects" | "Rasi aspects") {
             let mut labels: Vec<_> = ["Asc", "1", "2", "3", "4", "5", "6", "0", "8", "9"]
                 .into_iter()

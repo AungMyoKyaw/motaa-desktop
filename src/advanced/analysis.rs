@@ -13,9 +13,9 @@ impl DesktopRoot {
             })
         };
         let positions = positions_at(false);
-        let mut view = column().child(heading(tool.to_owned())).child(caption(
-            "Traditional calculations using independent natal positions.",
-        ));
+        let mut view = column()
+            .child(heading(tool.to_owned()))
+            .child(caption("Traditional natal calculations."));
         if tool == "Ashtakavarga" {
             view = view.child(caption("Brihat Jataka convention · unreduced points"));
             match positions {
@@ -168,7 +168,7 @@ impl DesktopRoot {
             let mut settings = settings;
             settings.tropical = false;
             let positions = recovered::positions(&transit, &transit, settings)
-                .ok_or("Reference positions unavailable.")?;
+                .ok_or("Planetary positions unavailable.")?;
             let transits = |matches: &dyn Fn(usize) -> bool| {
                 let bodies = recovered::BODIES[1..]
                     .iter()
@@ -488,9 +488,7 @@ impl DesktopRoot {
         };
         let mut view = column()
             .child(heading("Sarvatobhadra"))
-            .child(caption(
-                "All-three vedha convention · independent sidereal positions",
-            ))
+            .child(caption("All-three vedha convention · sidereal positions"))
             .child(
                 row()
                     .child(button("27 mansions", !self.vedha.abhijit, cx, |view, _| {
@@ -709,10 +707,7 @@ impl DesktopRoot {
                             .collect();
                         view.name_wheel.sector = view.name_wheel.matches.first().copied();
                         if view.name_wheel.sector.is_none() {
-                            view.set_status(
-                                "No exact matching syllable in the recovered ring.",
-                                cx,
-                            );
+                            view.set_status("No exact matching syllable in the name wheel.", cx);
                         } else {
                             view.set_status("", cx);
                         }

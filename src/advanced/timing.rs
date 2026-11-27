@@ -36,7 +36,7 @@ impl DesktopRoot {
                     let result = (|| {
                         let mut positions = model::calculate_at(&profile, midnight)?
                             .reference_ephemeris
-                            .ok_or("Reference positions unavailable.")?;
+                            .ok_or("Planetary positions unavailable.")?;
                         positions.select_ayanamsha(settings.ayanamsha)?;
                         let longitude = |name| {
                             positions
@@ -222,7 +222,7 @@ impl DesktopRoot {
         let mut view = column()
             .child(heading("Transit events"))
             .child(caption(
-                "Reference sign ingresses and planetary stations over the following 30 days.",
+                "Sign ingresses and planetary stations over the following 30 days.",
             ))
             .child(
                 row()
@@ -551,7 +551,7 @@ impl DesktopRoot {
                         .ok_or("Outside the reference date range.")?;
                     ephemeris.select_ayanamsha(settings.ayanamsha)?;
                     let positions = recovered::positions(&ephemeris, &ephemeris, settings)
-                        .ok_or("Missing reference positions.")?;
+                        .ok_or("Planetary positions unavailable.")?;
                     let ascendant = recovered::sign(positions[0]);
                     let moon = ephemeris
                         .longitude("Moon", false)

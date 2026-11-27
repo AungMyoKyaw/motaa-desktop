@@ -133,11 +133,9 @@ impl DesktopRoot {
                         view.show_munp = !view.show_munp
                     })),
             )
-            .child(caption(if self.split_comparison {
-                "Independent astronomical positions"
-            } else {
-                "Birth inside · Transit outside · Independent astronomical positions"
-            }))
+            .when(!self.split_comparison, |view| {
+                view.child(caption("Birth inside · Transit outside"))
+            })
             .child(body)
             .into_any_element()
     }
