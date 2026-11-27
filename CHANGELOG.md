@@ -2,6 +2,19 @@
 
 All notable changes to MOTAA Desktop are documented in this file.
 
+## [0.2.2] - 2026-11-28
+
+### Added
+- **About & Credits Workspace**: Added a dedicated About & Credits page with origin story, attributions, and creator links (`07-about.png`).
+- **Dedicated Modal Pickers**: Added modal popups for the calendar date picker, 3-column time picker (with keyboard entry, nudges, and Cancel/Done), Myanmar 534-town directory (with full scrollable list), timezone chooser, and OpenStreetMap search/pin-on-map picker.
+- **Cross-Platform Text Input Polish**: Added double-click select-all, word navigation, and line delete across macOS, Windows, and Linux.
+- **Windows 11 Store Screenshots**: Refreshed all 7 app screenshots including high-resolution Windows 11 Store screenshots (`packaging/windows/screenshots/`).
+
+### Changed
+- **Timezone Engine**: Migrated from `chrono`/`chrono-tz` to `jiff 1.0.3` with bundled timezone database.
+- **License**: Switched project license to `AGPL-3.0-only`.
+- **UI Polish**: Removed residual engineering/provenance labels, chart color palette switcher, and in-element shortcut clutter; blocked scroll-through on modal backdrops.
+
 ## [0.2.1] - 2026-11-27
 
 ### Added

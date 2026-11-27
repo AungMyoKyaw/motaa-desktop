@@ -316,8 +316,8 @@ try {
     Get-ChildItem -Path $resolvedOut -Filter "*.done" -ErrorAction SilentlyContinue | Remove-Item -Force
 }
 
-if ($records.Count -lt 6) {
-    throw "Expected 6 Microsoft Store screenshots, but captured $($records.Count)."
+if ($records.Count -lt 7) {
+    throw "Expected 7 Microsoft Store screenshots, but captured $($records.Count)."
 }
 
 $manifest = [ordered]@{
