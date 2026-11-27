@@ -9,53 +9,68 @@ impl DesktopRoot {
             .h_full()
             .justify_between()
             .gap_3()
-            .border_t_1()
-            .border_color(rgb(LINE))
             .child(
                 row()
                     .gap_2()
                     .child(
                         div()
                             .font_family("Menlo")
-                            .text_size(px(12.5))
+                            .text_size(px(12.))
+                            .font_weight(gpui::FontWeight::MEDIUM)
                             .text_color(rgb(INK))
                             .child(display),
                     )
-                    .child(button(format!("Step: {unit}"), false, cx, |view, cx| {
-                        view.update(cx, |s| {
-                            let idx = Step::ALL
-                                .iter()
-                                .position(|step| *step == s.step)
-                                .unwrap_or(2);
-                            s.step = Step::ALL[(idx + 1) % Step::ALL.len()];
-                        });
-                    })),
+                    .child(compact_button(
+                        "time-step-unit",
+                        format!("Step · {unit}"),
+                        false,
+                        cx,
+                        |view, cx| {
+                            view.update(cx, |s| {
+                                let idx = Step::ALL
+                                    .iter()
+                                    .position(|step| *step == s.step)
+                                    .unwrap_or(2);
+                                s.step = Step::ALL[(idx + 1) % Step::ALL.len()];
+                            });
+                        },
+                    )),
             )
             .child(
                 row()
                     .gap_1()
-                    .child(button("‹", false, cx, |view, cx| {
+                    .child(ghost_button("time-step-back", "‹", cx, |view, cx| {
                         view.step_time(-1, false, cx)
                     }))
                     .child(
                         div()
-                            .w(px(180.))
+                            .w(px(200.))
                             .child(self.time_scrubber("chart-time-scrubber", cx)),
                     )
-                    .child(button("›", false, cx, |view, cx| {
+                    .child(ghost_button("time-step-forward", "›", cx, |view, cx| {
                         view.step_time(1, false, cx)
                     })),
             )
             .child(
                 row()
                     .gap_2()
-                    .child(button("Set date", false, cx, |view, cx| {
-                        view.time_picker.open = true;
-                        view.navigate(Workspace::Time, cx);
-                    }))
-                    .child(button("Now", true, cx, |view, cx| {
-                        view.set_time(view.session.read(cx).now(), true, cx)
-                    })),
+                    .child(compact_button(
+                        "time-set-date",
+                        "Set date",
+                        false,
+                        cx,
+                        |view, cx| {
+                            view.time_picker.open = true;
+                            view.navigate(Workspace::Time, cx);
+                        },
+                    ))
+                    .child(compact_button(
+                        "time-jump-now",
+                        "Now",
+                        true,
+                        cx,
+                        |view, cx| view.set_time(view.session.read(cx).now(), true, cx),
+                    )),
             )
             .into_any_element()
     }

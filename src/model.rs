@@ -16,15 +16,17 @@ pub enum Workspace {
     Calculations,
     Time,
     Advanced,
+    About,
 }
 
 impl Workspace {
-    pub const ALL: [Self; 5] = [
+    pub const ALL: [Self; 6] = [
         Self::Charts,
         Self::Profiles,
         Self::Calculations,
         Self::Time,
         Self::Advanced,
+        Self::About,
     ];
 
     pub fn label(self) -> &'static str {
@@ -34,6 +36,7 @@ impl Workspace {
             Self::Calculations => "Calculations",
             Self::Time => "Time & Analysis",
             Self::Advanced => "Advanced",
+            Self::About => "About",
         }
     }
 }

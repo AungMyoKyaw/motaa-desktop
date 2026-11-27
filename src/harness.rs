@@ -32,6 +32,7 @@ pub(crate) fn run(
                 (Workspace::Calculations, primary_keybinding("3")),
                 (Workspace::Time, primary_keybinding("4")),
                 (Workspace::Advanced, primary_keybinding("5")),
+                (Workspace::About, primary_keybinding("6")),
                 (Workspace::Charts, primary_keybinding("1")),
             ];
             cx.background_executor()
@@ -180,8 +181,8 @@ pub(crate) fn run(
                 .update(cx, |_, win, app| {
                     win.focus(&root_focus);
                     let tab = gpui::Keystroke::parse("tab").unwrap();
-                    // 6 sidebar controls + collapse toggle + quick jump + birth details + search + resume, then row.
-                    for _ in 0..12 {
+                    // 7 sidebar controls + collapse + header (3) + search + export + import + resume, then row.
+                    for _ in 0..16 {
                         assert!(win.dispatch_keystroke(tab.clone(), app));
                     }
                     let enter = gpui::Keystroke::parse("enter").unwrap();
@@ -222,9 +223,9 @@ pub(crate) fn run(
             window
                 .update(cx, |root, _, _| {
                     assert!(root.sidebar_collapsed);
-                    assert!(!root.inspector_open);
+                    assert!(root.inspector_open);
                     root.sidebar_collapsed = false;
-                    root.inspector_open = true;
+                    root.inspector_open = false;
                 })
                 .expect("restore sidebar and inspector");
             draw(cx);

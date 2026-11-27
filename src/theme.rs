@@ -1,4 +1,4 @@
-use gpui::{AnyElement, Div, SharedString, div, prelude::*, px, rgb};
+use gpui::{AnyElement, BoxShadow, Div, SharedString, div, point, prelude::*, px, rgb, rgba};
 
 // Observatory Manuscript (Light-only Heritage Gold) tokens.
 pub const GOLD: u32 = 0x7c5b21;
@@ -78,9 +78,69 @@ pub fn caption(value: impl Into<SharedString>) -> Div {
         .child(value.into())
 }
 
+pub fn card_shadow() -> Vec<BoxShadow> {
+    vec![
+        BoxShadow {
+            color: rgba(0x28251f0a).into(),
+            offset: point(px(0.), px(1.)),
+            blur_radius: px(2.),
+            spread_radius: px(0.),
+        },
+        BoxShadow {
+            color: rgba(0x28251f08).into(),
+            offset: point(px(0.), px(4.)),
+            blur_radius: px(12.),
+            spread_radius: px(-2.),
+        },
+    ]
+}
+
+pub fn pill_shadow() -> Vec<BoxShadow> {
+    vec![BoxShadow {
+        color: rgba(0x28251f14).into(),
+        offset: point(px(0.), px(1.)),
+        blur_radius: px(2.),
+        spread_radius: px(0.),
+    }]
+}
+
+pub fn popover_shadow() -> Vec<BoxShadow> {
+    vec![
+        BoxShadow {
+            color: rgba(0x28251f14).into(),
+            offset: point(px(0.), px(2.)),
+            blur_radius: px(6.),
+            spread_radius: px(0.),
+        },
+        BoxShadow {
+            color: rgba(0x28251f1c).into(),
+            offset: point(px(0.), px(12.)),
+            blur_radius: px(28.),
+            spread_radius: px(-4.),
+        },
+    ]
+}
+
+pub fn plate_shadow() -> Vec<BoxShadow> {
+    vec![
+        BoxShadow {
+            color: rgba(0x28251f0c).into(),
+            offset: point(px(0.), px(2.)),
+            blur_radius: px(4.),
+            spread_radius: px(0.),
+        },
+        BoxShadow {
+            color: rgba(0x28251f10).into(),
+            offset: point(px(0.), px(10.)),
+            blur_radius: px(24.),
+            spread_radius: px(-4.),
+        },
+    ]
+}
+
 pub fn section_label(value: impl Into<SharedString>) -> Div {
     div()
-        .text_size(px(11.))
+        .text_size(px(10.5))
         .font_weight(gpui::FontWeight::SEMIBOLD)
         .text_color(rgb(MUTED))
         .child(value.into())
@@ -88,8 +148,9 @@ pub fn section_label(value: impl Into<SharedString>) -> Div {
 
 pub fn heading(value: impl Into<SharedString>) -> Div {
     div()
-        .text_size(px(22.))
-        .font_weight(gpui::FontWeight::MEDIUM)
+        .text_size(px(21.))
+        .line_height(px(26.))
+        .font_weight(gpui::FontWeight::SEMIBOLD)
         .text_color(rgb(INK))
         .child(value.into())
 }
@@ -98,9 +159,47 @@ pub fn panel() -> Div {
     column()
         .p_4()
         .border_1()
+        .border_color(rgb(SUBTLE_LINE))
+        .rounded(px(RADIUS_PANEL))
+        .bg(rgb(PAPER))
+        .shadow(card_shadow())
+}
+
+pub fn chart_plate() -> Div {
+    column()
+        .gap_3()
+        .p_4()
+        .border_1()
         .border_color(rgb(LINE))
         .rounded(px(RADIUS_PANEL))
         .bg(rgb(PAPER))
+        .shadow(plate_shadow())
+}
+
+pub fn segmented_track() -> Div {
+    div()
+        .flex()
+        .items_center()
+        .gap(px(2.))
+        .p(px(3.))
+        .rounded(px(8.))
+        .bg(rgb(SOFT))
+        .border_1()
+        .border_color(rgb(SUBTLE_LINE))
+}
+
+pub fn shortcut_keycap(label: impl Into<SharedString>) -> Div {
+    div()
+        .px(px(5.))
+        .py(px(1.))
+        .rounded(px(4.))
+        .bg(rgb(SOFT))
+        .border_1()
+        .border_color(rgb(LINE))
+        .font_family("Menlo")
+        .text_size(px(10.))
+        .text_color(rgb(MUTED))
+        .child(label.into())
 }
 
 pub fn vertical_scrollbar(handle: &gpui::ScrollHandle, track_height: f32) -> Div {
@@ -183,9 +282,9 @@ pub fn tabular_row<const N: usize>(values: [String; N], striped: bool) -> Div {
     row()
         .w_full()
         .gap_3()
-        .min_h(px(26.))
+        .min_h(px(28.))
         .px_2()
-        .py(px(4.))
+        .py(px(5.))
         .bg(rgb(if striped { SOFT } else { PAPER }))
         .border_b_1()
         .border_color(rgb(SUBTLE_LINE))

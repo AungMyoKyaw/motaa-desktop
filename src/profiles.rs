@@ -78,37 +78,88 @@ impl DesktopRoot {
         let search = self.search.read(cx).value().trim().to_lowercase();
         let entries = s.profiles();
         let mut view = column()
+            .gap_4()
             .child(heading("Saved profiles"))
             .child(
                 panel()
-                    .gap_1()
-                    .child(caption("Active chart context"))
+                    .py_3()
+                    .px_4()
+                    .gap_2()
+                    .child(section_label("ACTIVE CHART CONTEXT"))
                     .child(
                         row()
                             .gap_8()
-                            .child(div().child(format!("Natal · {natal}")))
-                            .child(div().child(format!("Transit · {transit}"))),
+                            .child(
+                                row().gap_2().child(caption("Natal")).child(
+                                    div()
+                                        .font_weight(gpui::FontWeight::SEMIBOLD)
+                                        .text_color(rgb(GOLD))
+                                        .child(natal),
+                                ),
+                            )
+                            .child(
+                                row().gap_2().child(caption("Transit")).child(
+                                    div()
+                                        .font_weight(gpui::FontWeight::MEDIUM)
+                                        .text_color(rgb(INK))
+                                        .child(transit),
+                                ),
+                            ),
                     ),
             )
             .child(
                 row()
                     .w_full()
                     .justify_between()
+                    .flex_wrap()
                     .gap_3()
                     .child(
                         div()
                             .flex_1()
                             .min_w(px(220.))
-                            .max_w(px(380.))
+                            .max_w(px(360.))
                             .child(self.search.clone()),
                     )
-                    .child(if self.draft.is_some() {
-                        button("Resume draft", true, cx, DesktopRoot::resume_profile_draft)
-                    } else {
-                        button("New profile", true, cx, |view, cx| {
-                            view.open_draft(ChartRequest::default(), None, cx)
-                        })
-                    }),
+                    .child(
+                        row()
+                            .gap_2()
+                            .child(compact_button(
+                                "profiles-export",
+                                "Export JSON",
+                                false,
+                                cx,
+                                DesktopRoot::export_backup,
+                            ))
+                            .when(
+                                !self.reading_backup && self.pending_import.is_none(),
+                                |bar| {
+                                    bar.child(compact_button(
+                                        "profiles-import",
+                                        "Import backup",
+                                        false,
+                                        cx,
+                                        DesktopRoot::inspect_backup,
+                                    ))
+                                },
+                            )
+                            .child(if self.draft.is_some() {
+                                compact_button(
+                                    "profiles-resume-draft",
+                                    "Resume draft",
+                                    true,
+                                    cx,
+                                    DesktopRoot::resume_profile_draft,
+                                )
+                            } else {
+                                compact_button(
+                                    "profiles-new",
+                                    "+ New profile",
+                                    false,
+                                    cx,
+                                    |view, cx| view.open_draft(ChartRequest::default(), None, cx),
+                                )
+                            }),
+                    ),
             );
         if let Some(pending) = &self.pending_import {
             view = view.child(
@@ -141,33 +192,218 @@ impl DesktopRoot {
                     })
                     .collect();
                 let count = matches.len();
+                let is_empty = matches.is_empty();
                 view = view.child(
                     column()
-                        .gap_0()
-                        .when(!matches.is_empty(), |table| {
-                            table
-                                .child(row().justify_between().pb_2().child(caption(format!(
-                                    "{count} {}",
-                                    if count == 1 { "profile" } else { "profiles" }
-                                ))))
-                                .child(
-                                    row()
-                                        .w_full()
-                                        .bg(rgb(SOFT))
-                                        .child(
-                                            table_header_row([
-                                                "Name",
-                                                "Birth date",
-                                                "Birthplace",
-                                                "Calculation",
-                                            ])
-                                            .flex_1()
-                                            .min_w(px(0.)),
-                                        )
-                                        .child(div().w(px(84.)).flex_shrink_0()),
-                                )
+                        .gap_2()
+                        .when(!is_empty, |col| {
+                            col.child(row().justify_between().child(caption(format!(
+                                "{count} {}",
+                                if count == 1 { "profile" } else { "profiles" }
+                            ))))
+                            .child(
+                                panel()
+                                    .p_0()
+                                    .gap_0()
+                                    .overflow_hidden()
+                                    .child(
+                                        row()
+                                            .w_full()
+                                            .bg(rgb(SOFT))
+                                            .border_b_1()
+                                            .border_color(rgb(LINE))
+                                            .child(
+                                                table_header_row([
+                                                    "Name",
+                                                    "Birth date",
+                                                    "Birthplace",
+                                                    "Calculation",
+                                                ])
+                                                .border_b_0()
+                                                .flex_1()
+                                                .min_w(px(0.)),
+                                            )
+                                            .child(div().w(px(48.)).flex_shrink_0()),
+                                    )
+                                    .children(matches.into_iter().map(|profile| {
+                                        let id = profile.id;
+                                        let menu_open = self.selected == Some(id);
+                                        let active = natal_id == Some(id);
+                                        let name_for_menu = profile.name.clone();
+                                        let date = if self.show_birth {
+                                            serde_json::from_str::<ChartRequest>(&profile.data_json)
+                                                .ok()
+                                                .map_or_else(
+                                                    || "Unavailable".into(),
+                                                    |request| {
+                                                        format!(
+                                                            "{:04}-{:02}-{:02}",
+                                                            request.year,
+                                                            request.month,
+                                                            request.day
+                                                        )
+                                                    },
+                                                )
+                                        } else {
+                                            "Hidden".into()
+                                        };
+                                        let calculation =
+                                            self.session.read(cx).profile_settings(id).map_or_else(
+                                                |_| "Unavailable".into(),
+                                                |settings| {
+                                                    format!(
+                                                        "{} · {}",
+                                                        if settings.tropical {
+                                                            "Tropical"
+                                                        } else {
+                                                            "Sidereal"
+                                                        },
+                                                        AYANAMSHAS[settings.ayanamsha]
+                                                    )
+                                                },
+                                            );
+                                        row()
+                                            .w_full()
+                                            .gap_0()
+                                            .border_b_1()
+                                            .border_color(rgb(SUBTLE_LINE))
+                                            .bg(rgb(if active { SOFT } else { PAPER }))
+                                            .hover(|item| {
+                                                item.bg(rgb(if active {
+                                                    SELECTED
+                                                } else {
+                                                    HEADER_BG
+                                                }))
+                                            })
+                                            .child(
+                                                action_control(
+                                                    ("profile-row", id as usize),
+                                                    cx,
+                                                    move |view, cx| {
+                                                        view.selected = None;
+                                                        view.delete_confirmation = None;
+                                                        view.choose_profile(
+                                                            id,
+                                                            ProfileAction::OpenChart,
+                                                            cx,
+                                                        );
+                                                    },
+                                                )
+                                                .flex_1()
+                                                .min_w(px(0.))
+                                                .px_2()
+                                                .py(px(10.))
+                                                .gap_3()
+                                                .child(
+                                                    row()
+                                                        .flex_1()
+                                                        .min_w(px(0.))
+                                                        .gap_2()
+                                                        .overflow_hidden()
+                                                        .child(
+                                                            div()
+                                                                .font_weight(if active {
+                                                                    gpui::FontWeight::SEMIBOLD
+                                                                } else {
+                                                                    gpui::FontWeight::MEDIUM
+                                                                })
+                                                                .text_color(rgb(INK))
+                                                                .child(profile.name),
+                                                        )
+                                                        .when(active, |name_cell| {
+                                                            name_cell
+                                                                .child(badge("Active", Tone::Gold))
+                                                        }),
+                                                )
+                                                .child(
+                                                    div()
+                                                        .flex_1()
+                                                        .min_w(px(0.))
+                                                        .overflow_hidden()
+                                                        .font_family("Menlo")
+                                                        .text_size(px(12.))
+                                                        .text_color(rgb(MUTED))
+                                                        .child(date),
+                                                )
+                                                .child(
+                                                    div()
+                                                        .flex_1()
+                                                        .min_w(px(0.))
+                                                        .overflow_hidden()
+                                                        .text_size(px(13.))
+                                                        .text_color(rgb(INK))
+                                                        .child(profile.birthplace),
+                                                )
+                                                .child(
+                                                    div()
+                                                        .flex_1()
+                                                        .min_w(px(0.))
+                                                        .overflow_hidden()
+                                                        .text_size(px(12.5))
+                                                        .text_color(rgb(MUTED))
+                                                        .child(calculation),
+                                                ),
+                                            )
+                                            .child(
+                                                div()
+                                                    .id(("profile-management", id as usize))
+                                                    .relative()
+                                                    .w(px(48.))
+                                                    .flex_shrink_0()
+                                                    .flex()
+                                                    .items_center()
+                                                    .justify_center()
+                                                    .on_mouse_down(
+                                                        gpui::MouseButton::Left,
+                                                        |_, _, cx| cx.stop_propagation(),
+                                                    )
+                                                    .child(
+                                                        action_control(
+                                                            ("profile-more-btn", id as usize),
+                                                            cx,
+                                                            move |view, _| {
+                                                                view.selected = (view.selected
+                                                                    != Some(id))
+                                                                .then_some(id);
+                                                                view.delete_confirmation = None;
+                                                            },
+                                                        )
+                                                        .w(px(28.))
+                                                        .h(px(26.))
+                                                        .justify_center()
+                                                        .rounded(px(6.))
+                                                        .text_size(px(15.))
+                                                        .text_color(rgb(if menu_open {
+                                                            GOLD
+                                                        } else {
+                                                            MUTED
+                                                        }))
+                                                        .bg(if menu_open {
+                                                            rgb(SELECTED).into()
+                                                        } else {
+                                                            gpui::transparent_black()
+                                                        })
+                                                        .hover(|s| {
+                                                            s.bg(rgb(SELECTED)).text_color(rgb(INK))
+                                                        })
+                                                        .child(ui_icon(
+                                                            "ui/ellipsis",
+                                                            15.,
+                                                            if menu_open { GOLD } else { MUTED },
+                                                        )),
+                                                    )
+                                                    .when(menu_open, |anchor| {
+                                                        anchor.child(self.profile_actions_popover(
+                                                            id,
+                                                            &name_for_menu,
+                                                            cx,
+                                                        ))
+                                                    }),
+                                            )
+                                    })),
+                            )
                         })
-                        .when(matches.is_empty(), |v| {
+                        .when(is_empty, |v| {
                             v.child(empty_state(
                                 if search.is_empty() {
                                     "No saved profiles yet"
@@ -185,151 +421,149 @@ impl DesktopRoot {
                                     })
                                 }),
                             ))
-                        })
-                        .children(matches.into_iter().map(|profile| {
-                            let id = profile.id;
-                            let selected = self.selected == Some(id);
-                            let active = natal_id == Some(id);
-                            let date = if self.show_birth {
-                                serde_json::from_str::<ChartRequest>(&profile.data_json)
-                                    .ok()
-                                    .map_or_else(
-                                        || "Unavailable".into(),
-                                        |request| {
-                                            format!(
-                                                "{:04}-{:02}-{:02}",
-                                                request.year, request.month, request.day
-                                            )
-                                        },
-                                    )
-                            } else {
-                                "Hidden".into()
-                            };
-                            let calculation =
-                                self.session.read(cx).profile_settings(id).map_or_else(
-                                    |_| "Unavailable".into(),
-                                    |settings| {
-                                        format!(
-                                            "{} · {}",
-                                            if settings.tropical {
-                                                "Tropical"
-                                            } else {
-                                                "Sidereal"
-                                            },
-                                            AYANAMSHAS[settings.ayanamsha]
-                                        )
-                                    },
-                                );
-                            let actions =
-                                selected.then(|| self.profile_actions(id, &profile.name, cx));
-                            column()
-                                .gap_1()
-                                .child(
-                                    row()
-                                        .child(
-                                            action_control(
-                                                ("profile-row", id as usize),
-                                                cx,
-                                                move |view, cx| {
-                                                    view.choose_profile(
-                                                        id,
-                                                        ProfileAction::OpenChart,
-                                                        cx,
-                                                    );
-                                                },
-                                            )
-                                            .flex_1()
-                                            .min_w(px(0.))
-                                            .when(active, |item| item.bg(rgb(SELECTED)))
-                                            .hover(|item| item.bg(rgb(SELECTED)))
-                                            .child(
-                                                data_row([
-                                                    profile.name,
-                                                    date,
-                                                    profile.birthplace,
-                                                    calculation,
-                                                ])
-                                                .w_full(),
-                                            ),
-                                        )
-                                        .child(
-                                            div()
-                                                .id(("profile-management", id as usize))
-                                                .w(px(84.))
-                                                .flex_shrink_0()
-                                                .child(button(
-                                                    "Manage",
-                                                    selected,
-                                                    cx,
-                                                    move |view, _| {
-                                                        view.selected = (view.selected != Some(id))
-                                                            .then_some(id);
-                                                        view.delete_confirmation = None;
-                                                    },
-                                                )),
-                                        ),
-                                )
-                                .when_some(actions, |item, actions| item.child(actions))
-                        })),
+                        }),
                 );
             }
             Err(error) => view = view.child(panel().child(error)),
         }
         if self.deleted_profile.is_some() {
-            view = view.child(button("Undo deletion", false, cx, DesktopRoot::undo_delete));
+            view = view.child(row().child(compact_button(
+                "profiles-undo-delete",
+                "Undo deletion",
+                false,
+                cx,
+                DesktopRoot::undo_delete,
+            )));
         }
-        view = view.child(
-            row()
-                .child(button(
-                    "Export JSON backup",
-                    false,
-                    cx,
-                    DesktopRoot::export_backup,
-                ))
-                .when(
-                    !self.reading_backup && self.pending_import.is_none(),
-                    |row| {
-                        row.child(button(
-                            "Import backup or Android profiles",
-                            false,
-                            cx,
-                            DesktopRoot::inspect_backup,
-                        ))
-                    },
-                ),
-        );
         view.into_any_element()
     }
 
-    fn profile_actions(&self, id: i64, name: &str, cx: &mut Context<Self>) -> Div {
-        if self.delete_confirmation == Some(id) {
-            return panel().child(format!("Delete {name}?")).child(
-                row()
-                    .child(button("Confirm delete", true, cx, move |view, cx| {
-                        view.delete_profile(id, cx)
-                    }))
-                    .child(button("Cancel", false, cx, |view, _| {
-                        view.delete_confirmation = None
-                    })),
-            );
-        }
-        row()
-            .flex_wrap()
-            .children(
-                [
-                    ("Edit profile", ProfileAction::Edit),
-                    ("Duplicate", ProfileAction::Duplicate),
-                    ("Use for transit", ProfileAction::UseForTransit),
-                ]
-                .map(|(label, action)| {
-                    button(label, false, cx, move |view, cx| {
-                        view.choose_profile(id, action, cx)
-                    })
-                }),
-            )
-            .child(button("Delete profile", false, cx, move |view, _| {
-                view.delete_confirmation = Some(id)
-            }))
+    fn profile_actions_popover(&self, id: i64, name: &str, cx: &mut Context<Self>) -> AnyElement {
+        let confirming = self.delete_confirmation == Some(id);
+        let title = format!("Delete {name}?");
+        gpui::deferred(
+            gpui::anchored()
+                .anchor(gpui::Corner::TopRight)
+                .snap_to_window_with_margin(px(12.))
+                .child(
+                    div()
+                        .id(("profile-actions-popover", id as usize))
+                        .occlude()
+                        .mt(px(4.))
+                        .w(px(204.))
+                        .p(px(5.))
+                        .rounded(px(10.))
+                        .bg(rgb(PAPER))
+                        .border_1()
+                        .border_color(rgb(LINE))
+                        .shadow(popover_shadow())
+                        .flex()
+                        .flex_col()
+                        .gap(px(1.))
+                        .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
+                        .on_click(|_, _, cx| cx.stop_propagation())
+                        .when(confirming, |menu| {
+                            menu.p_2()
+                                .gap_2()
+                                .child(
+                                    div()
+                                        .text_size(px(12.5))
+                                        .font_weight(gpui::FontWeight::SEMIBOLD)
+                                        .text_color(rgb(INK))
+                                        .child(title.clone()),
+                                )
+                                .child(caption("You can undo right after deleting."))
+                                .child(
+                                    row()
+                                        .justify_end()
+                                        .gap_2()
+                                        .child(compact_button(
+                                            ("cancel-delete", id as usize),
+                                            "Cancel",
+                                            false,
+                                            cx,
+                                            |view, _| {
+                                                view.delete_confirmation = None;
+                                            },
+                                        ))
+                                        .child(
+                                            action_control(
+                                                ("confirm-delete", id as usize),
+                                                cx,
+                                                move |view, cx| {
+                                                    view.selected = None;
+                                                    view.delete_profile(id, cx);
+                                                },
+                                            )
+                                            .px(px(10.))
+                                            .h(px(26.))
+                                            .justify_center()
+                                            .rounded(px(RADIUS_CONTROL))
+                                            .text_size(px(12.))
+                                            .font_weight(gpui::FontWeight::MEDIUM)
+                                            .bg(rgb(ERROR))
+                                            .text_color(rgb(PAPER))
+                                            .hover(|s| s.opacity(0.9))
+                                            .child("Delete"),
+                                        ),
+                                )
+                        })
+                        .when(!confirming, |menu| {
+                            menu.child(menu_item(
+                                ("profile-open", id as usize),
+                                "Open chart",
+                                false,
+                                cx,
+                                move |view, cx| {
+                                    view.selected = None;
+                                    view.choose_profile(id, ProfileAction::OpenChart, cx);
+                                },
+                            ))
+                            .child(menu_item(
+                                ("profile-transit", id as usize),
+                                "Use for transit",
+                                false,
+                                cx,
+                                move |view, cx| {
+                                    view.selected = None;
+                                    view.choose_profile(id, ProfileAction::UseForTransit, cx);
+                                },
+                            ))
+                            .child(menu_divider())
+                            .child(menu_item(
+                                ("profile-edit", id as usize),
+                                "Edit profile",
+                                false,
+                                cx,
+                                move |view, cx| {
+                                    view.selected = None;
+                                    view.choose_profile(id, ProfileAction::Edit, cx);
+                                },
+                            ))
+                            .child(menu_item(
+                                ("profile-dup", id as usize),
+                                "Duplicate",
+                                false,
+                                cx,
+                                move |view, cx| {
+                                    view.selected = None;
+                                    view.choose_profile(id, ProfileAction::Duplicate, cx);
+                                },
+                            ))
+                            .child(menu_divider())
+                            .child(menu_item_danger(
+                                ("profile-del", id as usize),
+                                "Delete profile",
+                                cx,
+                                move |view, _| {
+                                    view.delete_confirmation = Some(id);
+                                },
+                            ))
+                        }),
+                ),
+        )
+        .with_priority(1)
+        .into_any_element()
     }
 
     fn choose_profile(&mut self, id: i64, action: ProfileAction, cx: &mut Context<Self>) {

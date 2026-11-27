@@ -60,12 +60,12 @@ impl DesktopRoot {
 
         div()
             .id("right-inspector")
-            .w(px(284.))
+            .w(px(268.))
             .flex_shrink_0()
             .h_full()
-            .bg(rgb(PAPER))
+            .bg(rgb(HEADER_BG))
             .border_l_1()
-            .border_color(rgb(LINE))
+            .border_color(rgb(SUBTLE_LINE))
             .overflow_y_scroll()
             .p_4()
             .flex()
@@ -74,94 +74,94 @@ impl DesktopRoot {
             .child(
                 column()
                     .gap_2()
-                    .pb_3()
+                    .pb_4()
                     .border_b_1()
                     .border_color(rgb(SUBTLE_LINE))
                     .child(
                         row()
                             .justify_between()
                             .child(section_label("BIRTH PROFILE"))
-                            .child(button(
+                            .child(ghost_button(
+                                "inspector-privacy",
                                 if self.show_birth { "Hide" } else { "Show" },
-                                false,
                                 cx,
                                 |view, _| view.show_birth = !view.show_birth,
                             )),
                     )
                     .child(
                         div()
-                            .text_size(px(15.))
+                            .text_size(px(15.5))
                             .font_weight(gpui::FontWeight::SEMIBOLD)
                             .text_color(rgb(INK))
                             .child(natal.name.clone()),
                     )
-                    .child(caption(format!("{birth_label} · {timezone}")))
+                    .child(
+                        div()
+                            .font_family("Menlo")
+                            .text_size(px(11.5))
+                            .text_color(rgb(MUTED))
+                            .child(format!("{birth_label} · {timezone}")),
+                    )
                     .child(caption(place_label))
                     .child(div().pt_1().child(self.profile_edit_save_buttons(cx))),
             )
             .child(
                 column()
-                    .gap_2()
-                    .pb_3()
+                    .gap(px(10.))
+                    .pb_4()
                     .border_b_1()
                     .border_color(rgb(SUBTLE_LINE))
                     .child(
                         row()
                             .justify_between()
                             .child(section_label("CALCULATION"))
-                            .child(button("Setup", false, cx, |view, cx| {
-                                view.navigate(Workspace::Calculations, cx);
-                            })),
+                            .child(ghost_button(
+                                "inspector-setup",
+                                "Setup ›",
+                                cx,
+                                |view, cx| {
+                                    view.navigate(Workspace::Calculations, cx);
+                                },
+                            )),
                     )
                     .child(
                         row()
                             .flex_wrap()
                             .gap_1()
-                            .child(chip(
-                                if settings.tropical {
-                                    "Tropical"
-                                } else {
-                                    "Sidereal"
-                                },
-                                !settings.tropical,
-                            ))
                             .child(chip(ayanamsha, false))
-                            .child(chip(houses, false)),
+                            .child(chip(format!("{houses} houses"), false)),
                     )
                     .child(
-                        row()
-                            .gap_2()
-                            .child(button(
-                                if settings.tropical {
-                                    "Tropical"
-                                } else {
-                                    "Sidereal"
-                                },
-                                !settings.tropical,
+                        column()
+                            .gap_1()
+                            .child(caption("Zodiac"))
+                            .child(segmented_pair(
+                                "insp-zodiac",
+                                ("Sidereal", "Tropical"),
+                                settings.tropical,
                                 cx,
-                                |view, cx| {
+                                |view, is_tropical, cx| {
                                     view.update(cx, |s| {
-                                        s.settings.tropical = !s.settings.tropical;
-                                        s.settings_draft.tropical = s.settings.tropical;
-                                    });
-                                },
-                            ))
-                            .child(button(
-                                if settings.mean_node {
-                                    "Mean Rahu"
-                                } else {
-                                    "True Rahu"
-                                },
-                                settings.mean_node,
-                                cx,
-                                |view, cx| {
-                                    view.update(cx, |s| {
-                                        s.settings.mean_node = !s.settings.mean_node;
-                                        s.settings_draft.mean_node = s.settings.mean_node;
+                                        s.settings.tropical = is_tropical;
+                                        s.settings_draft.tropical = is_tropical;
                                     });
                                 },
                             )),
-                    ),
+                    )
+                    .child(column().gap_1().child(caption("Lunar node (Rahu)")).child(
+                        segmented_pair(
+                            "insp-node",
+                            ("True", "Mean"),
+                            settings.mean_node,
+                            cx,
+                            |view, is_mean, cx| {
+                                view.update(cx, |s| {
+                                    s.settings.mean_node = is_mean;
+                                    s.settings_draft.mean_node = is_mean;
+                                });
+                            },
+                        ),
+                    )),
             )
             .when(
                 workspace == Workspace::Charts
@@ -169,34 +169,30 @@ impl DesktopRoot {
                 |insp| {
                     insp.child(
                         column()
-                            .gap_2()
+                            .gap(px(10.))
                             .pb_3()
-                            .border_b_1()
-                            .border_color(rgb(SUBTLE_LINE))
                             .child(section_label("EPOCH OVERLAYS"))
-                            .child(button(
-                                if planet_transit {
-                                    "Planets: Transit"
-                                } else {
-                                    "Planets: Natal"
-                                },
-                                planet_transit,
-                                cx,
-                                |view, cx| {
-                                    view.update(cx, |s| s.planet_transit = !s.planet_transit)
-                                },
+                            .child(column().gap_1().child(caption("Planets")).child(
+                                segmented_pair(
+                                    "insp-planets-epoch",
+                                    ("Natal", "Transit"),
+                                    planet_transit,
+                                    cx,
+                                    |view, is_transit, cx| {
+                                        view.update(cx, |s| s.planet_transit = is_transit);
+                                    },
+                                ),
                             ))
-                            .child(button(
-                                if ascendant_transit {
-                                    "Ascendant: Transit"
-                                } else {
-                                    "Ascendant: Natal"
-                                },
-                                ascendant_transit,
-                                cx,
-                                |view, cx| {
-                                    view.update(cx, |s| s.ascendant_transit = !s.ascendant_transit)
-                                },
+                            .child(column().gap_1().child(caption("Ascendant")).child(
+                                segmented_pair(
+                                    "insp-asc-epoch",
+                                    ("Natal", "Transit"),
+                                    ascendant_transit,
+                                    cx,
+                                    |view, is_transit, cx| {
+                                        view.update(cx, |s| s.ascendant_transit = is_transit);
+                                    },
+                                ),
                             ))
                             .when(
                                 matches!(
@@ -208,14 +204,21 @@ impl DesktopRoot {
                                         | "Rasi aspects"
                                 ),
                                 |col| {
-                                    col.child(button(
-                                        "MUNP overlay",
-                                        self.show_munp,
-                                        cx,
-                                        |view, _| {
-                                            view.show_munp = !view.show_munp;
-                                        },
-                                    ))
+                                    col.child(
+                                        row()
+                                            .pt_1()
+                                            .justify_between()
+                                            .child(caption("MUNP overlay"))
+                                            .child(compact_button(
+                                                "insp-munp-toggle",
+                                                if self.show_munp { "On" } else { "Off" },
+                                                self.show_munp,
+                                                cx,
+                                                |view, _| {
+                                                    view.show_munp = !view.show_munp;
+                                                },
+                                            )),
+                                    )
                                 },
                             ),
                     )

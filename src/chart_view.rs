@@ -523,39 +523,58 @@ impl DesktopRoot {
             ("Natal + transit", "Natal + transit"),
             ("Rahu wheel", "Rahu wheel"),
         ];
+        let secondary_active = !primary_modes.iter().any(|(_, target)| *target == mode);
+        let more_label = if secondary_active {
+            format!("{mode} ▾")
+        } else if self.show_modes {
+            "More ▴".into()
+        } else {
+            "More ▾".into()
+        };
         view = view.child(
             row()
                 .justify_between()
                 .flex_wrap()
                 .gap_2()
                 .pb_2()
-                .border_b_1()
-                .border_color(rgb(SUBTLE_LINE))
                 .child(
-                    row()
+                    segmented_track()
                         .flex_wrap()
-                        .gap_1()
-                        .children(primary_modes.into_iter().map(|(label, target)| {
-                            button(label, mode == target, cx, move |view, cx| {
-                                view.select_mode(target, cx)
-                            })
-                        }))
-                        .child(button(
-                            if self.show_modes {
-                                "More modes ▴"
-                            } else {
-                                "More modes ▾"
+                        .children(primary_modes.into_iter().enumerate().map(
+                            |(idx, (label, target))| {
+                                mode_pill(
+                                    ("primary-mode", idx),
+                                    label,
+                                    mode == target,
+                                    cx,
+                                    move |view, cx| view.select_mode(target, cx),
+                                )
                             },
-                            self.show_modes,
-                            cx,
-                            |view, _| view.show_modes = !view.show_modes,
-                        )),
+                        ))
+                        .child(
+                            div()
+                                .relative()
+                                .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| {
+                                    cx.stop_propagation()
+                                })
+                                .child(mode_pill(
+                                    "more-modes-toggle",
+                                    more_label,
+                                    self.show_modes || secondary_active,
+                                    cx,
+                                    |view, _| view.show_modes = !view.show_modes,
+                                ))
+                                .when(self.show_modes, |anchor| {
+                                    anchor.child(self.mode_buttons_popover(cx))
+                                }),
+                        ),
                 )
                 .child(
                     row()
                         .gap_2()
                         .when(mode == "Circular chart", |toolbar| {
-                            toolbar.child(button(
+                            toolbar.child(compact_button(
+                                "chart-inspect-wheel",
                                 if self.circular_detail {
                                     "Back to chart"
                                 } else {
@@ -567,11 +586,28 @@ impl DesktopRoot {
                             ))
                         })
                         .when(matches!(mode, "Rasi" | "Circular chart"), |toolbar| {
-                            toolbar.child(button("Full view", false, cx, |view, cx| {
-                                view.open_chart_lightbox(LightboxTarget::ActiveChart, cx)
-                            }))
+                            toolbar.child(
+                                action_control("chart-full-view", cx, |view, cx| {
+                                    view.open_chart_lightbox(LightboxTarget::ActiveChart, cx)
+                                })
+                                .h(px(26.))
+                                .px(px(10.))
+                                .gap(px(6.))
+                                .justify_center()
+                                .rounded(px(RADIUS_CONTROL))
+                                .border_1()
+                                .border_color(rgb(LINE))
+                                .bg(rgb(PAPER))
+                                .text_size(px(12.))
+                                .font_weight(gpui::FontWeight::MEDIUM)
+                                .text_color(rgb(INK))
+                                .hover(|s| s.bg(rgb(SOFT)))
+                                .child(ui_icon("ui/maximize", 12.5, MUTED))
+                                .child("Full view"),
+                            )
                         })
-                        .child(button(
+                        .child(compact_button(
+                            "chart-compact-toggle",
                             if self.compact { "Standard" } else { "Compact" },
                             self.compact,
                             cx,
@@ -579,34 +615,31 @@ impl DesktopRoot {
                         )),
                 ),
         );
-        if self.show_modes {
-            view = view.child(self.mode_buttons(cx));
-        }
 
         let max_side = if self.compact || viewport.width <= px(1320.) {
-            416.
+            436.
         } else {
-            530.
+            560.
         };
         let side = if mode == "Circular chart" && self.circular_detail {
-            f32::from(viewport.width - px(520.)).clamp(360., 760.)
+            f32::from(viewport.width - px(500.)).clamp(380., 780.)
         } else if mode == "Rahu wheel" {
             let controls_height = if self.rahu_reference == RahuReference::Manual {
-                48.
+                44.
             } else {
                 0.
             };
-            f32::from(viewport.width - px(590.))
-                .min(f32::from(viewport.height - px(430. + controls_height)))
-                .clamp(196., max_side)
+            f32::from(viewport.width - px(550.))
+                .min(f32::from(viewport.height - px(390. + controls_height)))
+                .clamp(210., max_side)
         } else if mode == "Natal + transit" {
-            f32::from(viewport.width - px(590.))
-                .min(f32::from(viewport.height - px(432.)))
-                .clamp(280., max_side)
+            f32::from(viewport.width - px(550.))
+                .min(f32::from(viewport.height - px(396.)))
+                .clamp(290., max_side)
         } else {
-            f32::from(viewport.width - px(590.))
-                .min(f32::from(viewport.height - px(384.)))
-                .clamp(280., max_side)
+            f32::from(viewport.width - px(550.))
+                .min(f32::from(viewport.height - px(340.)))
+                .clamp(296., max_side)
         };
         let content = if mode == "Dasha periods" {
             self.dasha_view(cx)
@@ -688,39 +721,64 @@ impl DesktopRoot {
                 }),
             )
             .child(drawing);
-        column()
-            .gap_2()
+        chart_plate()
+            .items_center()
             .child(surface)
-            .when(scene.rahu.is_none(), |surface| {
-                surface.child(caption("Click chart to open full view & zoom"))
+            .when(scene.rahu.is_none(), |plate| {
+                plate.child(
+                    row()
+                        .w_full()
+                        .pt_1()
+                        .border_t_1()
+                        .border_color(rgb(SUBTLE_LINE))
+                        .justify_between()
+                        .child(
+                            div()
+                                .text_size(px(11.))
+                                .text_color(rgb(MUTED))
+                                .child("Click chart for full view & zoom"),
+                        )
+                        .when(
+                            !matches!(scene.title, "Rasi chart" | "Circular chart")
+                                || self.show_modes,
+                            |bar| {
+                                bar.child(
+                                    row()
+                                        .gap_1()
+                                        .child(ghost_button(
+                                            "chart-zoom-out",
+                                            "−",
+                                            cx,
+                                            |root, _| {
+                                                root.chart_zoom = (root.chart_zoom - 0.25).max(1.);
+                                                if root.chart_zoom == 1. {
+                                                    root.chart_scroll
+                                                        .set_offset(point(px(0.), px(0.)));
+                                                }
+                                            },
+                                        ))
+                                        .child(ghost_button(
+                                            "chart-zoom-reset",
+                                            format!("{:.0}%", zoom * 100.),
+                                            cx,
+                                            |root, _| {
+                                                root.chart_zoom = 1.;
+                                                root.chart_scroll.set_offset(point(px(0.), px(0.)));
+                                            },
+                                        ))
+                                        .child(ghost_button(
+                                            "chart-zoom-in",
+                                            "+",
+                                            cx,
+                                            |root, _| {
+                                                root.chart_zoom = (root.chart_zoom + 0.25).min(2.5)
+                                            },
+                                        )),
+                                )
+                            },
+                        ),
+                )
             })
-            .when(
-                scene.rahu.is_none()
-                    && (!matches!(scene.title, "Rasi chart" | "Circular chart") || self.show_modes),
-                |view| {
-                    view.child(
-                        row()
-                            .child(button("−", false, cx, |root, _| {
-                                root.chart_zoom = (root.chart_zoom - 0.25).max(1.);
-                                if root.chart_zoom == 1. {
-                                    root.chart_scroll.set_offset(point(px(0.), px(0.)));
-                                }
-                            }))
-                            .child(button(
-                                format!("{:.0}%", zoom * 100.),
-                                false,
-                                cx,
-                                |root, _| {
-                                    root.chart_zoom = 1.;
-                                    root.chart_scroll.set_offset(point(px(0.), px(0.)));
-                                },
-                            ))
-                            .child(button("+", false, cx, |root, _| {
-                                root.chart_zoom = (root.chart_zoom + 0.25).min(2.5)
-                            })),
-                    )
-                },
-            )
     }
 
     fn render_scene(&self, scene: &chart::ChartScene, side: f32, cx: &App) -> AnyElement {

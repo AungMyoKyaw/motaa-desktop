@@ -4,6 +4,16 @@ MOTAA Desktop is an offline-first Myanmar astrology workspace built with Rust an
 
 ![MOTAA Desktop Rasi Chart](docs/screenshots/01-rasi-chart.png)
 
+## Origin & Credits
+
+MOTAA Desktop is a reverse-engineered desktop port of the original **[MOTAA Myanmar](https://play.google.com/store/apps/details?id=motaa.myanmar)** Android application. The astrological algorithms, traditional Burmese chart geometry, and calculations in this project are ported from the original app and the work of its creators.
+
+Special thanks to:
+
+- **Original Android App**: [MOTAA Myanmar on Google Play](https://play.google.com/store/apps/details?id=motaa.myanmar)
+- **Numan MOTAA**: [https://web.facebook.com/numan.motaa](https://web.facebook.com/numan.motaa)
+- **AstrologerKoPaKhan**: [https://web.facebook.com/AstrologerKoPaKhan](https://web.facebook.com/AstrologerKoPaKhan)
+
 ## Workspaces & Features
 
 - **Charts (`Cmd+1`)**: 12 chart modes including Rasi, Tricakka, Traditional aspects, Nakshatra traversal, LatLon, Western aspects, Natal + transit, Dasha periods, Circular chart (with 27-nakshatra detail view), Rahu wheel (27/28 divisions), Rasi strengths, and Rasi aspects.
@@ -11,6 +21,7 @@ MOTAA Desktop is an offline-first Myanmar astrology workspace built with Rust an
 - **Calculations (`Cmd+3`)**: Tropical/Sidereal toggle, Ayanamsha selection, and House system configuration.
 - **Time & Analysis (`Cmd+4`)**: Independent transit/reference time and location navigator with live scrubber (`‹` / `›` / `Now`).
 - **Advanced (`Cmd+5`)**: 16 tools covering Strength timeline, Ashtakavarga, KP subdivisions, Heliocentric model, Divisional charts, Electional timing, Ephemeris calendar, Eclipses, Daily Tatkalika, Satapati name wheel, Sarvatobhadra, Yoga / candidate times, Interpretations, Transit events, Ten pillars / Ayu Moon, and Nakshatra groups.
+- **About (`Cmd+6`)**: Credits & origin page acknowledging the original MOTAA Myanmar Android app, Numan MOTAA, and AstrologerKoPaKhan with quick-open and copyable links.
 - **Quick Jump (`Cmd+K`)**: Keyboard-driven command palette across all modes, tools, profiles, and actions.
 
 ![MOTAA Desktop Profiles](docs/screenshots/05-profiles.png)

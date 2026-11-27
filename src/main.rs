@@ -1,3 +1,4 @@
+mod about;
 mod advanced;
 mod ashtakavarga;
 mod backup;
@@ -191,7 +192,6 @@ struct DesktopRoot {
     sidebar_collapsed: bool,
     inspector_open: bool,
     palette_open: bool,
-    about_open: bool,
     town_scroll: gpui::ScrollHandle,
     tz_scroll: gpui::ScrollHandle,
     palette_query: Entity<TextInput>,
@@ -267,7 +267,7 @@ struct DesktopRoot {
 }
 
 // Navigation geometry exported from the master’s Lucide v0.468.0 components.
-const RAIL_ICONS: [(&str, &[u8]); 5] = [
+const RAIL_ICONS: [(&str, &[u8]); 6] = [
     ("orbit", include_bytes!("../assets/rail/orbit.svg")),
     (
         "users-round",
@@ -282,6 +282,7 @@ const RAIL_ICONS: [(&str, &[u8]); 5] = [
         include_bytes!("../assets/rail/calendar-clock.svg"),
     ),
     ("telescope", include_bytes!("../assets/rail/telescope.svg")),
+    ("info", include_bytes!("../assets/rail/info.svg")),
 ];
 
 fn app_icon() -> Arc<Image> {
@@ -295,12 +296,57 @@ fn app_icon() -> Arc<Image> {
     .clone()
 }
 
+// Crisp Lucide-style UI chrome icons embedded directly into the binary.
+const UI_ICONS: [(&str, &[u8]); 10] = [
+    (
+        "ui/panel-right",
+        br#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg>"#,
+    ),
+    (
+        "ui/panel-left",
+        br#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>"#,
+    ),
+    (
+        "ui/search",
+        br#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>"#,
+    ),
+    (
+        "ui/ellipsis",
+        br#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>"#,
+    ),
+    (
+        "ui/eye",
+        br#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>"#,
+    ),
+    (
+        "ui/eye-off",
+        br#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>"#,
+    ),
+    (
+        "ui/maximize",
+        br#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/></svg>"#,
+    ),
+    (
+        "ui/plus",
+        br#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>"#,
+    ),
+    (
+        "ui/external-link",
+        br#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>"#,
+    ),
+    (
+        "ui/copy",
+        br#"<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>"#,
+    ),
+];
+
 struct DesktopAssets;
 
 impl gpui::AssetSource for DesktopAssets {
     fn load(&self, path: &str) -> gpui::Result<Option<std::borrow::Cow<'static, [u8]>>> {
         Ok(RAIL_ICONS
             .iter()
+            .chain(UI_ICONS.iter())
             .find(|(name, _)| *name == path)
             .map(|(_, bytes)| std::borrow::Cow::Borrowed(*bytes)))
     }
@@ -308,6 +354,7 @@ impl gpui::AssetSource for DesktopAssets {
     fn list(&self, path: &str) -> gpui::Result<Vec<gpui::SharedString>> {
         Ok(RAIL_ICONS
             .iter()
+            .chain(UI_ICONS.iter())
             .filter(|(name, _)| name.starts_with(path))
             .map(|(name, _)| (*name).into())
             .collect())
@@ -319,6 +366,14 @@ fn rail_icon(index: usize, selected: bool) -> impl IntoElement {
         .path(RAIL_ICONS[index].0)
         .size(px(16.))
         .text_color(rgb(if selected { GOLD } else { MUTED }))
+}
+
+pub(crate) fn ui_icon(path: &'static str, size_px: f32, color: u32) -> impl IntoElement {
+    gpui::svg()
+        .path(path)
+        .size(px(size_px))
+        .flex_shrink_0()
+        .text_color(rgb(color))
 }
 
 fn field(label: &'static str, input: Entity<TextInput>) -> Div {
@@ -336,13 +391,16 @@ fn button(
     let label = label.into();
     action_control(label.clone(), cx, action)
         .px_3()
-        .h(px(38.))
+        .h(px(32.))
         .justify_center()
-        .rounded(px(6.))
+        .rounded(px(RADIUS_CONTROL))
+        .text_size(px(13.))
+        .font_weight(gpui::FontWeight::MEDIUM)
         .border_1()
         .border_color(rgb(if primary { GOLD } else { LINE }))
         .bg(rgb(if primary { GOLD } else { PAPER }))
         .text_color(rgb(if primary { PAPER } else { INK }))
+        .when(primary, |el| el.shadow(pill_shadow()))
         .hover(|style| style.bg(rgb(if primary { ACTION_HOVER } else { SOFT })))
         .active(|style| style.bg(rgb(if primary { ACTION_PRESSED } else { SELECTED })))
         .focus(|style| {
@@ -352,6 +410,215 @@ fn button(
         })
         .child(label)
         .into_any_element()
+}
+
+fn compact_button(
+    id: impl Into<gpui::ElementId>,
+    label: impl Into<gpui::SharedString>,
+    active: bool,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
+) -> AnyElement {
+    action_control(id, cx, action)
+        .px(px(10.))
+        .h(px(26.))
+        .justify_center()
+        .rounded(px(RADIUS_CONTROL))
+        .text_size(px(12.))
+        .font_weight(gpui::FontWeight::MEDIUM)
+        .border_1()
+        .border_color(rgb(if active { GOLD } else { LINE }))
+        .bg(rgb(if active { GOLD } else { PAPER }))
+        .text_color(rgb(if active { PAPER } else { INK }))
+        .when(active, |el| el.shadow(pill_shadow()))
+        .hover(|style| style.bg(rgb(if active { ACTION_HOVER } else { SOFT })))
+        .active(|style| style.bg(rgb(if active { ACTION_PRESSED } else { SELECTED })))
+        .child(label.into())
+        .into_any_element()
+}
+
+fn ghost_button(
+    id: impl Into<gpui::ElementId>,
+    label: impl Into<gpui::SharedString>,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
+) -> AnyElement {
+    action_control(id, cx, action)
+        .px_2()
+        .h(px(24.))
+        .justify_center()
+        .rounded(px(5.))
+        .text_size(px(11.5))
+        .font_weight(gpui::FontWeight::MEDIUM)
+        .text_color(rgb(MUTED))
+        .hover(|style| style.bg(rgb(SOFT)).text_color(rgb(INK)))
+        .active(|style| style.bg(rgb(SELECTED)))
+        .child(label.into())
+        .into_any_element()
+}
+
+fn mode_pill(
+    id: impl Into<gpui::ElementId>,
+    label: impl Into<gpui::SharedString>,
+    active: bool,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
+) -> AnyElement {
+    action_control(id, cx, action)
+        .px(px(10.))
+        .h(px(26.))
+        .justify_center()
+        .rounded(px(6.))
+        .text_size(px(12.5))
+        .font_weight(if active {
+            gpui::FontWeight::SEMIBOLD
+        } else {
+            gpui::FontWeight::MEDIUM
+        })
+        .bg(if active {
+            rgb(PAPER).into()
+        } else {
+            gpui::transparent_black()
+        })
+        .text_color(rgb(if active { GOLD } else { MUTED }))
+        .when(active, |el| el.shadow(pill_shadow()))
+        .hover(|style| {
+            if active {
+                style.bg(rgb(PAPER))
+            } else {
+                style.bg(rgb(SURFACE_HOVER)).text_color(rgb(INK))
+            }
+        })
+        .child(label.into())
+        .into_any_element()
+}
+
+fn segmented_pair(
+    id_prefix: &'static str,
+    labels: (&'static str, &'static str),
+    second_active: bool,
+    cx: &mut Context<DesktopRoot>,
+    on_select: impl Fn(&mut DesktopRoot, bool, &mut Context<DesktopRoot>) + 'static,
+) -> AnyElement {
+    let on_select = Rc::new(on_select);
+    let left_cb = on_select.clone();
+    let right_cb = on_select;
+    segmented_track()
+        .w_full()
+        .child(
+            action_control((id_prefix, 0usize), cx, move |view, cx| {
+                left_cb(view, false, cx)
+            })
+            .flex_1()
+            .h(px(26.))
+            .justify_center()
+            .rounded(px(6.))
+            .text_size(px(12.))
+            .font_weight(if !second_active {
+                gpui::FontWeight::SEMIBOLD
+            } else {
+                gpui::FontWeight::MEDIUM
+            })
+            .bg(if !second_active {
+                rgb(PAPER).into()
+            } else {
+                gpui::transparent_black()
+            })
+            .text_color(rgb(if !second_active { INK } else { MUTED }))
+            .when(!second_active, |el| el.shadow(pill_shadow()))
+            .hover(|s| {
+                if !second_active {
+                    s.bg(rgb(PAPER))
+                } else {
+                    s.text_color(rgb(INK))
+                }
+            })
+            .child(labels.0),
+        )
+        .child(
+            action_control((id_prefix, 1usize), cx, move |view, cx| {
+                right_cb(view, true, cx)
+            })
+            .flex_1()
+            .h(px(26.))
+            .justify_center()
+            .rounded(px(6.))
+            .text_size(px(12.))
+            .font_weight(if second_active {
+                gpui::FontWeight::SEMIBOLD
+            } else {
+                gpui::FontWeight::MEDIUM
+            })
+            .bg(if second_active {
+                rgb(PAPER).into()
+            } else {
+                gpui::transparent_black()
+            })
+            .text_color(rgb(if second_active { GOLD } else { MUTED }))
+            .when(second_active, |el| el.shadow(pill_shadow()))
+            .hover(|s| {
+                if second_active {
+                    s.bg(rgb(PAPER))
+                } else {
+                    s.text_color(rgb(INK))
+                }
+            })
+            .child(labels.1),
+        )
+        .into_any_element()
+}
+
+fn menu_item(
+    id: impl Into<gpui::ElementId>,
+    label: impl Into<gpui::SharedString>,
+    checked: bool,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
+) -> AnyElement {
+    action_control(id, cx, action)
+        .w_full()
+        .h(px(30.))
+        .px(px(10.))
+        .justify_between()
+        .rounded(px(6.))
+        .text_size(px(12.5))
+        .font_weight(if checked {
+            gpui::FontWeight::SEMIBOLD
+        } else {
+            gpui::FontWeight::MEDIUM
+        })
+        .text_color(rgb(if checked { GOLD } else { INK }))
+        .hover(|style| style.bg(rgb(SOFT)))
+        .active(|style| style.bg(rgb(SELECTED)))
+        .child(label.into())
+        .when(checked, |item| {
+            item.child(div().text_size(px(11.5)).text_color(rgb(GOLD)).child("✓"))
+        })
+        .into_any_element()
+}
+
+fn menu_item_danger(
+    id: impl Into<gpui::ElementId>,
+    label: impl Into<gpui::SharedString>,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
+) -> AnyElement {
+    action_control(id, cx, action)
+        .w_full()
+        .h(px(30.))
+        .px(px(10.))
+        .justify_start()
+        .rounded(px(6.))
+        .text_size(px(12.5))
+        .font_weight(gpui::FontWeight::MEDIUM)
+        .text_color(rgb(ERROR))
+        .hover(|style| style.bg(rgb(ERROR_BG)))
+        .child(label.into())
+        .into_any_element()
+}
+
+fn menu_divider() -> Div {
+    div().w_full().h(px(1.)).my_1().bg(rgb(SUBTLE_LINE))
 }
 
 fn action_control(
@@ -442,9 +709,8 @@ impl DesktopRoot {
             session,
             focus: cx.focus_handle(),
             sidebar_collapsed: false,
-            inspector_open: true,
+            inspector_open: false,
             palette_open: false,
-            about_open: false,
             town_scroll: gpui::ScrollHandle::new(),
             tz_scroll: gpui::ScrollHandle::new(),
             palette_query,
@@ -703,47 +969,92 @@ impl DesktopRoot {
         }
     }
 
-    fn mode_buttons(&self, cx: &mut Context<Self>) -> Div {
+    fn mode_buttons_popover(&self, cx: &mut Context<Self>) -> AnyElement {
         let active = self.session.read(cx).mode;
-        div().grid().grid_cols(3).gap_2().children(
-            MODES
-                .into_iter()
-                .filter(|mode| {
-                    !matches!(
-                        *mode,
-                        "Rasi"
-                            | "Tricakka"
-                            | "Circular chart"
-                            | "Dasha periods"
-                            | "Natal + transit"
-                            | "Rahu wheel"
-                    )
-                })
-                .map(|mode| {
-                    button(mode, active == mode, cx, move |view, cx| {
-                        view.select_mode(mode, cx)
-                    })
-                }),
+        gpui::deferred(
+            gpui::anchored()
+                .anchor(gpui::Corner::TopLeft)
+                .snap_to_window_with_margin(px(12.))
+                .child(
+                    div()
+                        .id("more-modes-popover")
+                        .occlude()
+                        .mt(px(4.))
+                        .w(px(216.))
+                        .p(px(5.))
+                        .rounded(px(10.))
+                        .bg(rgb(PAPER))
+                        .border_1()
+                        .border_color(rgb(LINE))
+                        .shadow(popover_shadow())
+                        .flex()
+                        .flex_col()
+                        .gap(px(1.))
+                        .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
+                        .on_click(|_, _, cx| cx.stop_propagation())
+                        .children(
+                            MODES
+                                .into_iter()
+                                .filter(|mode| {
+                                    !matches!(
+                                        *mode,
+                                        "Rasi"
+                                            | "Tricakka"
+                                            | "Circular chart"
+                                            | "Dasha periods"
+                                            | "Natal + transit"
+                                            | "Rahu wheel"
+                                    )
+                                })
+                                .enumerate()
+                                .map(|(idx, mode)| {
+                                    menu_item(
+                                        ("extra-mode", idx),
+                                        mode,
+                                        active == mode,
+                                        cx,
+                                        move |view, cx| {
+                                            view.show_modes = false;
+                                            view.select_mode(mode, cx);
+                                        },
+                                    )
+                                }),
+                        ),
+                ),
         )
+        .with_priority(1)
+        .into_any_element()
     }
 
     fn profile_edit_save_buttons(&self, cx: &mut Context<Self>) -> Div {
         row()
             .gap_2()
-            .child(button("Edit", false, cx, |view, cx| {
-                let s = view.session.read(cx);
-                view.open_draft(s.natal.clone(), s.natal_id, cx);
-            }))
-            .child(button("Save", true, cx, |view, cx| {
-                let s = view.session.read(cx);
-                match save_profile(s, s.natal_id, &s.natal) {
-                    Ok(profile) => view.update(cx, |s| {
-                        s.natal_id = Some(profile.id);
-                        s.status = "Profile saved.".into();
-                    }),
-                    Err(error) => view.set_status(error, cx),
-                }
-            }))
+            .child(compact_button(
+                "profile-edit-btn",
+                "Edit",
+                false,
+                cx,
+                |view, cx| {
+                    let s = view.session.read(cx);
+                    view.open_draft(s.natal.clone(), s.natal_id, cx);
+                },
+            ))
+            .child(compact_button(
+                "profile-save-btn",
+                "Save",
+                true,
+                cx,
+                |view, cx| {
+                    let s = view.session.read(cx);
+                    match save_profile(s, s.natal_id, &s.natal) {
+                        Ok(profile) => view.update(cx, |s| {
+                            s.natal_id = Some(profile.id);
+                            s.status = "Profile saved.".into();
+                        }),
+                        Err(error) => view.set_status(error, cx),
+                    }
+                },
+            ))
     }
 
     fn calculations_view(&self, cx: &mut Context<Self>) -> AnyElement {
@@ -911,25 +1222,51 @@ impl Render for DesktopRoot {
                     }),
             )
             .child(div().h(px(14.)))
-            .child(button(
-                if collapsed { "+" } else { "New birth chart" },
-                true,
-                cx,
-                |view, cx| view.open_draft(ChartRequest::default(), None, cx),
-            ))
+            .child(
+                action_control("sidebar-new-chart", cx, |view, cx| {
+                    view.open_draft(ChartRequest::default(), None, cx)
+                })
+                .w_full()
+                .h(px(32.))
+                .px_3()
+                .gap_2()
+                .justify_center()
+                .rounded(px(RADIUS_CONTROL))
+                .text_size(px(13.))
+                .font_weight(gpui::FontWeight::MEDIUM)
+                .border_1()
+                .border_color(rgb(GOLD))
+                .bg(rgb(GOLD))
+                .text_color(rgb(PAPER))
+                .shadow(pill_shadow())
+                .hover(|style| style.bg(rgb(ACTION_HOVER)))
+                .active(|style| style.bg(rgb(ACTION_PRESSED)))
+                .child(ui_icon("ui/plus", 14., PAPER))
+                .when(!collapsed, |btn| btn.child("New birth chart")),
+            )
             .child(div().h(px(10.)))
-            .children(Workspace::ALL.into_iter().map(|entry| {
+            .children(Workspace::ALL.into_iter().enumerate().map(|(idx, entry)| {
                 let selected = entry == route;
+                let shortcut_hint = if cfg!(target_os = "macos") {
+                    format!("⌘{}", idx + 1)
+                } else {
+                    format!("^{}", idx + 1)
+                };
                 let item = action_control(("workspace", entry as usize), cx, move |view, cx| {
                     view.navigate(entry, cx)
                 })
                 .relative()
                 .px(px(if collapsed { 8. } else { 12. }))
-                .h(px(38.))
+                .h(px(36.))
                 .gap_2()
                 .rounded(px(RADIUS_NAV))
-                .bg(rgb(if selected { SELECTED } else { RAIL }))
-                .hover(|style| style.bg(rgb(if selected { SELECTED } else { SURFACE_HOVER })))
+                .bg(rgb(if selected { PAPER } else { RAIL }))
+                .when(selected, |el| {
+                    el.border_1()
+                        .border_color(rgb(SUBTLE_LINE))
+                        .shadow(pill_shadow())
+                })
+                .hover(|style| style.bg(rgb(if selected { PAPER } else { SURFACE_HOVER })))
                 .focus(|style| style.border_2().border_color(rgb(GOLD)))
                 .when(selected && !collapsed, |row_el| {
                     row_el.child(
@@ -937,7 +1274,7 @@ impl Render for DesktopRoot {
                             .absolute()
                             .left(px(3.))
                             .w(px(3.))
-                            .h(px(18.))
+                            .h(px(16.))
                             .rounded(px(2.))
                             .bg(rgb(GOLD)),
                     )
@@ -952,13 +1289,21 @@ impl Render for DesktopRoot {
                             .flex_1()
                             .min_w(px(0.))
                             .whitespace_nowrap()
-                            .text_size(px(13.5))
+                            .text_size(px(13.))
+                            .text_color(rgb(if selected { INK } else { MUTED }))
                             .font_weight(if selected {
-                                gpui::FontWeight::MEDIUM
+                                gpui::FontWeight::SEMIBOLD
                             } else {
-                                gpui::FontWeight::NORMAL
+                                gpui::FontWeight::MEDIUM
                             })
                             .child(entry.label()),
+                    )
+                    .child(
+                        div()
+                            .font_family("Menlo")
+                            .text_size(px(10.))
+                            .text_color(rgb(if selected { GOLD } else { MUTED }))
+                            .child(shortcut_hint),
                     )
                 }
             }))
@@ -977,12 +1322,10 @@ impl Render for DesktopRoot {
                         .px_2()
                         .rounded(px(RADIUS_CONTROL))
                         .justify_center()
+                        .gap_2()
                         .hover(|s| s.bg(rgb(SURFACE_HOVER)))
-                        .child(caption(if collapsed {
-                            "»"
-                        } else {
-                            "« Collapse"
-                        })),
+                        .child(ui_icon("ui/panel-left", 14., MUTED))
+                        .when(!collapsed, |btn| btn.child(caption("Collapse"))),
                     ),
             );
         let lightbox_open = self.chart_lightbox.is_some();
@@ -1004,6 +1347,7 @@ impl Render for DesktopRoot {
                 Workspace::Calculations => self.calculations_view(cx),
                 Workspace::Time => self.time_view(cx),
                 Workspace::Advanced => self.advanced_view(cx),
+                Workspace::About => self.about_view(cx),
             }
         };
         div()
@@ -1015,7 +1359,29 @@ impl Render for DesktopRoot {
             .bg(rgb(IVORY))
             .text_size(px(14.))
             .font_family("Helvetica Neue")
+            .on_mouse_down(
+                gpui::MouseButton::Left,
+                cx.listener(|view, _, _, cx| {
+                    if view.selected.is_some() || view.show_modes {
+                        view.selected = None;
+                        view.delete_confirmation = None;
+                        view.show_modes = false;
+                        cx.notify();
+                    }
+                }),
+            )
             .on_key_down(cx.listener(|view, event: &gpui::KeyDownEvent, _, cx| {
+                if event.keystroke.key.as_str() == "escape"
+                    && view.chart_lightbox.is_none()
+                    && (view.selected.is_some() || view.show_modes)
+                {
+                    view.selected = None;
+                    view.delete_confirmation = None;
+                    view.show_modes = false;
+                    cx.stop_propagation();
+                    cx.notify();
+                    return;
+                }
                 if view.chart_lightbox.is_none() {
                     return;
                 }
@@ -1051,6 +1417,9 @@ impl Render for DesktopRoot {
             )
             .on_action(
                 cx.listener(|view, _: &Advanced, _, cx| view.navigate(Workspace::Advanced, cx)),
+            )
+            .on_action(
+                cx.listener(|view, _: &About, _, cx| view.navigate(Workspace::About, cx)),
             )
             .on_action(cx.listener(|view, _: &TogglePalette, window, cx| {
                 if view.palette_open {
@@ -1099,12 +1468,12 @@ impl Render for DesktopRoot {
                     .h_full()
                     .child(
                         row()
-                            .h(px(52.))
+                            .h(px(48.))
                             .flex_shrink_0()
                             .px_6()
                             .gap_3()
                             .border_b_1()
-                            .border_color(rgb(LINE))
+                            .border_color(rgb(SUBTLE_LINE))
                             .justify_between()
                             .bg(rgb(HEADER_BG))
                             .child(
@@ -1122,16 +1491,24 @@ impl Render for DesktopRoot {
                                     })
                                     .child(
                                         div()
+                                            .text_size(px(14.))
                                             .font_weight(gpui::FontWeight::SEMIBOLD)
                                             .text_color(rgb(INK))
                                             .child(route.label()),
                                     )
                                     .child(caption("·"))
                                     .child(
-                                        div()
-                                            .text_color(rgb(GOLD))
-                                            .font_weight(gpui::FontWeight::MEDIUM)
-                                            .child(active_natal),
+                                        action_control("header-active-profile", cx, |view, cx| {
+                                            view.navigate(Workspace::Profiles, cx);
+                                        })
+                                        .px(px(6.))
+                                        .py(px(2.))
+                                        .rounded(px(5.))
+                                        .text_size(px(13.))
+                                        .text_color(rgb(GOLD))
+                                        .font_weight(gpui::FontWeight::MEDIUM)
+                                        .hover(|s| s.bg(rgb(SOFT)))
+                                        .child(active_natal),
                                     )
                                     .child(caption("·"))
                                     .child(
@@ -1146,7 +1523,7 @@ impl Render for DesktopRoot {
                                 row()
                                     .flex_shrink_0()
                                     .gap_2()
-                                    .when(viewport_w >= 1120., |bar| {
+                                    .when(viewport_w >= 1120. && !show_inspector, |bar| {
                                         bar.child(chip(
                                             format!(
                                                 "{zodiac_label} · {ayanamsha_label} · {houses_label}"
@@ -1170,15 +1547,22 @@ impl Render for DesktopRoot {
                                                     }
                                                 },
                                             ))
-                                            .h(px(30.))
-                                            .px_3()
+                                            .h(px(26.))
+                                            .px(px(10.))
                                             .gap_2()
                                             .rounded(px(RADIUS_CONTROL))
                                             .border_1()
                                             .border_color(rgb(LINE))
                                             .bg(rgb(PAPER))
+                                            .shadow(pill_shadow())
                                             .hover(|s| s.bg(rgb(SOFT)))
-                                            .child(caption("Quick jump")),
+                                            .child(ui_icon("ui/search", 12.5, MUTED))
+                                            .child(caption("Quick jump"))
+                                            .child(shortcut_keycap(if cfg!(target_os = "macos") {
+                                                "⌘K"
+                                            } else {
+                                                "^K"
+                                            })),
                                     )
                                     .when(
                                         viewport_w >= 1060.
@@ -1189,18 +1573,43 @@ impl Render for DesktopRoot {
                                                     | Workspace::Advanced
                                             ),
                                         |bar| {
-                                            bar.child(button(
-                                                if self.inspector_open {
-                                                    "Hide inspector"
+                                            bar.child(
+                                                action_control(
+                                                    "header-inspector-toggle",
+                                                    cx,
+                                                    |view, _| {
+                                                        view.inspector_open = !view.inspector_open;
+                                                    },
+                                                )
+                                                .w(px(28.))
+                                                .h(px(26.))
+                                                .justify_center()
+                                                .rounded(px(RADIUS_CONTROL))
+                                                .border_1()
+                                                .border_color(rgb(if self.inspector_open {
+                                                    GOLD
                                                 } else {
-                                                    "Inspector"
-                                                },
-                                                self.inspector_open,
-                                                cx,
-                                                |view, _| {
-                                                    view.inspector_open = !view.inspector_open;
-                                                },
-                                            ))
+                                                    LINE
+                                                }))
+                                                .bg(rgb(if self.inspector_open {
+                                                    GOLD
+                                                } else {
+                                                    PAPER
+                                                }))
+                                                .shadow(pill_shadow())
+                                                .hover(|s| {
+                                                    s.bg(rgb(if self.inspector_open {
+                                                        ACTION_HOVER
+                                                    } else {
+                                                        SOFT
+                                                    }))
+                                                })
+                                                .child(ui_icon(
+                                                    "ui/panel-right",
+                                                    14.5,
+                                                    if self.inspector_open { PAPER } else { INK },
+                                                )),
+                                            )
                                         },
                                     )
                                     .when(route == Workspace::Profiles, |bar| {
@@ -1251,9 +1660,11 @@ impl Render for DesktopRoot {
                         view.child(
                             div()
                                 .flex_shrink_0()
-                                .bg(rgb(PAPER))
+                                .bg(rgb(HEADER_BG))
+                                .border_t_1()
+                                .border_color(rgb(LINE))
                                 .px_6()
-                                .h(px(64.))
+                                .h(px(48.))
                                 .child(controls),
                         )
                     }),
@@ -1279,86 +1690,41 @@ impl Render for DesktopRoot {
             .when(self.palette_open, |root| {
                 root.child(self.palette_overlay(cx))
             })
-            .when(self.about_open, |root| {
-                root.child(self.about_overlay(cx))
-            })
     }
 }
 
 impl DesktopRoot {
-    pub(crate) fn about_overlay(&self, cx: &mut Context<Self>) -> AnyElement {
-        div()
-            .id("about-backdrop")
-            .occlude()
-            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
-            .absolute()
-            .inset_0()
-            .bg(gpui::rgba(0x28251f70))
-            .flex()
-            .items_center()
-            .justify_center()
-            .p_6()
-            .child(
-                div()
-                    .id("about-dialog")
-                    .w(px(420.))
-                    .max_w_full()
-                    .bg(rgb(PAPER))
-                    .rounded(px(12.))
-                    .border_1()
-                    .border_color(rgb(LINE))
-                    .shadow_lg()
-                    .p_6()
-                    .flex()
-                    .flex_col()
-                    .items_center()
-                    .gap_3()
-                    .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
-                    .on_click(|_, _, cx| cx.stop_propagation())
-                    .on_key_down(cx.listener(|root, event: &gpui::KeyDownEvent, _, cx| {
-                        if event.keystroke.key == "escape" {
-                            root.about_open = false;
-                            cx.stop_propagation();
-                            cx.notify();
-                        }
-                    }))
-                    .child(img(app_icon()).w(px(56.)).h(px(56.)).rounded(px(12.)))
-                    .child(
-                        div()
-                            .text_size(px(18.))
-                            .font_weight(gpui::FontWeight::SEMIBOLD)
-                            .text_color(rgb(INK))
-                            .child("MOTAA Desktop"),
-                    )
-                    .child(caption(format!("Version {}", env!("CARGO_PKG_VERSION"))))
-                    .child(div().text_size(px(13.)).text_color(rgb(INK)).child(
-                        "Offline-first Myanmar astrology workspace built with Rust and GPUI.",
-                    ))
-                    .child(caption(
-                        "License: GNU Affero General Public License v3.0 (AGPL-3.0)",
-                    ))
-                    .child(caption(
-                        "Local-first SQLite storage · No accounts or telemetry",
-                    ))
-                    .child(div().pt_2().child(button("Close", true, cx, |root, cx| {
-                        root.about_open = false;
-                        cx.notify();
-                    }))),
-            )
-            .into_any_element()
-    }
-
     pub(crate) fn birth_details_button(&self, cx: &mut Context<Self>) -> AnyElement {
-        button(
+        action_control("header-birth-details", cx, |view, _| {
+            view.show_birth = !view.show_birth;
+        })
+        .h(px(26.))
+        .px(px(10.))
+        .gap(px(6.))
+        .justify_center()
+        .rounded(px(RADIUS_CONTROL))
+        .border_1()
+        .border_color(rgb(LINE))
+        .bg(rgb(PAPER))
+        .shadow(pill_shadow())
+        .text_size(px(12.))
+        .font_weight(gpui::FontWeight::MEDIUM)
+        .text_color(rgb(INK))
+        .hover(|s| s.bg(rgb(SOFT)))
+        .child(ui_icon(
             if self.show_birth {
-                "Hide birth details"
+                "ui/eye-off"
             } else {
-                "Show birth details"
+                "ui/eye"
             },
-            false,
-            cx,
-            |view, _| view.show_birth = !view.show_birth,
-        )
+            13.5,
+            MUTED,
+        ))
+        .child(if self.show_birth {
+            "Hide birth details"
+        } else {
+            "Show birth details"
+        })
         .into_any_element()
     }
 }
@@ -1603,6 +1969,7 @@ fn main() {
                 KeyBinding::new(&primary_keybinding("3"), Calculations, None),
                 KeyBinding::new(&primary_keybinding("4"), TimeAnalysis, None),
                 KeyBinding::new(&primary_keybinding("5"), Advanced, None),
+                KeyBinding::new(&primary_keybinding("6"), About, None),
                 KeyBinding::new(&primary_keybinding("k"), TogglePalette, None),
                 KeyBinding::new(&primary_keybinding("b"), ToggleSidebar, None),
                 KeyBinding::new(&primary_keybinding("i"), ToggleInspector, None),
@@ -1656,8 +2023,7 @@ fn main() {
             let about_window = window;
             cx.on_action(move |_: &About, cx| {
                 let _ = about_window.update(cx, |root, _, cx| {
-                    root.about_open = true;
-                    cx.notify();
+                    root.navigate(Workspace::About, cx);
                 });
             });
             #[cfg(target_os = "macos")]

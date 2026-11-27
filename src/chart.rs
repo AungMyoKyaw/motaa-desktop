@@ -81,23 +81,35 @@ impl ChartScene {
                 canvas(
                     |_, _, _| (),
                     move |bounds, _, window, _| {
-                        let mut path = PathBuilder::stroke(px(1.));
                         let pos = |x, y| bounds.origin + point(px(x * side), px(y * side));
-                        let mut line = |a: (f32, f32), b: (f32, f32)| {
-                            path.move_to(pos(a.0, a.1));
-                            path.line_to(pos(b.0, b.1));
-                        };
                         let lo = 0.35;
                         let hi = 0.635;
-                        for n in [0., lo, hi, 1.] {
-                            line((n, 0.), (n, 1.));
-                            line((0., n), (1., n));
+
+                        // Inner traditional house grid & corner diagonals (1px hairline)
+                        let mut inner = PathBuilder::stroke(px(1.));
+                        let add_line = |builder: &mut PathBuilder, a: (f32, f32), b: (f32, f32)| {
+                            builder.move_to(pos(a.0, a.1));
+                            builder.line_to(pos(b.0, b.1));
+                        };
+                        for n in [lo, hi] {
+                            add_line(&mut inner, (n, 0.), (n, 1.));
+                            add_line(&mut inner, (0., n), (1., n));
                         }
-                        line((0., 0.), (lo, lo));
-                        line((1., 0.), (hi, lo));
-                        line((0., 1.), (lo, hi));
-                        line((1., 1.), (hi, hi));
-                        if let Ok(path) = path.build() {
+                        add_line(&mut inner, (0., 0.), (lo, lo));
+                        add_line(&mut inner, (1., 0.), (hi, lo));
+                        add_line(&mut inner, (0., 1.), (lo, hi));
+                        add_line(&mut inner, (1., 1.), (hi, hi));
+                        if let Ok(path) = inner.build() {
+                            window.paint_path(path, rgb(color));
+                        }
+
+                        // Crisp 1.5px outer chart frame for engraved manuscript weight
+                        let mut outer = PathBuilder::stroke(px(1.5));
+                        add_line(&mut outer, (0., 0.), (1., 0.));
+                        add_line(&mut outer, (1., 0.), (1., 1.));
+                        add_line(&mut outer, (1., 1.), (0., 1.));
+                        add_line(&mut outer, (0., 1.), (0., 0.));
+                        if let Ok(path) = outer.build() {
                             window.paint_path(path, rgb(color));
                         }
                     },

@@ -93,7 +93,11 @@ impl DesktopRoot {
             entries.push(PaletteEntry {
                 category: "Workspace",
                 label: workspace.label().to_owned(),
-                hint: String::new(),
+                hint: if workspace == Workspace::About {
+                    "Credits & origin".into()
+                } else {
+                    String::new()
+                },
                 action: PaletteAction::Workspace(workspace),
             });
         }
