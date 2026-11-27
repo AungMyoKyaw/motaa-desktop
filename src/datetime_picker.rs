@@ -546,7 +546,6 @@ impl DateTimePicker {
     fn render_calendar_popup_body(
         &self,
         current: DateTime,
-        unknown_time: bool,
         on_change: Option<PickerChangeCallback>,
         get_mut: PickerSelector,
         cx: &mut Context<DesktopRoot>,
@@ -653,7 +652,7 @@ impl DateTimePicker {
                     .child(m_name)
                 }));
 
-        let calendar_column = panel()
+        panel()
             .gap_2()
             .child(
                 row()
@@ -752,61 +751,7 @@ impl DateTimePicker {
                             .child(wd)
                     })),
             )
-            .child(div().grid().grid_cols(7).gap_1().children(calendar_cells));
-
-        let presets = div().grid().grid_cols(4).gap_1().children(
-            [
-                ("Midnight", 0u32, 0u32),
-                ("06:00 AM", 6, 0),
-                ("12:00 PM", 12, 0),
-                ("06:00 PM", 18, 0),
-            ]
-            .into_iter()
-            .enumerate()
-            .map(|(idx, (p_label, h, m))| {
-                let active = !unknown_time
-                    && current.hour() == h as i8
-                    && current.minute() == m as i8
-                    && current.second() == 0;
-                action_control(
-                    (SharedString::from(format!("{prefix}-preset")), idx),
-                    cx,
-                    move |view, cx| {
-                        if let Some(picker) = get_mut(view) {
-                            picker.set_hms(h, m, 0, cx);
-                            let dt = picker.current_datetime(cx);
-                            if let Some(cb) = on_change {
-                                cb(view, dt, cx);
-                            }
-                        }
-                    },
-                )
-                .h(px(28.))
-                .justify_center()
-                .rounded(px(4.))
-                .border_1()
-                .border_color(rgb(if active { GOLD } else { LINE }))
-                .bg(rgb(if active { SELECTED } else { PAPER }))
-                .text_color(rgb(INK))
-                .text_size(px(12.))
-                .hover(|style| style.bg(rgb(SELECTED)))
-                .child(p_label)
-            }),
-        );
-
-        let time_column = panel()
-            .gap_2()
-            .when(!unknown_time, |p| {
-                p.child(caption("Time presets")).child(presets)
-            })
-            .child(
-                column()
-                    .gap_1()
-                    .child(caption("Direct timestamp (YYYY-MM-DD HH:MM:SS)"))
-                    .child(self.datetime.clone()),
-            );
-
-        column().gap_3().child(calendar_column).child(time_column)
+            .child(div().grid().grid_cols(7).gap_1().children(calendar_cells))
     }
 }
 
@@ -852,9 +797,8 @@ impl DesktopRoot {
         target: ActiveDateTimePicker,
         cx: &mut Context<Self>,
     ) -> gpui::AnyElement {
-        let (picker, unknown_time, on_change, get_mut, title): (
+        let (picker, on_change, get_mut, title): (
             &DateTimePicker,
-            bool,
             Option<PickerChangeCallback>,
             PickerSelector,
             &'static str,
@@ -865,18 +809,16 @@ impl DesktopRoot {
                 };
                 (
                     &d.picker,
-                    d.unknown,
                     None,
                     |view| view.draft.as_mut().map(|d| &mut d.picker),
-                    "Birth Date & Time",
+                    "Pick Birth Date",
                 )
             }
             ActiveDateTimePicker::ReferenceTime => (
                 &self.time_picker,
-                false,
                 Some(|view, dt, cx| view.set_time(dt, true, cx)),
                 |view| Some(&mut view.time_picker),
-                "Reference Date & Time",
+                "Pick Reference Date",
             ),
             ActiveDateTimePicker::Candidate(idx) => {
                 let Some(p) = self.candidate_pickers.get(idx) else {
@@ -887,12 +829,17 @@ impl DesktopRoot {
                     1 => |view| view.candidate_pickers.get_mut(1),
                     _ => |view| view.candidate_pickers.get_mut(2),
                 };
-                (p, false, None, get_mut, "Candidate Date & Time")
+                (p, None, get_mut, "Pick Candidate Date")
             }
         };
 
         let current = picker.current_datetime(cx);
-        let summary = format_time(current);
+        let summary = format!(
+            "{:04}-{:02}-{:02}",
+            current.year(),
+            current.month(),
+            current.day()
+        );
 
         div()
             .id("datetime-backdrop")
@@ -949,13 +896,7 @@ impl DesktopRoot {
                                 cx.notify();
                             })),
                     )
-                    .child(picker.render_calendar_popup_body(
-                        current,
-                        unknown_time,
-                        on_change,
-                        get_mut,
-                        cx,
-                    )),
+                    .child(picker.render_calendar_popup_body(current, on_change, get_mut, cx)),
             )
             .into_any_element()
     }
