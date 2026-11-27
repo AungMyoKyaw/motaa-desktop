@@ -65,6 +65,14 @@
   else if (ua.includes('linux') && !ua.includes('android')) selectOs('linux');
   else selectOs('macos');
 
+  if (ua.includes('win') || (ua.includes('linux') && !ua.includes('android'))) {
+    document.querySelectorAll('.kbd, .ledger-count').forEach((el) => {
+      if (el.textContent.includes('⌘')) {
+        el.textContent = el.textContent.replace(/⌘/g, 'Ctrl+');
+      }
+    });
+  }
+
   document.querySelectorAll('[data-copy-target]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const target = document.getElementById(btn.dataset.copyTarget);
