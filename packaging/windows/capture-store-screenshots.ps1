@@ -71,6 +71,7 @@ public static class Win32Capture {
     public const int CDS_UPDATEREGISTRY = 0x01;
     public const int DISP_CHANGE_SUCCESSFUL = 0;
     public const uint SWP_SHOWWINDOW = 0x0040;
+    public const uint SWP_NOSENDCHANGING = 0x0400;
     public const uint PW_RENDERFULLCONTENT = 0x00000002;
     public const int SW_RESTORE = 9;
 
@@ -191,7 +192,7 @@ function Capture-WindowPng([IntPtr]$Hwnd, [string]$Path) {
     $h = $rect.Bottom - $rect.Top
     if ($w -lt 1366 -or $h -lt 768) {
         Write-Host "Window rect was ${w}x${h}; resizing to ${Width}x${Height}..."
-        [Win32Capture]::SetWindowPos($Hwnd, [IntPtr]::Zero, 0, 0, $Width, $Height, [Win32Capture]::SWP_SHOWWINDOW) | Out-Null
+        [Win32Capture]::SetWindowPos($Hwnd, [IntPtr]::Zero, 0, 0, $Width, $Height, ([Win32Capture]::SWP_SHOWWINDOW -bor [Win32Capture]::SWP_NOSENDCHANGING)) | Out-Null
         Start-Sleep -Milliseconds 450
         [Win32Capture]::GetWindowRect($Hwnd, [ref]$rect) | Out-Null
         $w = $rect.Right - $rect.Left
@@ -276,7 +277,8 @@ try {
             break
         }
         Write-Host "[app] $line"
-        if ($line -match '^STORE_CAPTURE_READYs+([A-Za-z0-9_-]+)$') {
+        $trimmed = $line.Trim()
+        if ($trimmed -match '^STORE_CAPTURE_READY[ ]+([A-Za-z0-9_-]+)$') {
             $slug = $Matches[1]
             $hwnd = [IntPtr]::Zero
             for ($attempt = 0; $attempt -lt 30; $attempt++) {
@@ -288,7 +290,7 @@ try {
                 throw "Could not locate visible MOTAA Desktop window for PID $($proc.Id)"
             }
             [Win32Capture]::ShowWindow($hwnd, [Win32Capture]::SW_RESTORE) | Out-Null
-            [Win32Capture]::SetWindowPos($hwnd, [IntPtr]::Zero, 0, 0, $Width, $Height, [Win32Capture]::SWP_SHOWWINDOW) | Out-Null
+            [Win32Capture]::SetWindowPos($hwnd, [IntPtr]::Zero, 0, 0, $Width, $Height, ([Win32Capture]::SWP_SHOWWINDOW -bor [Win32Capture]::SWP_NOSENDCHANGING)) | Out-Null
             [Win32Capture]::SetForegroundWindow($hwnd) | Out-Null
             Start-Sleep -Milliseconds 350
 
