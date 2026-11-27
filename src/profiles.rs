@@ -441,129 +441,111 @@ impl DesktopRoot {
     fn profile_actions_popover(&self, id: i64, name: &str, cx: &mut Context<Self>) -> AnyElement {
         let confirming = self.delete_confirmation == Some(id);
         let title = format!("Delete {name}?");
-        gpui::deferred(
-            gpui::anchored()
-                .anchor(gpui::Corner::TopRight)
-                .snap_to_window_with_margin(px(12.))
-                .child(
-                    div()
-                        .id(("profile-actions-popover", id as usize))
-                        .occlude()
-                        .mt(px(4.))
-                        .w(px(204.))
-                        .p(px(5.))
-                        .rounded(px(10.))
-                        .bg(rgb(PAPER))
-                        .border_1()
-                        .border_color(rgb(LINE))
-                        .shadow(popover_shadow())
-                        .flex()
-                        .flex_col()
-                        .gap(px(1.))
-                        .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
-                        .on_click(|_, _, cx| cx.stop_propagation())
-                        .when(confirming, |menu| {
-                            menu.p_2()
+        anchored_popover(
+            ("profile-actions-popover", id as usize),
+            gpui::Corner::TopRight,
+            204.,
+            |menu| {
+                menu.when(confirming, |menu| {
+                    menu.p_2()
+                        .gap_2()
+                        .child(
+                            div()
+                                .text_size(px(12.5))
+                                .font_weight(gpui::FontWeight::SEMIBOLD)
+                                .text_color(rgb(INK))
+                                .child(title.clone()),
+                        )
+                        .child(caption("You can undo right after deleting."))
+                        .child(
+                            row()
+                                .justify_end()
                                 .gap_2()
+                                .child(compact_button(
+                                    ("cancel-delete", id as usize),
+                                    "Cancel",
+                                    false,
+                                    cx,
+                                    |view, _| {
+                                        view.delete_confirmation = None;
+                                    },
+                                ))
                                 .child(
-                                    div()
-                                        .text_size(px(12.5))
-                                        .font_weight(gpui::FontWeight::SEMIBOLD)
-                                        .text_color(rgb(INK))
-                                        .child(title.clone()),
-                                )
-                                .child(caption("You can undo right after deleting."))
-                                .child(
-                                    row()
-                                        .justify_end()
-                                        .gap_2()
-                                        .child(compact_button(
-                                            ("cancel-delete", id as usize),
-                                            "Cancel",
-                                            false,
-                                            cx,
-                                            |view, _| {
-                                                view.delete_confirmation = None;
-                                            },
-                                        ))
-                                        .child(
-                                            action_control(
-                                                ("confirm-delete", id as usize),
-                                                cx,
-                                                move |view, cx| {
-                                                    view.selected = None;
-                                                    view.delete_profile(id, cx);
-                                                },
-                                            )
-                                            .px(px(10.))
-                                            .h(px(26.))
-                                            .justify_center()
-                                            .rounded(px(RADIUS_CONTROL))
-                                            .text_size(px(12.))
-                                            .font_weight(gpui::FontWeight::MEDIUM)
-                                            .bg(rgb(ERROR))
-                                            .text_color(rgb(PAPER))
-                                            .hover(|s| s.opacity(0.9))
-                                            .child("Delete"),
-                                        ),
-                                )
-                        })
-                        .when(!confirming, |menu| {
-                            menu.child(menu_item(
-                                ("profile-open", id as usize),
-                                "Open chart",
-                                false,
-                                cx,
-                                move |view, cx| {
-                                    view.selected = None;
-                                    view.choose_profile(id, ProfileAction::OpenChart, cx);
-                                },
-                            ))
-                            .child(menu_item(
-                                ("profile-transit", id as usize),
-                                "Use for transit",
-                                false,
-                                cx,
-                                move |view, cx| {
-                                    view.selected = None;
-                                    view.choose_profile(id, ProfileAction::UseForTransit, cx);
-                                },
-                            ))
-                            .child(menu_divider())
-                            .child(menu_item(
-                                ("profile-edit", id as usize),
-                                "Edit profile",
-                                false,
-                                cx,
-                                move |view, cx| {
-                                    view.selected = None;
-                                    view.choose_profile(id, ProfileAction::Edit, cx);
-                                },
-                            ))
-                            .child(menu_item(
-                                ("profile-dup", id as usize),
-                                "Duplicate",
-                                false,
-                                cx,
-                                move |view, cx| {
-                                    view.selected = None;
-                                    view.choose_profile(id, ProfileAction::Duplicate, cx);
-                                },
-                            ))
-                            .child(menu_divider())
-                            .child(menu_item_danger(
-                                ("profile-del", id as usize),
-                                "Delete profile",
-                                cx,
-                                move |view, _| {
-                                    view.delete_confirmation = Some(id);
-                                },
-                            ))
-                        }),
-                ),
+                                    action_control(
+                                        ("confirm-delete", id as usize),
+                                        cx,
+                                        move |view, cx| {
+                                            view.selected = None;
+                                            view.delete_profile(id, cx);
+                                        },
+                                    )
+                                    .px(px(10.))
+                                    .h(px(26.))
+                                    .justify_center()
+                                    .rounded(px(RADIUS_CONTROL))
+                                    .text_size(px(12.))
+                                    .font_weight(gpui::FontWeight::MEDIUM)
+                                    .bg(rgb(ERROR))
+                                    .text_color(rgb(PAPER))
+                                    .hover(|s| s.opacity(0.9))
+                                    .child("Delete"),
+                                ),
+                        )
+                })
+                .when(!confirming, |menu| {
+                    menu.child(menu_item(
+                        ("profile-open", id as usize),
+                        "Open chart",
+                        false,
+                        cx,
+                        move |view, cx| {
+                            view.selected = None;
+                            view.choose_profile(id, ProfileAction::OpenChart, cx);
+                        },
+                    ))
+                    .child(menu_item(
+                        ("profile-transit", id as usize),
+                        "Use for transit",
+                        false,
+                        cx,
+                        move |view, cx| {
+                            view.selected = None;
+                            view.choose_profile(id, ProfileAction::UseForTransit, cx);
+                        },
+                    ))
+                    .child(menu_divider())
+                    .child(menu_item(
+                        ("profile-edit", id as usize),
+                        "Edit profile",
+                        false,
+                        cx,
+                        move |view, cx| {
+                            view.selected = None;
+                            view.choose_profile(id, ProfileAction::Edit, cx);
+                        },
+                    ))
+                    .child(menu_item(
+                        ("profile-dup", id as usize),
+                        "Duplicate",
+                        false,
+                        cx,
+                        move |view, cx| {
+                            view.selected = None;
+                            view.choose_profile(id, ProfileAction::Duplicate, cx);
+                        },
+                    ))
+                    .child(menu_divider())
+                    .child(menu_item_danger(
+                        ("profile-del", id as usize),
+                        "Delete profile",
+                        cx,
+                        move |view, _| {
+                            view.delete_confirmation = Some(id);
+                        },
+                    ))
+                })
+            },
         )
-        .with_priority(1)
-        .into_any_element()
     }
 
     fn choose_profile(&mut self, id: i64, action: ProfileAction, cx: &mut Context<Self>) {
@@ -663,64 +645,18 @@ impl DesktopRoot {
         reference: bool,
         cx: &mut Context<Self>,
     ) -> AnyElement {
-        div()
-            .id("town-backdrop")
-            .occlude()
-            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
-            .absolute()
-            .inset_0()
-            .bg(gpui::rgba(0x28251f70))
-            .flex()
-            .items_center()
-            .justify_center()
-            .p_6()
-            .child(
-                div()
-                    .id("town-dialog")
-                    .w(px(580.))
-                    .max_w_full()
-                    .bg(rgb(PAPER))
-                    .rounded(px(12.))
-                    .border_1()
-                    .border_color(rgb(LINE))
-                    .shadow_lg()
-                    .p_5()
-                    .flex()
-                    .flex_col()
-                    .gap_3()
-                    .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
-                    .on_click(|_, _, cx| cx.stop_propagation())
-                    .on_key_down(cx.listener(move |root, event: &gpui::KeyDownEvent, _, cx| {
-                        if event.keystroke.key == "escape" {
-                            root.close_town_popup(reference);
-                            cx.stop_propagation();
-                            cx.notify();
-                        }
-                    }))
-                    .child(
-                        row()
-                            .justify_between()
-                            .items_center()
-                            .child(
-                                column()
-                                    .gap_0()
-                                    .child(
-                                        div()
-                                            .text_size(px(16.))
-                                            .font_weight(gpui::FontWeight::SEMIBOLD)
-                                            .text_color(rgb(INK))
-                                            .child("Myanmar Town Directory"),
-                                    )
-                                    .child(caption("534-town offline directory")),
-                            )
-                            .child(button("Close", true, cx, move |root, cx| {
-                                root.close_town_popup(reference);
-                                cx.notify();
-                            })),
-                    )
-                    .child(self.town_picker_panel(reference, cx)),
-            )
-            .into_any_element()
+        modal_dialog(
+            "town-backdrop",
+            "town-dialog",
+            580.,
+            None,
+            "Myanmar Town Directory",
+            "534-town offline directory",
+            "Close",
+            self.town_picker_panel(reference, cx).into_any_element(),
+            cx,
+            move |root, _| root.close_town_popup(reference),
+        )
     }
 
     pub(super) fn town_picker_panel(&self, reference: bool, cx: &mut Context<Self>) -> Div {

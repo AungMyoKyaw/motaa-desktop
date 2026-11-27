@@ -21,7 +21,7 @@ use serde::Deserialize;
 use crate::{
     DesktopRoot, GOLD, INK, LINE, MUTED, PAPER, RADIUS_CONTROL, RADIUS_FIELD, SELECTED, SOFT,
     SUBTLE_LINE, action_control, button, caption, column, error_banner, field, input::TextInput,
-    panel, parse_coordinate, row, section_label, text_input,
+    modal_dialog, panel, parse_coordinate, row, section_label, text_input,
 };
 
 const USER_AGENT: &str = concat!(
@@ -1318,67 +1318,22 @@ impl DesktopRoot {
             ("0.0000°, 0.0000°".to_owned(), String::new())
         };
 
-        div()
-            .id("location-map-backdrop")
-            .occlude()
-            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
-            .absolute()
-            .inset_0()
-            .bg(gpui::rgba(0x28251f70))
-            .flex()
-            .items_center()
-            .justify_center()
-            .p_6()
-            .child(
-                div()
-                    .id("location-map-dialog")
-                    .w(px(760.))
-                    .max_w_full()
-                    .max_h(px(760.))
-                    .overflow_y_scroll()
-                    .bg(rgb(PAPER))
-                    .rounded(px(12.))
-                    .border_1()
-                    .border_color(rgb(LINE))
-                    .shadow_lg()
-                    .p_5()
-                    .flex()
-                    .flex_col()
-                    .gap_3()
-                    .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
-                    .on_click(|_, _, cx| cx.stop_propagation())
-                    .on_key_down(cx.listener(move |root, event: &gpui::KeyDownEvent, _, cx| {
-                        if event.keystroke.key == "escape" {
-                            root.close_map_popup(reference);
-                            cx.stop_propagation();
-                            cx.notify();
-                        }
-                    }))
-                    .child(
-                        row()
-                            .justify_between()
-                            .items_center()
-                            .child(
-                                column()
-                                    .gap_0()
-                                    .child(
-                                        div()
-                                            .text_size(px(16.))
-                                            .font_weight(gpui::FontWeight::SEMIBOLD)
-                                            .text_color(rgb(INK))
-                                            .child(title),
-                                    )
-                                    .child(caption(format!("{pin_summary} · {tz_summary}"))),
-                            )
-                            .child(button("Done", true, cx, move |root, cx| {
-                                root.close_map_popup(reference);
-                                cx.notify();
-                            })),
-                    )
-                    .child(self.render_osm_search_panel(reference, cx))
-                    .child(self.render_osm_map_panel(reference, cx)),
-            )
-            .into_any_element()
+        modal_dialog(
+            "location-map-backdrop",
+            "location-map-dialog",
+            760.,
+            Some(760.),
+            title,
+            format!("{pin_summary} · {tz_summary}"),
+            "Done",
+            column()
+                .gap_3()
+                .child(self.render_osm_search_panel(reference, cx))
+                .child(self.render_osm_map_panel(reference, cx))
+                .into_any_element(),
+            cx,
+            move |root, _| root.close_map_popup(reference),
+        )
     }
 
     pub(super) fn timezone_overlay(&self, reference: bool, cx: &mut Context<Self>) -> AnyElement {
@@ -1400,64 +1355,19 @@ impl DesktopRoot {
             .and_then(|h| describe_timezone_at(h.timezone.read(cx).value(), effective_dt).ok())
             .unwrap_or_else(|| "Select an IANA timezone or UTC offset".to_owned());
 
-        div()
-            .id("timezone-backdrop")
-            .occlude()
-            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
-            .absolute()
-            .inset_0()
-            .bg(gpui::rgba(0x28251f70))
-            .flex()
-            .items_center()
-            .justify_center()
-            .p_6()
-            .child(
-                div()
-                    .id("timezone-dialog")
-                    .w(px(580.))
-                    .max_w_full()
-                    .bg(rgb(PAPER))
-                    .rounded(px(12.))
-                    .border_1()
-                    .border_color(rgb(LINE))
-                    .shadow_lg()
-                    .p_5()
-                    .flex()
-                    .flex_col()
-                    .gap_3()
-                    .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
-                    .on_click(|_, _, cx| cx.stop_propagation())
-                    .on_key_down(cx.listener(move |root, event: &gpui::KeyDownEvent, _, cx| {
-                        if event.keystroke.key == "escape" {
-                            root.close_timezone_popup(reference);
-                            cx.stop_propagation();
-                            cx.notify();
-                        }
-                    }))
-                    .child(
-                        row()
-                            .justify_between()
-                            .items_center()
-                            .child(
-                                column()
-                                    .gap_0()
-                                    .child(
-                                        div()
-                                            .text_size(px(16.))
-                                            .font_weight(gpui::FontWeight::SEMIBOLD)
-                                            .text_color(rgb(INK))
-                                            .child(title),
-                                    )
-                                    .child(caption(tz_summary)),
-                            )
-                            .child(button("Close", true, cx, move |root, cx| {
-                                root.close_timezone_popup(reference);
-                                cx.notify();
-                            })),
-                    )
-                    .child(self.render_timezone_panel(reference, effective_dt, cx)),
-            )
-            .into_any_element()
+        modal_dialog(
+            "timezone-backdrop",
+            "timezone-dialog",
+            580.,
+            None,
+            title,
+            tz_summary,
+            "Close",
+            self.render_timezone_panel(reference, effective_dt, cx)
+                .into_any_element(),
+            cx,
+            move |root, _| root.close_timezone_popup(reference),
+        )
     }
 
     fn render_timezone_panel(

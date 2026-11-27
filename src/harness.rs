@@ -430,11 +430,11 @@ pub(crate) fn run(
             window
                 .update(cx, |root, _, cx| {
                     root.select_mode("Rahu wheel", cx);
-                    root.rahu_28 = true;
-                    root.rahu_reference = RahuReference::Manual;
-                    root.rahu_manual_angle = Some(195.);
+                    root.rahu.divisions_28 = true;
+                    root.rahu.reference = RahuReference::Manual;
+                    root.rahu.manual_angle = Some(195.);
                     root.step_rahu_mansion(1, cx);
-                    assert_eq!(root.rahu_manual_angle, Some(201.));
+                    assert_eq!(root.rahu.manual_angle, Some(201.));
                 })
                 .expect("render 28-division Rahu with manual reference");
             draw(cx);
@@ -443,8 +443,8 @@ pub(crate) fn run(
                 .await;
             window
                 .update(cx, |root, _, _| {
-                    root.rahu_28 = false;
-                    root.rahu_reference = RahuReference::Node;
+                    root.rahu.divisions_28 = false;
+                    root.rahu.reference = RahuReference::Node;
                 })
                 .expect("restore Rahu reference");
             println!("Verified Rahu 28-division manual reference");
@@ -484,10 +484,10 @@ pub(crate) fn run(
             }
             window
                 .update(cx, |root, _, cx| {
-                    root.satapati_lagna = Some(9);
+                    root.name_wheel.satapati_lagna = Some(9);
                     root.kp_horary = Some(1);
-                    root.interpretation = Interpretation::Yoga;
-                    root.strength_age = Some(10);
+                    root.interpretations.kind = Interpretation::Yoga;
+                    root.strength.age = Some(10);
                     root.update(cx, |session| {
                         session.workspace = Workspace::Advanced;
                         session.tool = Some("Satapati name wheel");
@@ -509,10 +509,10 @@ pub(crate) fn run(
             draw(cx);
             window
                 .update(cx, |root, _, _| {
-                    root.satapati_lagna = None;
+                    root.name_wheel.satapati_lagna = None;
                     root.kp_horary = None;
-                    root.interpretation = Interpretation::Period;
-                    root.strength_age = None;
+                    root.interpretations.kind = Interpretation::Period;
+                    root.strength.age = None;
                 })
                 .expect("reset advanced interactive states");
             println!("Verified premium interactive states");
@@ -533,7 +533,7 @@ pub(crate) fn run(
                     .timer(std::time::Duration::from_millis(100))
                     .await;
                 monthly_checked = window
-                    .update(cx, |root, _, _| match root.ephemeris_month.as_ref() {
+                    .update(cx, |root, _, _| match root.ephemeris.month.as_ref() {
                         Some(Ok(month)) => {
                             assert_eq!(month.title, "February 2024");
                             assert_eq!(month.rows.len(), 29);
@@ -580,7 +580,7 @@ pub(crate) fn run(
                     .await;
                 analyses_checked = window
                     .update(cx, |root, _, _| {
-                        match (&root.transit_report, &root.strength_report) {
+                        match (&root.transits.report, &root.strength.report) {
                             (Some(Ok(transits)), Some(Ok(strength))) => {
                                 assert!(
                                     transits
@@ -636,12 +636,12 @@ pub(crate) fn run(
                     root.toggle_circular_detail(cx);
                     assert!(!root.circular_detail);
                     root.open_chart_lightbox(LightboxTarget::ActiveChart, cx);
-                    assert_eq!(root.chart_lightbox, Some(LightboxTarget::ActiveChart));
+                    assert_eq!(root.lightbox.target, Some(LightboxTarget::ActiveChart));
                     root.set_lightbox_zoom(2.25, cx);
-                    assert_eq!(root.lightbox_zoom, 2.25);
+                    assert_eq!(root.lightbox.zoom, 2.25);
                     root.close_chart_lightbox(cx);
-                    assert!(root.chart_lightbox.is_none());
-                    assert_eq!(root.lightbox_zoom, 1.);
+                    assert!(root.lightbox.target.is_none());
+                    assert_eq!(root.lightbox.zoom, 1.);
                 })
                 .expect("close circular chart detail");
             println!("Verified circular chart detail navigation");
@@ -799,7 +799,7 @@ pub(crate) fn run(
             window
                 .update(cx, |root, window, cx| {
                     root.select_mode("Rahu wheel", cx);
-                    root.rahu_reference = RahuReference::Moon;
+                    root.rahu.reference = RahuReference::Moon;
                     window.refresh();
                 })
                 .expect("capture compact Rahu with Moon reference");
@@ -808,8 +808,8 @@ pub(crate) fn run(
             wait(700).await;
             window
                 .update(cx, |root, window, cx| {
-                    root.rahu_28 = true;
-                    root.rahu_reference = RahuReference::Manual;
+                    root.rahu.divisions_28 = true;
+                    root.rahu.reference = RahuReference::Manual;
                     root.step_rahu_mansion(1, cx);
                     root.open_chart_lightbox(LightboxTarget::ActiveChart, cx);
                     window.refresh();

@@ -630,7 +630,7 @@ impl Element for TextElement {
         let style = window.text_style();
 
         let (display_text, text_color) = if content.is_empty() {
-            (input.placeholder.clone(), rgb(0x686053).into())
+            (input.placeholder.clone(), rgb(crate::MUTED).into())
         } else {
             (content, style.color)
         };
@@ -700,7 +700,7 @@ impl Element for TextElement {
                             bounds.bottom(),
                         ),
                     ),
-                    rgba(0x8b6b2e45),
+                    rgba(crate::SELECTION_BG),
                 )),
                 None,
             )
@@ -785,8 +785,8 @@ impl Render for TextInput {
             .on_mouse_up_out(MouseButton::Left, cx.listener(Self::on_mouse_up))
             .on_mouse_move(cx.listener(Self::on_mouse_move))
             .border_1()
-            .border_color(rgb(0xd9cdbb))
-            .focus(|style| style.border_color(rgb(0x7c5b21)))
+            .border_color(rgb(crate::LINE))
+            .focus(|style| style.border_color(rgb(crate::GOLD)))
             .rounded(px(5.))
             .overflow_hidden()
             .line_height(px(24.))

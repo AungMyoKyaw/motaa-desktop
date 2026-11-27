@@ -186,6 +186,65 @@ pub(crate) enum LightboxTarget {
     ComparisonSplit(usize),
 }
 
+struct LightboxState {
+    target: Option<LightboxTarget>,
+    zoom: f32,
+    scroll: gpui::ScrollHandle,
+    drag: Option<(gpui::Point<gpui::Pixels>, gpui::Point<gpui::Pixels>)>,
+}
+
+struct RahuState {
+    divisions_28: bool,
+    reference: RahuReference,
+    manual_input: Entity<TextInput>,
+    manual_angle: Option<f64>,
+}
+
+struct EphemerisState {
+    month: Option<Result<EphemerisMonth, String>>,
+    progress: bool,
+    request_id: u64,
+}
+
+struct TransitState {
+    report: Option<Result<transits::Report, String>>,
+    searching: bool,
+    filter: TransitFilter,
+}
+
+struct StrengthState {
+    body: usize,
+    pending: bool,
+    report: Option<Result<strength_timeline::Timeline, String>>,
+    age: Option<u8>,
+}
+
+struct EclipseState {
+    lunar: bool,
+    visible_only: bool,
+    selection: Option<f64>,
+}
+
+struct VedhaState {
+    body: usize,
+    transit: bool,
+    abhijit: bool,
+}
+
+struct InterpretationState {
+    kind: Interpretation,
+    body: usize,
+    bhava: bool,
+    transit: bool,
+}
+
+struct NameWheelState {
+    reference: Entity<TextInput>,
+    matches: Vec<usize>,
+    sector: Option<usize>,
+    satapati_lagna: Option<usize>,
+}
+
 struct DesktopRoot {
     session: Entity<WorkspaceSession>,
     focus: FocusHandle,
@@ -218,50 +277,27 @@ struct DesktopRoot {
     chart_scroll: gpui::ScrollHandle,
     chart_drag: Option<(gpui::Point<gpui::Pixels>, gpui::Point<gpui::Pixels>)>,
     chart_press_origin: Option<gpui::Point<gpui::Pixels>>,
-    chart_lightbox: Option<LightboxTarget>,
-    lightbox_zoom: f32,
-    lightbox_scroll: gpui::ScrollHandle,
-    lightbox_drag: Option<(gpui::Point<gpui::Pixels>, gpui::Point<gpui::Pixels>)>,
+    lightbox: LightboxState,
     scrub_offset: i32,
     scrub_dragging: bool,
     dasha_major: Option<usize>,
     dasha_sub: Option<usize>,
     all_strengths: bool,
-    rahu_28: bool,
-    rahu_reference: RahuReference,
-    rahu_manual_input: Entity<TextInput>,
-    rahu_manual_angle: Option<f64>,
+    rahu: RahuState,
     sky_rotation: f64,
     tara_from_ascendant: bool,
-    vedha_body: usize,
-    vedha_transit: bool,
-    vedha_abhijit: bool,
+    vedha: VedhaState,
     selected_varga: varga::Varga,
-    name_reference: Entity<TextInput>,
-    name_matches: Vec<usize>,
-    name_sector: Option<usize>,
-    transit_report: Option<Result<transits::Report, String>>,
-    transit_searching: bool,
-    transit_filter: TransitFilter,
-    eclipse_lunar: bool,
-    eclipse_visible_only: bool,
-    eclipse_selection: Option<f64>,
-    strength_body: usize,
-    strength_pending: bool,
-    strength_report: Option<Result<strength_timeline::Timeline, String>>,
+    name_wheel: NameWheelState,
+    transits: TransitState,
+    eclipses: EclipseState,
+    strength: StrengthState,
     candidate_inputs: [Entity<TextInput>; 3],
     candidate_pickers: [datetime_picker::DateTimePicker; 3],
     candidate_rows: Option<Vec<[String; 5]>>,
-    interpretation: Interpretation,
-    interpretation_body: usize,
-    interpretation_bhava: bool,
-    interpretation_transit: bool,
-    satapati_lagna: Option<usize>,
+    interpretations: InterpretationState,
     kp_horary: Option<usize>,
-    strength_age: Option<u8>,
-    ephemeris_month: Option<Result<EphemerisMonth, String>>,
-    ephemeris_progress: bool,
-    ephemeris_request_id: u64,
+    ephemeris: EphemerisState,
     towns: TownDirectory,
     tile_cache: std::collections::HashMap<(u8, u32, u32), location_picker::TileState>,
 }
@@ -412,6 +448,21 @@ fn button(
         .into_any_element()
 }
 
+fn pill_control(
+    id: impl Into<gpui::ElementId>,
+    radius: f32,
+    text_size: f32,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
+) -> gpui::Stateful<Div> {
+    action_control(id, cx, action)
+        .px(px(10.))
+        .h(px(26.))
+        .justify_center()
+        .rounded(px(radius))
+        .text_size(px(text_size))
+}
+
 fn compact_button(
     id: impl Into<gpui::ElementId>,
     label: impl Into<gpui::SharedString>,
@@ -419,12 +470,7 @@ fn compact_button(
     cx: &mut Context<DesktopRoot>,
     action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
 ) -> AnyElement {
-    action_control(id, cx, action)
-        .px(px(10.))
-        .h(px(26.))
-        .justify_center()
-        .rounded(px(RADIUS_CONTROL))
-        .text_size(px(12.))
+    pill_control(id, RADIUS_CONTROL, 12., cx, action)
         .font_weight(gpui::FontWeight::MEDIUM)
         .border_1()
         .border_color(rgb(if active { GOLD } else { LINE }))
@@ -434,6 +480,135 @@ fn compact_button(
         .hover(|style| style.bg(rgb(if active { ACTION_HOVER } else { SOFT })))
         .active(|style| style.bg(rgb(if active { ACTION_PRESSED } else { SELECTED })))
         .child(label.into())
+        .into_any_element()
+}
+
+pub(crate) fn icon_compact_button(
+    id: impl Into<gpui::ElementId>,
+    icon_path: &'static str,
+    icon_size: f32,
+    label: impl Into<gpui::SharedString>,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
+) -> AnyElement {
+    pill_control(id, RADIUS_CONTROL, 12., cx, action)
+        .gap(px(6.))
+        .font_weight(gpui::FontWeight::MEDIUM)
+        .border_1()
+        .border_color(rgb(LINE))
+        .bg(rgb(PAPER))
+        .text_color(rgb(INK))
+        .shadow(pill_shadow())
+        .hover(|s| s.bg(rgb(SOFT)))
+        .child(ui_icon(icon_path, icon_size, MUTED))
+        .child(label.into())
+        .into_any_element()
+}
+
+pub(crate) fn anchored_popover(
+    id: impl Into<gpui::ElementId>,
+    anchor: gpui::Corner,
+    width: f32,
+    content: impl FnOnce(gpui::Stateful<Div>) -> gpui::Stateful<Div>,
+) -> AnyElement {
+    let container = div()
+        .id(id)
+        .occlude()
+        .mt(px(4.))
+        .w(px(width))
+        .p(px(5.))
+        .rounded(px(10.))
+        .bg(rgb(PAPER))
+        .border_1()
+        .border_color(rgb(LINE))
+        .shadow(popover_shadow())
+        .flex()
+        .flex_col()
+        .gap(px(1.))
+        .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
+        .on_click(|_, _, cx| cx.stop_propagation());
+    gpui::deferred(
+        gpui::anchored()
+            .anchor(anchor)
+            .snap_to_window_with_margin(px(12.))
+            .child(content(container)),
+    )
+    .with_priority(1)
+    .into_any_element()
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn modal_dialog(
+    backdrop_id: &'static str,
+    dialog_id: &'static str,
+    width: f32,
+    max_height: Option<f32>,
+    title: impl Into<gpui::SharedString>,
+    subtitle: impl Into<gpui::SharedString>,
+    close_label: &'static str,
+    body: AnyElement,
+    cx: &mut Context<DesktopRoot>,
+    on_close: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
+) -> AnyElement {
+    let on_close = Rc::new(on_close);
+    let on_escape = on_close.clone();
+    let mut dialog = div()
+        .id(dialog_id)
+        .w(px(width))
+        .max_w_full()
+        .when_some(max_height, |el, mh| el.max_h(px(mh)).overflow_y_scroll())
+        .bg(rgb(PAPER))
+        .rounded(px(12.))
+        .border_1()
+        .border_color(rgb(LINE))
+        .shadow_lg()
+        .p_5()
+        .flex()
+        .flex_col()
+        .gap_3()
+        .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
+        .on_click(|_, _, cx| cx.stop_propagation())
+        .on_key_down(cx.listener(move |root, event: &gpui::KeyDownEvent, _, cx| {
+            if event.keystroke.key == "escape" {
+                on_escape(root, cx);
+                cx.stop_propagation();
+                cx.notify();
+            }
+        }))
+        .child(
+            row()
+                .justify_between()
+                .items_center()
+                .child(
+                    column()
+                        .gap_0()
+                        .child(
+                            div()
+                                .text_size(px(16.))
+                                .font_weight(gpui::FontWeight::SEMIBOLD)
+                                .text_color(rgb(INK))
+                                .child(title.into()),
+                        )
+                        .child(caption(subtitle.into())),
+                )
+                .child(button(close_label, true, cx, move |root, cx| {
+                    on_close(root, cx);
+                    cx.notify();
+                })),
+        );
+    dialog = dialog.child(body);
+    div()
+        .id(backdrop_id)
+        .occlude()
+        .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
+        .absolute()
+        .inset_0()
+        .bg(gpui::rgba(BACKDROP))
+        .flex()
+        .items_center()
+        .justify_center()
+        .p_6()
+        .child(dialog)
         .into_any_element()
 }
 
@@ -464,12 +639,7 @@ fn mode_pill(
     cx: &mut Context<DesktopRoot>,
     action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
 ) -> AnyElement {
-    action_control(id, cx, action)
-        .px(px(10.))
-        .h(px(26.))
-        .justify_center()
-        .rounded(px(6.))
-        .text_size(px(12.5))
+    pill_control(id, 6., 12.5, cx, action)
         .font_weight(if active {
             gpui::FontWeight::SEMIBOLD
         } else {
@@ -661,7 +831,7 @@ fn directory_link(
         .px_2()
         .h(px(39.))
         .border_b_1()
-        .border_color(rgb(0xeae5dc))
+        .border_color(rgb(SUBTLE_LINE))
         .hover(|item| item.bg(rgb(SELECTED)))
         .child(label)
         .child(caption("→"))
@@ -737,50 +907,68 @@ impl DesktopRoot {
             chart_scroll: gpui::ScrollHandle::new(),
             chart_drag: None,
             chart_press_origin: None,
-            chart_lightbox: None,
-            lightbox_zoom: 1.,
-            lightbox_scroll: gpui::ScrollHandle::new(),
-            lightbox_drag: None,
+            lightbox: LightboxState {
+                target: None,
+                zoom: 1.,
+                scroll: gpui::ScrollHandle::new(),
+                drag: None,
+            },
             scrub_offset: 0,
             scrub_dragging: false,
             dasha_major: None,
             dasha_sub: None,
             all_strengths: false,
-            rahu_28: false,
-            rahu_reference: RahuReference::Node,
-            rahu_manual_input: text_input("", "Longitude 0° to <360°", cx),
-            rahu_manual_angle: None,
+            rahu: RahuState {
+                divisions_28: false,
+                reference: RahuReference::Node,
+                manual_input: text_input("", "Longitude 0° to <360°", cx),
+                manual_angle: None,
+            },
             sky_rotation: 0.,
             tara_from_ascendant: false,
-            vedha_body: 2,
-            vedha_transit: true,
-            vedha_abhijit: true,
+            vedha: VedhaState {
+                body: 2,
+                transit: true,
+                abhijit: true,
+            },
             selected_varga: varga::Varga::Navamsa,
-            name_reference: text_input("", "Myanmar syllable", cx),
-            name_matches: Vec::new(),
-            name_sector: None,
-            transit_report: None,
-            transit_searching: false,
-            transit_filter: TransitFilter::All,
-            eclipse_lunar: false,
-            eclipse_visible_only: false,
-            eclipse_selection: None,
-            strength_body: 2,
-            strength_pending: false,
-            strength_report: None,
+            name_wheel: NameWheelState {
+                reference: text_input("", "Myanmar syllable", cx),
+                matches: Vec::new(),
+                sector: None,
+                satapati_lagna: None,
+            },
+            transits: TransitState {
+                report: None,
+                searching: false,
+                filter: TransitFilter::All,
+            },
+            eclipses: EclipseState {
+                lunar: false,
+                visible_only: false,
+                selection: None,
+            },
+            strength: StrengthState {
+                body: 2,
+                pending: false,
+                report: None,
+                age: None,
+            },
             candidate_inputs,
             candidate_pickers,
             candidate_rows: None,
-            interpretation: Interpretation::Period,
-            interpretation_body: 2,
-            interpretation_bhava: false,
-            interpretation_transit: false,
-            satapati_lagna: None,
+            interpretations: InterpretationState {
+                kind: Interpretation::Period,
+                body: 2,
+                bhava: false,
+                transit: false,
+            },
             kp_horary: None,
-            strength_age: None,
-            ephemeris_month: None,
-            ephemeris_progress: false,
-            ephemeris_request_id: 0,
+            ephemeris: EphemerisState {
+                month: None,
+                progress: false,
+                request_id: 0,
+            },
             towns: serde_json::from_str(include_str!("../design/source/locations.v31.1.json"))
                 .expect("bundled MOTAA town directory"),
             tile_cache: std::collections::HashMap::new(),
@@ -797,7 +985,7 @@ impl DesktopRoot {
     fn navigate(&mut self, route: Workspace, cx: &mut Context<Self>) {
         let was_editing_profile = std::mem::take(&mut self.show_profile_editor);
         self.delete_confirmation = None;
-        self.chart_lightbox = None;
+        self.lightbox.target = None;
         self.update(cx, |session| {
             if session.workspace != route || was_editing_profile {
                 session.status.clear();
@@ -929,7 +1117,7 @@ impl DesktopRoot {
     fn select_mode(&mut self, mode: &'static str, cx: &mut Context<Self>) {
         self.show_modes = false;
         self.circular_detail = false;
-        self.chart_lightbox = None;
+        self.lightbox.target = None;
         self.chart_zoom = 1.;
         self.chart_scroll.set_offset(gpui::point(px(0.), px(0.)));
         self.chart_drag = None;
@@ -971,59 +1159,36 @@ impl DesktopRoot {
 
     fn mode_buttons_popover(&self, cx: &mut Context<Self>) -> AnyElement {
         let active = self.session.read(cx).mode;
-        gpui::deferred(
-            gpui::anchored()
-                .anchor(gpui::Corner::TopLeft)
-                .snap_to_window_with_margin(px(12.))
-                .child(
-                    div()
-                        .id("more-modes-popover")
-                        .occlude()
-                        .mt(px(4.))
-                        .w(px(216.))
-                        .p(px(5.))
-                        .rounded(px(10.))
-                        .bg(rgb(PAPER))
-                        .border_1()
-                        .border_color(rgb(LINE))
-                        .shadow(popover_shadow())
-                        .flex()
-                        .flex_col()
-                        .gap(px(1.))
-                        .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
-                        .on_click(|_, _, cx| cx.stop_propagation())
-                        .children(
-                            MODES
-                                .into_iter()
-                                .filter(|mode| {
-                                    !matches!(
-                                        *mode,
-                                        "Rasi"
-                                            | "Tricakka"
-                                            | "Circular chart"
-                                            | "Dasha periods"
-                                            | "Natal + transit"
-                                            | "Rahu wheel"
-                                    )
-                                })
-                                .enumerate()
-                                .map(|(idx, mode)| {
-                                    menu_item(
-                                        ("extra-mode", idx),
-                                        mode,
-                                        active == mode,
-                                        cx,
-                                        move |view, cx| {
-                                            view.show_modes = false;
-                                            view.select_mode(mode, cx);
-                                        },
-                                    )
-                                }),
-                        ),
-                ),
-        )
-        .with_priority(1)
-        .into_any_element()
+        anchored_popover("more-modes-popover", gpui::Corner::TopLeft, 216., |menu| {
+            menu.children(
+                MODES
+                    .into_iter()
+                    .filter(|mode| {
+                        !matches!(
+                            *mode,
+                            "Rasi"
+                                | "Tricakka"
+                                | "Circular chart"
+                                | "Dasha periods"
+                                | "Natal + transit"
+                                | "Rahu wheel"
+                        )
+                    })
+                    .enumerate()
+                    .map(|(idx, mode)| {
+                        menu_item(
+                            ("extra-mode", idx),
+                            mode,
+                            active == mode,
+                            cx,
+                            move |view, cx| {
+                                view.show_modes = false;
+                                view.select_mode(mode, cx);
+                            },
+                        )
+                    }),
+            )
+        })
     }
 
     fn profile_edit_save_buttons(&self, cx: &mut Context<Self>) -> Div {
@@ -1328,7 +1493,7 @@ impl Render for DesktopRoot {
                         .when(!collapsed, |btn| btn.child(caption("Collapse"))),
                     ),
             );
-        let lightbox_open = self.chart_lightbox.is_some();
+        let lightbox_open = self.lightbox.target.is_some();
         let viewport_w = f32::from(window.viewport_size().width);
         let show_inspector = self.inspector_open
             && !lightbox_open
@@ -1372,7 +1537,7 @@ impl Render for DesktopRoot {
             )
             .on_key_down(cx.listener(|view, event: &gpui::KeyDownEvent, _, cx| {
                 if event.keystroke.key.as_str() == "escape"
-                    && view.chart_lightbox.is_none()
+                    && view.lightbox.target.is_none()
                     && (view.selected.is_some() || view.show_modes)
                 {
                     view.selected = None;
@@ -1382,7 +1547,7 @@ impl Render for DesktopRoot {
                     cx.notify();
                     return;
                 }
-                if view.chart_lightbox.is_none() {
+                if view.lightbox.target.is_none() {
                     return;
                 }
                 match event.keystroke.key.as_str() {
@@ -1391,11 +1556,11 @@ impl Render for DesktopRoot {
                         cx.stop_propagation();
                     }
                     "=" | "+" => {
-                        view.set_lightbox_zoom(view.lightbox_zoom + 0.25, cx);
+                        view.set_lightbox_zoom(view.lightbox.zoom + 0.25, cx);
                         cx.stop_propagation();
                     }
                     "-" => {
-                        view.set_lightbox_zoom(view.lightbox_zoom - 0.25, cx);
+                        view.set_lightbox_zoom(view.lightbox.zoom - 0.25, cx);
                         cx.stop_propagation();
                     }
                     "0" => {
@@ -1669,7 +1834,7 @@ impl Render for DesktopRoot {
                         )
                     }),
             )
-            .when_some(self.chart_lightbox, |root, target| {
+            .when_some(self.lightbox.target, |root, target| {
                 root.child(self.chart_lightbox_overlay(target, window, cx))
             })
             .when_some(self.active_map_popup(), |root, reference| {
@@ -1695,37 +1860,22 @@ impl Render for DesktopRoot {
 
 impl DesktopRoot {
     pub(crate) fn birth_details_button(&self, cx: &mut Context<Self>) -> AnyElement {
-        action_control("header-birth-details", cx, |view, _| {
-            view.show_birth = !view.show_birth;
-        })
-        .h(px(26.))
-        .px(px(10.))
-        .gap(px(6.))
-        .justify_center()
-        .rounded(px(RADIUS_CONTROL))
-        .border_1()
-        .border_color(rgb(LINE))
-        .bg(rgb(PAPER))
-        .shadow(pill_shadow())
-        .text_size(px(12.))
-        .font_weight(gpui::FontWeight::MEDIUM)
-        .text_color(rgb(INK))
-        .hover(|s| s.bg(rgb(SOFT)))
-        .child(ui_icon(
+        icon_compact_button(
+            "header-birth-details",
             if self.show_birth {
                 "ui/eye-off"
             } else {
                 "ui/eye"
             },
             13.5,
-            MUTED,
-        ))
-        .child(if self.show_birth {
-            "Hide birth details"
-        } else {
-            "Show birth details"
-        })
-        .into_any_element()
+            if self.show_birth {
+                "Hide birth details"
+            } else {
+                "Show birth details"
+            },
+            cx,
+            |view, _| view.show_birth = !view.show_birth,
+        )
     }
 }
 
@@ -1757,7 +1907,7 @@ fn settings_strip(settings: Settings) -> Div {
         .gap_12()
         .px_3()
         .py_2()
-        .bg(rgb(0xf6f1e8))
+        .bg(rgb(SOFT))
         .rounded(px(5.))
         .children(
             [
@@ -2048,9 +2198,9 @@ fn main() {
                             continue;
                         }
                         let _ = window.update(cx, |root, _, cx| {
-                            if root.chart_lightbox.is_some() {
+                            if root.lightbox.target.is_some() {
                                 let factor = (1. + total as f32).clamp(0.5, 2.0);
-                                root.set_lightbox_zoom(root.lightbox_zoom * factor, cx);
+                                root.set_lightbox_zoom(root.lightbox.zoom * factor, cx);
                             }
                         });
                     }

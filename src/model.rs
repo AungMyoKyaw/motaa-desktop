@@ -386,7 +386,7 @@ pub fn julian_at(profile: &ChartRequest, time: DateTime) -> Result<f64, String> 
     Ok(midnight + f64::from(seconds_from_midnight) / 86_400. - f64::from(offset) / 1440.)
 }
 
-pub fn reference_datetime(profile: &ChartRequest, jdut: f64) -> Option<DateTime> {
+fn reference_zoned(profile: &ChartRequest, jdut: f64) -> Option<(Timestamp, TimeZone)> {
     if !jdut.is_finite() {
         return None;
     }
@@ -399,22 +399,16 @@ pub fn reference_datetime(profile: &ChartRequest, jdut: f64) -> Option<DateTime>
             Offset::from_seconds(profile.timezone_offset_minutes.checked_mul(60)?).ok()?,
         )
     };
+    Some((time, tz))
+}
+
+pub fn reference_datetime(profile: &ChartRequest, jdut: f64) -> Option<DateTime> {
+    let (time, tz) = reference_zoned(profile, jdut)?;
     Some(tz.to_datetime(time))
 }
 
 pub fn display_reference_time(profile: &ChartRequest, jdut: f64) -> Option<String> {
-    if !jdut.is_finite() {
-        return None;
-    }
-    let seconds = ((jdut - 2_440_587.5) * 86_400.).round() as i64;
-    let time = Timestamp::from_second(seconds).ok()?;
-    let tz = if let Some(zone) = profile.timezone_id.as_deref() {
-        TimeZone::get(zone).ok()?
-    } else {
-        TimeZone::fixed(
-            Offset::from_seconds(profile.timezone_offset_minutes.checked_mul(60)?).ok()?,
-        )
-    };
+    let (time, tz) = reference_zoned(profile, jdut)?;
     let dt = tz.to_datetime(time);
     let offset_secs = tz.to_offset(time).seconds();
     let sign = if offset_secs < 0 { '-' } else { '+' };

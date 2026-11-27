@@ -42,25 +42,25 @@ impl Projection {
         let plot = div()
             .relative()
             .size(px(side))
-            .bg(rgb(0xfffefc))
+            .bg(rgb(crate::PAPER))
             .overflow_hidden();
         let grid = (0..72).map(|tick| {
             let [x, y, _] = self.point(f64::from(tick) * 5., 0.);
             marker(x, y, side)
                 .size(px(3.))
                 .rounded_full()
-                .bg(rgb(0xd9cdbb))
+                .bg(rgb(crate::LINE))
         });
         let nodes = vertices.into_iter().map(|(name, [x, y, _])| {
             marker(x, y, side)
                 .flex()
                 .items_center()
                 .gap_1()
-                .child(div().size(px(7.)).rounded_full().bg(rgb(0x7c5b21)))
+                .child(div().size(px(7.)).rounded_full().bg(rgb(crate::GOLD)))
                 .child(
                     div()
                         .text_size(px(11.))
-                        .bg(rgb(0xfffefc))
+                        .bg(rgb(crate::PAPER))
                         .child(name.to_owned()),
                 )
         });

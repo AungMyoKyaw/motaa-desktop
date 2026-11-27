@@ -9,39 +9,40 @@ impl DesktopRoot {
     }
 
     pub(super) fn open_chart_lightbox(&mut self, target: LightboxTarget, cx: &mut Context<Self>) {
-        self.chart_lightbox = Some(target);
-        self.lightbox_zoom = 1.;
-        self.lightbox_scroll.set_offset(gpui::point(px(0.), px(0.)));
-        self.lightbox_drag = None;
+        self.lightbox.target = Some(target);
+        self.lightbox.zoom = 1.;
+        self.lightbox.scroll.set_offset(gpui::point(px(0.), px(0.)));
+        self.lightbox.drag = None;
         cx.notify();
     }
 
     pub(super) fn close_chart_lightbox(&mut self, cx: &mut Context<Self>) {
-        self.chart_lightbox = None;
-        self.lightbox_zoom = 1.;
-        self.lightbox_scroll.set_offset(gpui::point(px(0.), px(0.)));
-        self.lightbox_drag = None;
+        self.lightbox.target = None;
+        self.lightbox.zoom = 1.;
+        self.lightbox.scroll.set_offset(gpui::point(px(0.), px(0.)));
+        self.lightbox.drag = None;
         cx.notify();
     }
 
     pub(super) fn set_lightbox_zoom(&mut self, zoom: f32, cx: &mut Context<Self>) {
-        let old_zoom = self.lightbox_zoom;
+        let old_zoom = self.lightbox.zoom;
         let new_zoom = zoom.clamp(0.75, 4.);
         if (new_zoom - old_zoom).abs() < 0.0001 {
             return;
         }
-        self.lightbox_zoom = new_zoom;
+        self.lightbox.zoom = new_zoom;
         if new_zoom <= 1. {
-            self.lightbox_scroll.set_offset(gpui::point(px(0.), px(0.)));
+            self.lightbox.scroll.set_offset(gpui::point(px(0.), px(0.)));
         } else {
             let ratio = new_zoom / old_zoom;
-            let offset = self.lightbox_scroll.offset();
-            let bounds = self.lightbox_scroll.bounds();
+            let offset = self.lightbox.scroll.offset();
+            let bounds = self.lightbox.scroll.bounds();
             let half_w = f32::from(bounds.size.width) * 0.5;
             let half_h = f32::from(bounds.size.height) * 0.5;
             let next_x = (f32::from(offset.x) - half_w) * ratio + half_w;
             let next_y = (f32::from(offset.y) - half_h) * ratio + half_h;
-            self.lightbox_scroll
+            self.lightbox
+                .scroll
                 .set_offset(gpui::point(px(next_x.min(0.)), px(next_y.min(0.))));
         }
         cx.notify();
@@ -62,7 +63,7 @@ impl DesktopRoot {
         let avail_w = (f32::from(viewport.width) - 88.).max(320.);
         let avail_h = (f32::from(viewport.height) - 160.).max(320.);
         let base_side = avail_w.min(avail_h);
-        let zoom = self.lightbox_zoom;
+        let zoom = self.lightbox.zoom;
         let zoomed_side = base_side * zoom;
         let pad = 32.;
         let min_x = px(-(zoomed_side + pad - avail_w).max(0.));
@@ -103,7 +104,7 @@ impl DesktopRoot {
         } else {
             format!("{title} — {profile_name} ({mode})")
         };
-        let scroll = self.lightbox_scroll.clone();
+        let scroll = self.lightbox.scroll.clone();
 
         div()
             .id("chart-lightbox-backdrop")
@@ -150,7 +151,7 @@ impl DesktopRoot {
                                 row()
                                     .gap_2()
                                     .child(button("−", false, cx, |root, cx| {
-                                        root.set_lightbox_zoom(root.lightbox_zoom - 0.25, cx);
+                                        root.set_lightbox_zoom(root.lightbox.zoom - 0.25, cx);
                                     }))
                                     .child(button(
                                         format!("{:.0}%", zoom * 100.),
@@ -159,7 +160,7 @@ impl DesktopRoot {
                                         |root, cx| root.set_lightbox_zoom(1., cx),
                                     ))
                                     .child(button("+", false, cx, |root, cx| {
-                                        root.set_lightbox_zoom(root.lightbox_zoom + 0.25, cx);
+                                        root.set_lightbox_zoom(root.lightbox.zoom + 0.25, cx);
                                     }))
                                     .child(button("Close", true, cx, |root, cx| {
                                         root.close_chart_lightbox(cx);
@@ -191,17 +192,17 @@ impl DesktopRoot {
                                         };
                                         if dy.abs() > 0.001 {
                                             let factor = (1. + dy).clamp(0.5, 2.0);
-                                            root.set_lightbox_zoom(root.lightbox_zoom * factor, cx);
+                                            root.set_lightbox_zoom(root.lightbox.zoom * factor, cx);
                                         }
                                     } else {
                                         let delta = event.delta.pixel_delta(window.line_height());
-                                        let current = root.lightbox_scroll.offset();
+                                        let current = root.lightbox.scroll.offset();
                                         let clamped = point(
                                             (current.x + delta.x).clamp(min_x, px(0.)),
                                             (current.y + delta.y).clamp(min_y, px(0.)),
                                         );
                                         if clamped != current {
-                                            root.lightbox_scroll.set_offset(clamped);
+                                            root.lightbox.scroll.set_offset(clamped);
                                             cx.notify();
                                         }
                                     }
@@ -211,14 +212,14 @@ impl DesktopRoot {
                             .on_mouse_down(
                                 MouseButton::Left,
                                 cx.listener(|root, event: &MouseDownEvent, _, cx| {
-                                    root.lightbox_drag =
-                                        Some((event.position, root.lightbox_scroll.offset()));
+                                    root.lightbox.drag =
+                                        Some((event.position, root.lightbox.scroll.offset()));
                                     cx.stop_propagation();
                                 }),
                             )
                             .on_mouse_move(cx.listener(
                                 move |root, event: &MouseMoveEvent, window, _| {
-                                    if let Some((start, offset)) = root.lightbox_drag
+                                    if let Some((start, offset)) = root.lightbox.drag
                                         && event.pressed_button == Some(MouseButton::Left)
                                     {
                                         let clamped = point(
@@ -227,8 +228,8 @@ impl DesktopRoot {
                                             (offset.y + (event.position.y - start.y))
                                                 .clamp(min_y, px(0.)),
                                         );
-                                        if clamped != root.lightbox_scroll.offset() {
-                                            root.lightbox_scroll.set_offset(clamped);
+                                        if clamped != root.lightbox.scroll.offset() {
+                                            root.lightbox.scroll.set_offset(clamped);
                                             window.refresh();
                                         }
                                     }
@@ -237,13 +238,13 @@ impl DesktopRoot {
                             .on_mouse_up(
                                 MouseButton::Left,
                                 cx.listener(|root, _: &MouseUpEvent, _, _| {
-                                    root.lightbox_drag = None;
+                                    root.lightbox.drag = None;
                                 }),
                             )
                             .on_mouse_up_out(
                                 MouseButton::Left,
                                 cx.listener(|root, _: &MouseUpEvent, _, _| {
-                                    root.lightbox_drag = None;
+                                    root.lightbox.drag = None;
                                 }),
                             )
                             .child(
@@ -586,25 +587,16 @@ impl DesktopRoot {
                             ))
                         })
                         .when(matches!(mode, "Rasi" | "Circular chart"), |toolbar| {
-                            toolbar.child(
-                                action_control("chart-full-view", cx, |view, cx| {
+                            toolbar.child(icon_compact_button(
+                                "chart-full-view",
+                                "ui/maximize",
+                                12.5,
+                                "Full view",
+                                cx,
+                                |view, cx| {
                                     view.open_chart_lightbox(LightboxTarget::ActiveChart, cx)
-                                })
-                                .h(px(26.))
-                                .px(px(10.))
-                                .gap(px(6.))
-                                .justify_center()
-                                .rounded(px(RADIUS_CONTROL))
-                                .border_1()
-                                .border_color(rgb(LINE))
-                                .bg(rgb(PAPER))
-                                .text_size(px(12.))
-                                .font_weight(gpui::FontWeight::MEDIUM)
-                                .text_color(rgb(INK))
-                                .hover(|s| s.bg(rgb(SOFT)))
-                                .child(ui_icon("ui/maximize", 12.5, MUTED))
-                                .child("Full view"),
-                            )
+                                },
+                            ))
                         })
                         .child(compact_button(
                             "chart-compact-toggle",
@@ -624,7 +616,7 @@ impl DesktopRoot {
         let side = if mode == "Circular chart" && self.circular_detail {
             f32::from(viewport.width - px(500.)).clamp(380., 780.)
         } else if mode == "Rahu wheel" {
-            let controls_height = if self.rahu_reference == RahuReference::Manual {
+            let controls_height = if self.rahu.reference == RahuReference::Manual {
                 44.
             } else {
                 0.
@@ -1493,13 +1485,13 @@ impl DesktopRoot {
     }
 
     pub(super) fn step_rahu_mansion(&mut self, step: i32, cx: &mut Context<Self>) {
-        let mansion = self.rahu_manual_angle.map_or_else(
+        let mansion = self.rahu.manual_angle.map_or_else(
             || if step < 0 { 26 } else { 0 },
             |angle| (crate::tara::mansion(angle) as i32 + step).rem_euclid(27),
         );
         let angle = f64::from(mansion) * (360. / 27.) + 1.;
-        self.rahu_manual_angle = Some(angle);
-        self.rahu_manual_input.update(cx, |input, cx| {
+        self.rahu.manual_angle = Some(angle);
+        self.rahu.manual_input.update(cx, |input, cx| {
             input.set_value(format!("{angle:.9}"), cx);
         });
         self.set_status("", cx);
@@ -1513,13 +1505,13 @@ impl DesktopRoot {
     ) -> chart::ChartScene {
         let node =
             ephemeris.map(|value| value.lunar_nodes(settings.mean_node, settings.tropical)[0]);
-        let (reference_name, reference) = match self.rahu_reference {
+        let (reference_name, reference) = match self.rahu.reference {
             RahuReference::Node => ("Rahu", node),
             RahuReference::Moon => (
                 "Moon",
                 ephemeris.and_then(|value| value.longitude("Moon", settings.tropical)),
             ),
-            RahuReference::Manual => ("Manual", self.rahu_manual_angle),
+            RahuReference::Manual => ("Manual", self.rahu.manual_angle),
         };
         let labels = ephemeris
             .and_then(|planets| {
@@ -1539,7 +1531,7 @@ impl DesktopRoot {
             circular: true,
             color: GOLD,
             rahu: Some(chart::RahuWheel {
-                use_28: self.rahu_28,
+                use_28: self.rahu.divisions_28,
                 node,
                 sun: ephemeris.and_then(|value| value.longitude("Sun", settings.tropical)),
                 reference,
@@ -1581,7 +1573,7 @@ impl DesktopRoot {
                         ),
                     ))
             } else {
-                inspector.child(caption(match self.rahu_reference {
+                inspector.child(caption(match self.rahu.reference {
                 RahuReference::Manual => "Choose a mansion or apply a manual longitude.",
                 _ => "This chart has no reference position. Choose Manual to explore Jamma groups.",
             }))
@@ -1616,12 +1608,18 @@ impl DesktopRoot {
         column()
             .child(
                 row()
-                    .child(button("27 divisions", !self.rahu_28, cx, |view, _| {
-                        view.rahu_28 = false
-                    }))
-                    .child(button("28 divisions", self.rahu_28, cx, |view, _| {
-                        view.rahu_28 = true
-                    }))
+                    .child(button(
+                        "27 divisions",
+                        !self.rahu.divisions_28,
+                        cx,
+                        |view, _| view.rahu.divisions_28 = false,
+                    ))
+                    .child(button(
+                        "28 divisions",
+                        self.rahu.divisions_28,
+                        cx,
+                        |view, _| view.rahu.divisions_28 = true,
+                    ))
                     .children(
                         [
                             ("Rahu reference", RahuReference::Node),
@@ -1631,9 +1629,9 @@ impl DesktopRoot {
                         .map(|(name, reference)| {
                             button(
                                 name,
-                                self.rahu_reference == reference,
+                                self.rahu.reference == reference,
                                 cx,
-                                move |view, _| view.rahu_reference = reference,
+                                move |view, _| view.rahu.reference = reference,
                             )
                         }),
                     )
@@ -1642,9 +1640,10 @@ impl DesktopRoot {
                         view.open_chart_lightbox(LightboxTarget::ActiveChart, cx)
                     })),
             )
-            .when(self.rahu_reference == RahuReference::Manual, |view| {
+            .when(self.rahu.reference == RahuReference::Manual, |view| {
                 let mansion = self
-                    .rahu_manual_angle
+                    .rahu
+                    .manual_angle
                     .and_then(|angle| crate::name_wheel::mansion_name(crate::tara::mansion(angle)))
                     .unwrap_or("Choose a mansion");
                 view.child(
@@ -1657,17 +1656,18 @@ impl DesktopRoot {
                             view.step_rahu_mansion(1, cx)
                         }))
                         .child(div().flex_1())
-                        .child(div().w(px(130.)).child(self.rahu_manual_input.clone()))
+                        .child(div().w(px(130.)).child(self.rahu.manual_input.clone()))
                         .child(button("Apply longitude", true, cx, |view, cx| {
                             match view
-                                .rahu_manual_input
+                                .rahu
+                                .manual_input
                                 .read(cx)
                                 .value()
                                 .trim()
                                 .parse::<f64>()
                             {
                                 Ok(angle) if (0. ..360.).contains(&angle) => {
-                                    view.rahu_manual_angle = Some(angle);
+                                    view.rahu.manual_angle = Some(angle);
                                     view.set_status("", cx);
                                 }
                                 _ => view.set_status(

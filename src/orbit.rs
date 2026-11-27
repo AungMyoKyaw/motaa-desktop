@@ -35,7 +35,7 @@ pub fn render(ephemeris: &ReferenceEphemeris) -> Div {
                     sun.move_to(center - point(px(2.), px(0.)));
                     sun.line_to(center + point(px(2.), px(0.)));
                     if let Ok(path) = sun.build() {
-                        window.paint_path(path, rgb(0xaa6500));
+                        window.paint_path(path, rgb(crate::ORBIT_ACCENT));
                     }
                     for (index, color) in COLORS.into_iter().enumerate() {
                         let mut path = PathBuilder::stroke(px(1.5));

@@ -18,6 +18,14 @@ pub const SELECTED: u32 = 0xede0bf;
 
 pub const ERROR: u32 = 0xb42318;
 pub const ERROR_BG: u32 = 0xfef3f2;
+pub const BACKDROP: u32 = 0x28251f70;
+pub const BACKDROP_LIGHT: u32 = 0x28251f66;
+pub const BACKDROP_DARK: u32 = 0x1f1d1988;
+pub const WHITE: u32 = 0xffffff;
+pub const SCROLL_THUMB_MUTED: u32 = 0x68605366;
+pub const SELECTION_BG: u32 = 0x8b6b2e45;
+pub const TRANSPARENT: u32 = 0x00000000;
+pub const ORBIT_ACCENT: u32 = 0xaa6500;
 
 pub const RADIUS_CONTROL: f32 = 6.;
 pub const RADIUS_FIELD: f32 = 5.;
@@ -202,7 +210,7 @@ pub fn shortcut_keycap(label: impl Into<SharedString>) -> Div {
         .child(label.into())
 }
 
-pub fn vertical_scrollbar(handle: &gpui::ScrollHandle, track_height: f32) -> Div {
+fn scrollbar_metrics(handle: &gpui::ScrollHandle, track_height: f32) -> (f32, f32, f32) {
     let max_y = f32::from(handle.max_offset().height).max(0.0);
     let viewport_h = f32::from(handle.bounds().size.height).max(track_height);
     let scroll_y = (-f32::from(handle.offset().y)).clamp(0.0, max_y);
@@ -212,6 +220,11 @@ pub fn vertical_scrollbar(handle: &gpui::ScrollHandle, track_height: f32) -> Div
     } else {
         0.0
     };
+    (max_y, thumb_h, thumb_y)
+}
+
+pub fn vertical_scrollbar(handle: &gpui::ScrollHandle, track_height: f32) -> Div {
+    let (max_y, thumb_h, thumb_y) = scrollbar_metrics(handle, track_height);
     let mut track = div()
         .relative()
         .w(px(8.))
@@ -230,6 +243,24 @@ pub fn vertical_scrollbar(handle: &gpui::ScrollHandle, track_height: f32) -> Div
                 .h(px(thumb_h))
                 .rounded(px(3.))
                 .bg(rgb(MUTED)),
+        );
+    }
+    track
+}
+
+pub fn slim_vertical_scrollbar(handle: &gpui::ScrollHandle, track_height: f32) -> Div {
+    let (max_y, thumb_h, thumb_y) = scrollbar_metrics(handle, track_height);
+    let mut track = div().relative().w(px(6.)).h(px(track_height)).flex_none();
+    if max_y > 0.5 {
+        track = track.child(
+            div()
+                .absolute()
+                .left(px(1.))
+                .top(px(thumb_y))
+                .w(px(4.))
+                .h(px(thumb_h))
+                .rounded(px(2.))
+                .bg(rgba(SCROLL_THUMB_MUTED)),
         );
     }
     track

@@ -208,7 +208,7 @@ impl DesktopRoot {
             .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
             .absolute()
             .inset_0()
-            .bg(rgba(0x28251f66))
+            .bg(rgba(BACKDROP_LIGHT))
             .flex()
             .items_start()
             .justify_center()
