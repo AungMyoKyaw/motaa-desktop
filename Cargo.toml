@@ -1,6 +1,6 @@
 [package]
 name = "motaa-desktop"
-version = "0.2.4"
+version = "0.2.5"
 edition = "2024"
 description = "Offline-first Myanmar astrology desktop workspace built with Rust and GPUI"
 license = "AGPL-3.0-only"

@@ -2,6 +2,11 @@
 
 All notable changes to MOTAA Desktop are documented in this file.
 
+## [0.2.5] - 2026-11-28
+
+### Changed
+- **Architectural Burmese Zata App Icon**: Redesigned the `motaa-desktop` app icon around an engraved Burmese Zata (`ဇာတာ`) plate on warm ivory parchment (`824×824` Apple HIG continuous-curve squircle) with a flush-inset burnished antique-bronze center plaque and precision ivory astronomical origin reticle (`☉`), regenerated across macOS `.icns`, GPUI `256px` PNG, web favicon, and all Windows Store/MSIX assets.
+
 ## [0.2.4] - 2026-11-28
 
 ### Changed
