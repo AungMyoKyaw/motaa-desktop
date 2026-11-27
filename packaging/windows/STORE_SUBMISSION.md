@@ -10,10 +10,10 @@ This repository includes an MSIX manifest template, Store image assets, a packag
 ## 2. CI/CD Submission Bundle (`windows-store-submission`)
 The **Desktop Release** GitHub Actions workflow (`.github/workflows/release.yml`, triggered on `v*` tags or manual `workflow_dispatch`) builds and uploads a complete `windows-store-submission` artifact on `windows-2025`:
 
-- `motaa-desktop-v<version>-windows-x64.msix` — Desktop Bridge MSIX package (signed automatically by Microsoft Store during ingestion)
-- `screenshots/01-rasi-chart.png` .. `06-advanced-tools.png` — Genuine Windows-native screenshots (≥1366×768 PNG, native Windows titlebar, `Ctrl+` shortcuts, zero macOS UI)
-- `assets/StoreIcon300.png` — 300×300 Store icon
-- `SUBMISSION_MANIFEST.json` — Version, SHA-256 checksums, and screenshot dimensions
+- `motaa-desktop-v<version>-windows-x64.msix`: Desktop Bridge MSIX package (signed automatically by Microsoft Store during ingestion)
+- `screenshots/01-rasi-chart.png` .. `06-advanced-tools.png`: Genuine Windows-native screenshots (≥1366×768 PNG, native Windows titlebar, `Ctrl+` shortcuts, zero macOS UI)
+- `assets/StoreIcon300.png`: 300×300 Store icon
+- `SUBMISSION_MANIFEST.json`: Version, SHA-256 checksums, and screenshot dimensions
 
 To build locally on Windows:
 ```powershell
