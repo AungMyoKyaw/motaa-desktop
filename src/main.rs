@@ -567,7 +567,7 @@ impl DesktopRoot {
         );
         let initial_dt =
             parse_time(&timestamp).unwrap_or_else(|_| DateTime::constant(2000, 1, 1, 12, 0, 0, 0));
-        let picker = datetime_picker::DateTimePicker::new("profile-dt", initial_dt, true, cx);
+        let picker = datetime_picker::DateTimePicker::new("profile-dt", initial_dt, false, cx);
         let datetime = picker.datetime.clone();
         self.draft = Some(ProfileDraft {
             copy_from: None,
@@ -1269,6 +1269,9 @@ impl Render for DesktopRoot {
             })
             .when_some(self.active_town_popup(), |root, reference| {
                 root.child(self.town_picker_overlay(reference, cx))
+            })
+            .when_some(self.active_datetime_popup(), |root, target| {
+                root.child(self.datetime_picker_overlay(target, cx))
             })
             .when(self.palette_open, |root| {
                 root.child(self.palette_overlay(cx))

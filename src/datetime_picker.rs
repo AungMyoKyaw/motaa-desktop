@@ -463,11 +463,7 @@ impl DateTimePicker {
 
         header_actions = header_actions.child(small_action_button(
             (prefix, "toggle-open"),
-            if self.open {
-                "Hide calendar"
-            } else {
-                "Calendar & time picker"
-            },
+            "Calendar",
             self.open,
             cx,
             move |view, _| {
@@ -632,23 +628,12 @@ impl DateTimePicker {
                         .child(err),
                 )
             })
-            .when(self.open, |view| {
-                view.child(self.render_expanded_picker(
-                    current,
-                    unknown_time,
-                    on_toggle_unknown,
-                    on_change,
-                    get_mut,
-                    cx,
-                ))
-            })
     }
 
-    fn render_expanded_picker(
+    fn render_calendar_popup_body(
         &self,
         current: DateTime,
         unknown_time: bool,
-        on_toggle_unknown: Option<ToggleCallback>,
         on_change: Option<PickerChangeCallback>,
         get_mut: PickerSelector,
         cx: &mut Context<DesktopRoot>,
@@ -856,179 +841,214 @@ impl DateTimePicker {
             )
             .child(div().grid().grid_cols(7).gap_1().children(calendar_cells));
 
-        let time_column = if unknown_time {
-            panel()
-                .justify_between()
-                .child(
-                    column()
-                        .gap_2()
-                        .child(div().text_size(px(15.)).child("Birth time unknown"))
-                        .child(caption(
-                            "Planet sign positions for the selected birth date are preserved. Time-dependent Ascendant and house placements remain omitted until a birth time is enabled.",
-                        ))
-                        .when_some(on_toggle_unknown, |col, toggle| {
-                            col.child(button(
-                                "Enter known birth time",
-                                false,
-                                cx,
-                                toggle,
-                            ))
-                        }),
+        let presets = div().grid().grid_cols(4).gap_1().children(
+            [
+                ("Midnight", 0u32, 0u32),
+                ("06:00 AM", 6, 0),
+                ("12:00 PM", 12, 0),
+                ("06:00 PM", 18, 0),
+            ]
+            .into_iter()
+            .enumerate()
+            .map(|(idx, (p_label, h, m))| {
+                let active = !unknown_time
+                    && current.hour() == h as i8
+                    && current.minute() == m as i8
+                    && current.second() == 0;
+                action_control(
+                    (SharedString::from(format!("{prefix}-preset")), idx),
+                    cx,
+                    move |view, cx| {
+                        if let Some(picker) = get_mut(view) {
+                            picker.set_hms(h, m, 0, cx);
+                            let dt = picker.current_datetime(cx);
+                            if let Some(cb) = on_change {
+                                cb(view, dt, cx);
+                            }
+                        }
+                    },
                 )
-                .child(
-                    column()
-                        .gap_1()
-                        .pt_2()
-                        .border_t_1()
-                        .border_color(rgb(LINE))
-                        .child(caption("Direct timestamp (YYYY-MM-DD HH:MM:SS)"))
-                        .child(self.datetime.clone()),
-                )
+                .h(px(28.))
+                .justify_center()
+                .rounded(px(4.))
+                .border_1()
+                .border_color(rgb(if active { GOLD } else { LINE }))
+                .bg(rgb(if active { SELECTED } else { PAPER }))
+                .text_color(rgb(INK))
+                .text_size(px(12.))
+                .hover(|style| style.bg(rgb(SELECTED)))
+                .child(p_label)
+            }),
+        );
+
+        let time_column = panel()
+            .gap_2()
+            .when(!unknown_time, |p| {
+                p.child(caption("Time presets")).child(presets)
+            })
+            .child(
+                column()
+                    .gap_1()
+                    .child(caption("Direct timestamp (YYYY-MM-DD HH:MM:SS)"))
+                    .child(self.datetime.clone()),
+            );
+
+        column().gap_3().child(calendar_column).child(time_column)
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ActiveDateTimePicker {
+    Profile,
+    ReferenceTime,
+    Candidate(usize),
+}
+
+impl DesktopRoot {
+    pub(crate) fn active_datetime_popup(&self) -> Option<ActiveDateTimePicker> {
+        if self.draft.as_ref().is_some_and(|d| d.picker.open) {
+            Some(ActiveDateTimePicker::Profile)
+        } else if self.time_picker.open {
+            Some(ActiveDateTimePicker::ReferenceTime)
         } else {
-            let selected_hour = current.hour();
-            let selected_minute = current.minute();
+            self.candidate_pickers
+                .iter()
+                .position(|p| p.open)
+                .map(ActiveDateTimePicker::Candidate)
+        }
+    }
 
-            let hour_grid = div()
-                .grid()
-                .grid_cols(6)
-                .gap_1()
-                .children((0..24u32).map(|h| {
-                    let active = h == selected_hour as u32;
-                    action_control(
-                        (
-                            SharedString::from(format!("{prefix}-hour-cell")),
-                            h as usize,
-                        ),
-                        cx,
-                        move |view, cx| {
-                            if let Some(picker) = get_mut(view) {
-                                let cur = picker.current_datetime(cx);
-                                picker.set_hms(h, cur.minute() as u32, cur.second() as u32, cx);
-                                let dt = picker.current_datetime(cx);
-                                if let Some(cb) = on_change {
-                                    cb(view, dt, cx);
-                                }
-                            }
-                        },
-                    )
-                    .h(px(26.))
-                    .justify_center()
-                    .rounded(px(4.))
-                    .border_1()
-                    .border_color(rgb(if active { GOLD } else { LINE }))
-                    .bg(rgb(if active { GOLD } else { PAPER }))
-                    .text_color(rgb(if active { PAPER } else { INK }))
-                    .text_size(px(12.))
-                    .hover(|style| style.bg(rgb(if active { GOLD } else { SELECTED })))
-                    .child(format!("{h:02}:00"))
-                }));
+    pub(crate) fn close_datetime_popup(&mut self, target: ActiveDateTimePicker) {
+        match target {
+            ActiveDateTimePicker::Profile => {
+                if let Some(d) = &mut self.draft {
+                    d.picker.open = false;
+                }
+            }
+            ActiveDateTimePicker::ReferenceTime => self.time_picker.open = false,
+            ActiveDateTimePicker::Candidate(idx) => {
+                if let Some(p) = self.candidate_pickers.get_mut(idx) {
+                    p.open = false;
+                }
+            }
+        }
+    }
 
-            let minute_grid = div().grid().grid_cols(6).gap_1().children(
-                [0u32, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
-                    .into_iter()
-                    .map(|m| {
-                        let active = m == selected_minute as u32 && current.second() == 0;
-                        action_control(
-                            (SharedString::from(format!("{prefix}-min-cell")), m as usize),
-                            cx,
-                            move |view, cx| {
-                                if let Some(picker) = get_mut(view) {
-                                    let cur = picker.current_datetime(cx);
-                                    picker.set_hms(cur.hour() as u32, m, 0, cx);
-                                    let dt = picker.current_datetime(cx);
-                                    if let Some(cb) = on_change {
-                                        cb(view, dt, cx);
-                                    }
-                                }
-                            },
-                        )
-                        .h(px(26.))
-                        .justify_center()
-                        .rounded(px(4.))
-                        .border_1()
-                        .border_color(rgb(if active { GOLD } else { LINE }))
-                        .bg(rgb(if active { SELECTED } else { PAPER }))
-                        .text_color(rgb(INK))
-                        .text_size(px(12.))
-                        .hover(|style| style.bg(rgb(SELECTED)))
-                        .child(format!(":{m:02}"))
-                    }),
-            );
-
-            let presets = div().grid().grid_cols(4).gap_1().children(
-                [
-                    ("Midnight", 0u32, 0u32),
-                    ("06:00 AM", 6, 0),
-                    ("12:00 PM", 12, 0),
-                    ("06:00 PM", 18, 0),
-                ]
-                .into_iter()
-                .enumerate()
-                .map(|(idx, (p_label, h, m))| {
-                    let active = current.hour() == h as i8
-                        && current.minute() == m as i8
-                        && current.second() == 0;
-                    action_control(
-                        (SharedString::from(format!("{prefix}-preset")), idx),
-                        cx,
-                        move |view, cx| {
-                            if let Some(picker) = get_mut(view) {
-                                picker.set_hms(h, m, 0, cx);
-                                let dt = picker.current_datetime(cx);
-                                if let Some(cb) = on_change {
-                                    cb(view, dt, cx);
-                                }
-                            }
-                        },
-                    )
-                    .h(px(28.))
-                    .justify_center()
-                    .rounded(px(4.))
-                    .border_1()
-                    .border_color(rgb(if active { GOLD } else { LINE }))
-                    .bg(rgb(if active { SELECTED } else { PAPER }))
-                    .text_color(rgb(INK))
-                    .text_size(px(12.))
-                    .hover(|style| style.bg(rgb(SELECTED)))
-                    .child(p_label)
-                }),
-            );
-
-            panel()
-                .gap_2()
-                .child(
-                    row()
-                        .justify_between()
-                        .child(caption("Quick hour (24-hour clock)"))
-                        .child(caption(format!(
-                            "Selected: {:02}:{:02}:{:02}",
-                            current.hour(),
-                            current.minute(),
-                            current.second()
-                        ))),
+    pub(crate) fn datetime_picker_overlay(
+        &self,
+        target: ActiveDateTimePicker,
+        cx: &mut Context<Self>,
+    ) -> gpui::AnyElement {
+        let (picker, unknown_time, on_change, get_mut, title): (
+            &DateTimePicker,
+            bool,
+            Option<PickerChangeCallback>,
+            PickerSelector,
+            &'static str,
+        ) = match target {
+            ActiveDateTimePicker::Profile => {
+                let Some(d) = self.draft.as_ref() else {
+                    return div().into_any_element();
+                };
+                (
+                    &d.picker,
+                    d.unknown,
+                    None,
+                    |view| view.draft.as_mut().map(|d| &mut d.picker),
+                    "Birth Date & Time",
                 )
-                .child(hour_grid)
-                .child(caption("Quick minute (5-minute intervals)"))
-                .child(minute_grid)
-                .child(caption("Time of day presets"))
-                .child(presets)
-                .child(
-                    column()
-                        .gap_1()
-                        .pt_2()
-                        .border_t_1()
-                        .border_color(rgb(LINE))
-                        .child(caption("Direct timestamp (YYYY-MM-DD HH:MM:SS)"))
-                        .child(self.datetime.clone()),
-                )
+            }
+            ActiveDateTimePicker::ReferenceTime => (
+                &self.time_picker,
+                false,
+                Some(|view, dt, cx| view.set_time(dt, true, cx)),
+                |view| Some(&mut view.time_picker),
+                "Reference Date & Time",
+            ),
+            ActiveDateTimePicker::Candidate(idx) => {
+                let Some(p) = self.candidate_pickers.get(idx) else {
+                    return div().into_any_element();
+                };
+                let get_mut: PickerSelector = match idx {
+                    0 => |view| view.candidate_pickers.get_mut(0),
+                    1 => |view| view.candidate_pickers.get_mut(1),
+                    _ => |view| view.candidate_pickers.get_mut(2),
+                };
+                (p, false, None, get_mut, "Candidate Date & Time")
+            }
         };
 
+        let current = picker.current_datetime(cx);
+        let summary = format_time(current);
+
         div()
-            .grid()
-            .grid_cols(2)
-            .gap_3()
-            .child(calendar_column)
-            .child(time_column)
+            .id("datetime-backdrop")
+            .occlude()
+            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
+            .absolute()
+            .inset_0()
+            .bg(gpui::rgba(0x28251f70))
+            .flex()
+            .items_center()
+            .justify_center()
+            .p_6()
+            .on_click(cx.listener(move |root, _, _, cx| {
+                root.close_datetime_popup(target);
+                cx.notify();
+            }))
+            .child(
+                div()
+                    .id("datetime-dialog")
+                    .w(px(560.))
+                    .max_w_full()
+                    .bg(rgb(PAPER))
+                    .rounded(px(12.))
+                    .border_1()
+                    .border_color(rgb(LINE))
+                    .shadow_lg()
+                    .p_5()
+                    .flex()
+                    .flex_col()
+                    .gap_3()
+                    .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
+                    .on_click(|_, _, cx| cx.stop_propagation())
+                    .on_key_down(cx.listener(move |root, event: &gpui::KeyDownEvent, _, cx| {
+                        if event.keystroke.key == "escape" {
+                            root.close_datetime_popup(target);
+                            cx.stop_propagation();
+                            cx.notify();
+                        }
+                    }))
+                    .child(
+                        row()
+                            .justify_between()
+                            .items_center()
+                            .child(
+                                column()
+                                    .gap_0()
+                                    .child(
+                                        div()
+                                            .text_size(px(16.))
+                                            .font_weight(gpui::FontWeight::SEMIBOLD)
+                                            .text_color(rgb(INK))
+                                            .child(title),
+                                    )
+                                    .child(caption(summary)),
+                            )
+                            .child(button("Done", true, cx, move |root, cx| {
+                                root.close_datetime_popup(target);
+                                cx.notify();
+                            })),
+                    )
+                    .child(picker.render_calendar_popup_body(
+                        current,
+                        unknown_time,
+                        on_change,
+                        get_mut,
+                        cx,
+                    )),
+            )
+            .into_any_element()
     }
 }
 
