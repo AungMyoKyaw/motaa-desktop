@@ -434,11 +434,21 @@ impl DateTimePicker {
                             cx,
                             move |view, cx| {
                                 if let Some(picker) = get_mut(view) {
+                                    let current = picker.current_datetime(cx);
                                     picker.time_open = true;
                                     picker.open = false;
-                                    picker.hour_scroll.set_offset(gpui::point(px(0.), px(0.)));
-                                    picker.minute_scroll.set_offset(gpui::point(px(0.), px(0.)));
-                                    picker.second_scroll.set_offset(gpui::point(px(0.), px(0.)));
+                                    picker.hour_scroll.set_offset(gpui::point(
+                                        px(0.),
+                                        px(-time_scroll_offset_for(current.hour())),
+                                    ));
+                                    picker.minute_scroll.set_offset(gpui::point(
+                                        px(0.),
+                                        px(-time_scroll_offset_for(current.minute())),
+                                    ));
+                                    picker.second_scroll.set_offset(gpui::point(
+                                        px(0.),
+                                        px(-time_scroll_offset_for(current.second())),
+                                    ));
                                 }
                                 cx.notify();
                             },
@@ -977,13 +987,106 @@ impl DesktopRoot {
         };
 
         let current = picker.current_datetime(cx);
-        let summary = format!(
-            "{:02}:{:02}:{:02}",
-            current.hour(),
-            current.minute(),
-            current.second()
-        );
+        let h = current.hour();
+        let m = current.minute();
+        let s = current.second();
+        let is_pm = h >= 12;
+        let h12 = match h % 12 {
+            0 => 12,
+            v => v,
+        };
+        let digital_readout = format!("{h:02} : {m:02} : {s:02}");
+        let twelve_hour_hint =
+            format!("{h12:02}:{m:02}:{s:02} {}", if is_pm { "PM" } else { "AM" });
         let prefix = picker.id_prefix;
+
+        let am_pm_toggle = row()
+            .gap_1()
+            .child(small_action_button(
+                (prefix, "tp-am"),
+                "AM",
+                !is_pm,
+                cx,
+                move |view, cx| {
+                    if let Some(picker) = get_mut(view) {
+                        let cur = picker.current_datetime(cx);
+                        if cur.hour() >= 12 {
+                            let next_h = cur.hour() - 12;
+                            let next =
+                                jiff::civil::Time::new(next_h, cur.minute(), cur.second(), 0)
+                                    .map(|t| DateTime::from_parts(cur.date(), t))
+                                    .unwrap_or(cur);
+                            picker.set_datetime(next, cx);
+                            picker.hour_scroll.set_offset(gpui::point(
+                                px(0.),
+                                px(-time_scroll_offset_for(next_h)),
+                            ));
+                            if let Some(cb) = on_change {
+                                cb(view, next, cx);
+                            }
+                        }
+                    }
+                    cx.notify();
+                },
+            ))
+            .child(small_action_button(
+                (prefix, "tp-pm"),
+                "PM",
+                is_pm,
+                cx,
+                move |view, cx| {
+                    if let Some(picker) = get_mut(view) {
+                        let cur = picker.current_datetime(cx);
+                        if cur.hour() < 12 {
+                            let next_h = cur.hour() + 12;
+                            let next =
+                                jiff::civil::Time::new(next_h, cur.minute(), cur.second(), 0)
+                                    .map(|t| DateTime::from_parts(cur.date(), t))
+                                    .unwrap_or(cur);
+                            picker.set_datetime(next, cx);
+                            picker.hour_scroll.set_offset(gpui::point(
+                                px(0.),
+                                px(-time_scroll_offset_for(next_h)),
+                            ));
+                            if let Some(cb) = on_change {
+                                cb(view, next, cx);
+                            }
+                        }
+                    }
+                    cx.notify();
+                },
+            ));
+
+        let digital_bar = row()
+            .w_full()
+            .px_4()
+            .py_3()
+            .rounded(px(10.))
+            .bg(rgb(SOFT))
+            .border_1()
+            .border_color(rgb(crate::SUBTLE_LINE))
+            .justify_between()
+            .items_center()
+            .gap_3()
+            .child(
+                column()
+                    .gap(px(2.))
+                    .child(
+                        div()
+                            .font_family("Menlo")
+                            .text_size(px(22.))
+                            .font_weight(gpui::FontWeight::SEMIBOLD)
+                            .text_color(rgb(INK))
+                            .child(digital_readout),
+                    )
+                    .child(
+                        div()
+                            .text_size(px(11.))
+                            .text_color(rgb(MUTED))
+                            .child(twelve_hour_hint),
+                    ),
+            )
+            .child(am_pm_toggle);
 
         let mut build_col = |col_id: &'static str,
                              col_title: &'static str,
@@ -994,7 +1097,7 @@ impl DesktopRoot {
             let items: Vec<_> = (0..count)
                 .map(|val| {
                     let is_sel = val == selected;
-                    action_control(
+                    let mut item = action_control(
                         (
                             SharedString::from(format!("{prefix}-tp-{col_id}")),
                             usize::try_from(val).unwrap_or(0),
@@ -1013,21 +1116,27 @@ impl DesktopRoot {
                         },
                     )
                     .w_full()
-                    .h(px(28.))
-                    .px_2()
+                    .h(px(30.))
+                    .rounded(px(6.))
                     .flex()
                     .items_center()
                     .justify_center()
-                    .rounded(px(5.))
-                    .bg(if is_sel {
-                        rgb(GOLD)
-                    } else {
-                        gpui::rgba(0x00000000)
-                    })
-                    .text_size(px(12.))
                     .font_family("Menlo")
-                    .text_color(if is_sel { rgb(0xffffff) } else { rgb(INK) })
-                    .child(format!("{val:02}"))
+                    .text_size(px(13.))
+                    .child(format!("{val:02}"));
+
+                    if is_sel {
+                        item = item
+                            .bg(rgb(GOLD))
+                            .text_color(rgb(0xffffff))
+                            .font_weight(gpui::FontWeight::SEMIBOLD);
+                    } else {
+                        item = item
+                            .bg(gpui::rgba(0x00000000))
+                            .text_color(rgb(INK))
+                            .hover(|s| s.bg(rgb(crate::SURFACE_HOVER)));
+                    }
+                    item
                 })
                 .collect();
 
@@ -1035,124 +1144,155 @@ impl DesktopRoot {
                 .flex_1()
                 .min_w(px(0.))
                 .gap_1()
-                .child(div().w_full().text_center().child(caption(col_title)))
                 .child(
                     div()
-                        .relative()
                         .w_full()
-                        .h(px(260.))
+                        .text_center()
+                        .text_size(px(11.))
+                        .font_weight(gpui::FontWeight::MEDIUM)
+                        .text_color(rgb(MUTED))
+                        .child(col_title),
+                )
+                .child(
+                    row()
+                        .w_full()
+                        .h(px(214.))
+                        .p_1()
+                        .gap_1()
                         .rounded(px(8.))
                         .bg(rgb(SOFT))
                         .border_1()
                         .border_color(rgb(crate::SUBTLE_LINE))
+                        .overflow_hidden()
                         .child(
                             div()
                                 .id((
                                     SharedString::from(format!("{prefix}-tp-scroll-{col_id}")),
                                     0,
                                 ))
-                                .size_full()
+                                .flex_1()
+                                .min_w(px(0.))
+                                .h_full()
                                 .overflow_y_scroll()
                                 .track_scroll(&scroll_handle)
                                 .on_scroll_wheel(cx.listener(|_, _, _, cx| {
                                     cx.stop_propagation();
                                     cx.notify();
                                 }))
-                                .p_1()
-                                .pr(px(14.))
                                 .flex()
                                 .flex_col()
                                 .gap(px(2.))
                                 .children(items),
                         )
-                        .child(crate::vertical_scrollbar(&scroll_handle, 260.0)),
+                        .child(crate::vertical_scrollbar(&scroll_handle, 204.0)),
                 )
         };
 
         let hour_col = build_col(
             "hour",
-            "Hour",
+            "HOUR",
             24,
-            current.hour(),
+            h,
             picker.hour_scroll.clone(),
-            |dt, h| {
-                jiff::civil::Time::new(h, dt.minute(), dt.second(), 0)
+            |dt, next_h| {
+                jiff::civil::Time::new(next_h, dt.minute(), dt.second(), 0)
                     .map(|t| DateTime::from_parts(dt.date(), t))
                     .unwrap_or(dt)
             },
         );
         let minute_col = build_col(
             "min",
-            "Minute",
+            "MIN",
             60,
-            current.minute(),
+            m,
             picker.minute_scroll.clone(),
-            |dt, m| {
-                jiff::civil::Time::new(dt.hour(), m, dt.second(), 0)
+            |dt, next_m| {
+                jiff::civil::Time::new(dt.hour(), next_m, dt.second(), 0)
                     .map(|t| DateTime::from_parts(dt.date(), t))
                     .unwrap_or(dt)
             },
         );
         let second_col = build_col(
             "sec",
-            "Second",
+            "SEC",
             60,
-            current.second(),
+            s,
             picker.second_scroll.clone(),
-            |dt, s| {
-                jiff::civil::Time::new(dt.hour(), dt.minute(), s, 0)
+            |dt, next_s| {
+                jiff::civil::Time::new(dt.hour(), dt.minute(), next_s, 0)
                     .map(|t| DateTime::from_parts(dt.date(), t))
                     .unwrap_or(dt)
             },
         );
 
-        let presets = row()
-            .gap_2()
-            .flex_wrap()
-            .children(
-                [
-                    ("00:00:00", 0i8),
-                    ("06:00:00", 6),
-                    ("12:00:00", 12),
-                    ("18:00:00", 18),
-                ]
-                .map(|(label, hour)| {
-                    small_action_button((prefix, label), label, false, cx, move |view, cx| {
-                        if let Some(picker) = get_mut(view) {
-                            let cur = picker.current_datetime(cx);
-                            let next = jiff::civil::Time::new(hour, 0, 0, 0)
-                                .map(|t| DateTime::from_parts(cur.date(), t))
-                                .unwrap_or(cur);
-                            picker.set_datetime(next, cx);
-                            if let Some(cb) = on_change {
-                                cb(view, next, cx);
-                            }
-                        }
-                        cx.notify();
-                    })
-                }),
-            )
-            .child(small_action_button(
-                (prefix, "Now"),
-                "Now",
-                false,
-                cx,
-                move |view, cx| {
+        let colon_sep = || {
+            div()
+                .pt(px(18.))
+                .text_size(px(16.))
+                .font_weight(gpui::FontWeight::SEMIBOLD)
+                .text_color(rgb(MUTED))
+                .child(":")
+        };
+
+        let presets = row().w_full().gap_2().flex_wrap().children(
+            [("Midnight", 0i8), ("06:00", 6), ("Noon", 12), ("18:00", 18)].map(|(label, hour)| {
+                small_action_button((prefix, label), label, false, cx, move |view, cx| {
                     if let Some(picker) = get_mut(view) {
-                        let now = jiff::tz::TimeZone::system().to_datetime(jiff::Timestamp::now());
                         let cur = picker.current_datetime(cx);
-                        let next =
-                            jiff::civil::Time::new(now.hour(), now.minute(), now.second(), 0)
-                                .map(|t| DateTime::from_parts(cur.date(), t))
-                                .unwrap_or(cur);
+                        let next = jiff::civil::Time::new(hour, 0, 0, 0)
+                            .map(|t| DateTime::from_parts(cur.date(), t))
+                            .unwrap_or(cur);
                         picker.set_datetime(next, cx);
+                        picker
+                            .hour_scroll
+                            .set_offset(gpui::point(px(0.), px(-time_scroll_offset_for(hour))));
+                        picker.minute_scroll.set_offset(gpui::point(px(0.), px(0.)));
+                        picker.second_scroll.set_offset(gpui::point(px(0.), px(0.)));
                         if let Some(cb) = on_change {
                             cb(view, next, cx);
                         }
                     }
                     cx.notify();
-                },
-            ));
+                })
+            }),
+        );
+
+        let footer = row()
+            .w_full()
+            .pt_3()
+            .border_t_1()
+            .border_color(rgb(crate::SUBTLE_LINE))
+            .justify_between()
+            .items_center()
+            .child(button("Now", false, cx, move |view, cx| {
+                if let Some(picker) = get_mut(view) {
+                    let now = jiff::tz::TimeZone::system().to_datetime(jiff::Timestamp::now());
+                    let cur = picker.current_datetime(cx);
+                    let next = jiff::civil::Time::new(now.hour(), now.minute(), now.second(), 0)
+                        .map(|t| DateTime::from_parts(cur.date(), t))
+                        .unwrap_or(cur);
+                    picker.set_datetime(next, cx);
+                    picker
+                        .hour_scroll
+                        .set_offset(gpui::point(px(0.), px(-time_scroll_offset_for(now.hour()))));
+                    picker.minute_scroll.set_offset(gpui::point(
+                        px(0.),
+                        px(-time_scroll_offset_for(now.minute())),
+                    ));
+                    picker.second_scroll.set_offset(gpui::point(
+                        px(0.),
+                        px(-time_scroll_offset_for(now.second())),
+                    ));
+                    if let Some(cb) = on_change {
+                        cb(view, next, cx);
+                    }
+                }
+                cx.notify();
+            }))
+            .child(button("Done", true, cx, move |root, cx| {
+                root.close_time_popup(target);
+                cx.notify();
+            }));
 
         div()
             .id("time-backdrop")
@@ -1168,7 +1308,7 @@ impl DesktopRoot {
             .child(
                 div()
                     .id("time-dialog")
-                    .w(px(480.))
+                    .w(px(400.))
                     .max_w_full()
                     .rounded(px(14.))
                     .bg(rgb(PAPER))
@@ -1187,38 +1327,38 @@ impl DesktopRoot {
                         }
                     }))
                     .child(
-                        row()
-                            .justify_between()
-                            .items_center()
-                            .gap_2()
+                        column()
+                            .gap(px(2.))
                             .child(
-                                column()
-                                    .gap(px(2.))
-                                    .child(
-                                        div()
-                                            .text_size(px(15.))
-                                            .font_weight(gpui::FontWeight::SEMIBOLD)
-                                            .text_color(rgb(INK))
-                                            .child(title),
-                                    )
-                                    .child(caption(summary)),
+                                div()
+                                    .text_size(px(15.))
+                                    .font_weight(gpui::FontWeight::SEMIBOLD)
+                                    .text_color(rgb(INK))
+                                    .child(title),
                             )
-                            .child(button("Done", true, cx, move |root, cx| {
-                                root.close_time_popup(target);
-                                cx.notify();
-                            })),
+                            .child(caption("24-hour time · scroll or click to select")),
                     )
+                    .child(digital_bar)
                     .child(
                         row()
-                            .gap_3()
+                            .w_full()
+                            .items_center()
+                            .gap_2()
                             .child(hour_col)
+                            .child(colon_sep())
                             .child(minute_col)
+                            .child(colon_sep())
                             .child(second_col),
                     )
-                    .child(presets),
+                    .child(presets)
+                    .child(footer),
             )
             .into_any_element()
     }
+}
+
+fn time_scroll_offset_for(val: i8) -> f32 {
+    ((f32::from(val) * 32.0) - 87.0).max(0.0)
 }
 
 fn small_action_button(
