@@ -187,19 +187,7 @@ impl DateTimePicker {
         })
     }
 
-    pub fn set_datetime(&mut self, dt: DateTime, cx: &mut Context<DesktopRoot>) {
-        self.view_year = i32::from(dt.year());
-        self.view_month = u32::from(dt.month() as u8);
-        self.parts_error = None;
-        let formatted = format_time(dt);
-        let parts = Self::format_parts(dt);
-        self.last_datetime_text = formatted.clone();
-        self.last_parts_text = parts.clone();
-
-        if self.datetime.read(cx).value() != formatted {
-            self.datetime
-                .update(cx, |input, cx| input.set_value(formatted, cx));
-        }
+    fn sync_part_inputs(&self, parts: &[String; 5], cx: &mut Context<DesktopRoot>) {
         for (entity, value) in [
             (&self.year_input, &parts[0]),
             (&self.day_input, &parts[1]),
@@ -214,6 +202,22 @@ impl DateTimePicker {
         }
     }
 
+    pub fn set_datetime(&mut self, dt: DateTime, cx: &mut Context<DesktopRoot>) {
+        self.view_year = i32::from(dt.year());
+        self.view_month = u32::from(dt.month() as u8);
+        self.parts_error = None;
+        let formatted = format_time(dt);
+        let parts = Self::format_parts(dt);
+        self.last_datetime_text = formatted.clone();
+        self.last_parts_text = parts.clone();
+
+        if self.datetime.read(cx).value() != formatted {
+            self.datetime
+                .update(cx, |input, cx| input.set_value(formatted, cx));
+        }
+        self.sync_part_inputs(&parts, cx);
+    }
+
     pub fn sync_from_inputs(&mut self, cx: &mut Context<DesktopRoot>) {
         let dt_text = self.datetime.read(cx).value().to_owned();
         if dt_text != self.last_datetime_text {
@@ -224,18 +228,7 @@ impl DateTimePicker {
                 self.parts_error = None;
                 let parts = Self::format_parts(dt);
                 self.last_parts_text = parts.clone();
-                for (entity, value) in [
-                    (&self.year_input, &parts[0]),
-                    (&self.day_input, &parts[1]),
-                    (&self.hour_input, &parts[2]),
-                    (&self.minute_input, &parts[3]),
-                    (&self.second_input, &parts[4]),
-                ] {
-                    if entity.read(cx).value() != value {
-                        let next = value.clone();
-                        entity.update(cx, |input, cx| input.set_value(next, cx));
-                    }
-                }
+                self.sync_part_inputs(&parts, cx);
             } else {
                 self.parts_error = None;
             }

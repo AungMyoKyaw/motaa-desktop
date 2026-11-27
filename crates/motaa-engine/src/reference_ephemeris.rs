@@ -299,22 +299,33 @@ impl ReferenceEphemeris {
         Ok(())
     }
 
-    pub fn cusps(
+    fn house_angles(
         &self,
-        system: crate::houses::System,
         tropical: bool,
+        select: impl FnOnce(crate::houses::Angles) -> Result<[f64; 12], String>,
     ) -> Result<[f64; 12], String> {
         let sample = self
             .observation
             .as_ref()
             .ok_or("Chart observation unavailable.")?;
-        let cusps =
-            crate::houses::angles(sample.jdut, sample.latitude, sample.longitude).cusps(system)?;
+        let values = select(crate::houses::angles(
+            sample.jdut,
+            sample.latitude,
+            sample.longitude,
+        ))?;
         Ok(if tropical {
-            cusps
+            values
         } else {
-            cusps.map(|longitude| norm(longitude - self.sidereal_offset()))
+            values.map(|angle| norm(angle - self.sidereal_offset()))
         })
+    }
+
+    pub fn cusps(
+        &self,
+        system: crate::houses::System,
+        tropical: bool,
+    ) -> Result<[f64; 12], String> {
+        self.house_angles(tropical, |angles| angles.cusps(system))
     }
 
     pub fn house_midpoints(
@@ -322,17 +333,7 @@ impl ReferenceEphemeris {
         system: crate::houses::System,
         tropical: bool,
     ) -> Result<[f64; 12], String> {
-        let sample = self
-            .observation
-            .as_ref()
-            .ok_or("Chart observation unavailable.")?;
-        let points = crate::houses::angles(sample.jdut, sample.latitude, sample.longitude)
-            .house_midpoints(system)?;
-        Ok(if tropical {
-            points
-        } else {
-            points.map(|angle| norm(angle - self.sidereal_offset()))
-        })
+        self.house_angles(tropical, |angles| angles.house_midpoints(system))
     }
 
     /// Centered numerical derivative of the selected zodiac longitude, in degrees per day.

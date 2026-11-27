@@ -1035,20 +1035,11 @@ impl DesktopRoot {
                 Err(error) => panel().child(error.clone()).into_any_element(),
             });
         }
-        view.child(button(
-            if self.show_birth {
-                "Hide birth details"
-            } else {
-                "Show birth details"
-            },
-            false,
-            cx,
-            |view, _| view.show_birth = !view.show_birth,
-        ))
-        .child(button("All tools", false, cx, |view, cx| {
-            view.update(cx, |s| s.tool = None)
-        }))
-        .into_any_element()
+        view.child(self.birth_details_button(cx))
+            .child(button("All tools", false, cx, |view, cx| {
+                view.update(cx, |s| s.tool = None)
+            }))
+            .into_any_element()
     }
 
     fn compare_candidate_times(&mut self, cx: &mut Context<Self>) {

@@ -2,17 +2,6 @@
 //! Java-compatible indexing, one-time +360 wrap, boundary guards and rounding.
 use serde::{Deserialize, Serialize};
 
-const D0_TABLE: [[i32; 9]; 9] = [
-    [3, 3, 1, 2, 2, 3, 2, 3, 2],
-    [3, 3, 2, 1, 2, 3, 2, 3, 3],
-    [3, 0, 2, 0, 1, 3, 2, 3, 0],
-    [2, 2, 0, 2, 3, 2, 3, 2, 1],
-    [0, 0, 2, 0, 2, 0, 1, 0, 0],
-    [2, 1, 3, 0, 0, 2, 3, 2, 2],
-    [2, 2, 3, 0, 0, 2, 0, 1, 0],
-    [0, 2, 3, 3, 3, 1, 0, 2, 2],
-    [1, 0, 0, 3, 0, 0, 0, 0, 0],
-];
 pub fn original_d0(code: u8, angle: f64) -> Result<i32, String> {
     if !angle.is_finite() {
         return Err("D0 angle must be finite".into());
@@ -24,7 +13,9 @@ pub fn original_d0(code: u8, angle: f64) -> Result<i32, String> {
     if i < 0 {
         return Err("Original D0 would index a negative Java array offset".into());
     }
-    Ok(D0_TABLE[(code - 1) as usize][(i % 9) as usize])
+    Ok(i32::from(
+        crate::original_aspects::ORIGINAL_D0_TABLE[(code - 1) as usize][(i % 9) as usize],
+    ))
 }
 fn java_round(n: f64) -> i32 {
     (n + 0.5).floor() as i32

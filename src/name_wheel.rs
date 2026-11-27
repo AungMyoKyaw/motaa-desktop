@@ -31,38 +31,10 @@ pub fn mansion_name(index: usize) -> Option<&'static str> {
 pub fn jamma_groups(longitude: f64, use_28: bool) -> [Option<usize>; 6] {
     // V31.1 main.X0/Y0 both use the 27-sector reference index. Y0's
     // sentinel value 30 suppresses that classification in the wheel.
-    const GROUPS_28: [[usize; 6]; 27] = [
-        [0, 9, 15, 17, 20, 21],
-        [1, 10, 16, 18, 30, 22],
-        [2, 11, 17, 19, 21, 23],
-        [3, 12, 18, 20, 22, 24],
-        [4, 13, 19, 30, 23, 25],
-        [5, 14, 20, 21, 24, 26],
-        [6, 15, 30, 22, 25, 0],
-        [7, 16, 21, 23, 26, 1],
-        [8, 17, 22, 24, 0, 2],
-        [9, 18, 23, 25, 1, 3],
-        [10, 19, 24, 26, 2, 4],
-        [11, 20, 25, 0, 3, 5],
-        [12, 30, 26, 1, 4, 6],
-        [13, 21, 0, 2, 5, 7],
-        [14, 22, 1, 3, 6, 8],
-        [15, 23, 2, 4, 7, 9],
-        [16, 24, 3, 5, 8, 10],
-        [17, 25, 4, 6, 9, 11],
-        [18, 26, 5, 7, 10, 12],
-        [19, 0, 6, 8, 11, 13],
-        [20, 1, 7, 9, 12, 14],
-        [21, 3, 9, 11, 14, 16],
-        [22, 4, 10, 12, 15, 17],
-        [23, 5, 11, 13, 16, 18],
-        [24, 6, 12, 14, 17, 19],
-        [25, 7, 13, 15, 18, 20],
-        [26, 8, 14, 16, 19, 30],
-    ];
     let index = sector(longitude) / 4;
     if use_28 {
-        GROUPS_28[index].map(|value| (value != 30).then_some(value))
+        motaa_engine::original_mansions::ORIGINAL_Y0[index]
+            .map(|value| (value != 30).then_some(value as usize))
     } else {
         [0, 9, 15, 17, 20, 22].map(|delta| Some((index + delta) % 27))
     }
