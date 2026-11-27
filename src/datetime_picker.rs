@@ -992,10 +992,6 @@ impl DesktopRoot {
             .items_center()
             .justify_center()
             .p_6()
-            .on_click(cx.listener(move |root, _, _, cx| {
-                root.close_datetime_popup(target);
-                cx.notify();
-            }))
             .child(
                 div()
                     .id("datetime-dialog")

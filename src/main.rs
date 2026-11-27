@@ -1295,10 +1295,6 @@ impl DesktopRoot {
             .items_center()
             .justify_center()
             .p_6()
-            .on_click(cx.listener(|root, _, _, cx| {
-                root.about_open = false;
-                cx.notify();
-            }))
             .child(
                 div()
                     .id("about-dialog")

@@ -440,10 +440,6 @@ impl DesktopRoot {
             .items_center()
             .justify_center()
             .p_6()
-            .on_click(cx.listener(move |root, _, _, cx| {
-                root.close_town_popup(reference);
-                cx.notify();
-            }))
             .child(
                 div()
                     .id("town-dialog")
