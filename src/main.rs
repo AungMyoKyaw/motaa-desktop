@@ -1273,6 +1273,9 @@ impl Render for DesktopRoot {
             .when_some(self.active_datetime_popup(), |root, target| {
                 root.child(self.datetime_picker_overlay(target, cx))
             })
+            .when_some(self.active_time_popup(), |root, target| {
+                root.child(self.time_picker_overlay(target, cx))
+            })
             .when(self.palette_open, |root| {
                 root.child(self.palette_overlay(cx))
             })

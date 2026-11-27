@@ -84,6 +84,10 @@ pub struct DateTimePicker {
     pub view_year: i32,
     pub view_month: u32,
     pub open: bool,
+    pub time_open: bool,
+    pub hour_scroll: gpui::ScrollHandle,
+    pub minute_scroll: gpui::ScrollHandle,
+    pub second_scroll: gpui::ScrollHandle,
     last_datetime_text: String,
     last_date_text: String,
     last_time_text: String,
@@ -119,6 +123,10 @@ impl DateTimePicker {
             view_year: i32::from(initial.year()),
             view_month: u32::from(initial.month() as u8),
             open,
+            time_open: false,
+            hour_scroll: gpui::ScrollHandle::new(),
+            minute_scroll: gpui::ScrollHandle::new(),
+            second_scroll: gpui::ScrollHandle::new(),
             last_datetime_text: formatted,
             last_date_text: date_text,
             last_time_text: time_text,
@@ -419,6 +427,34 @@ impl DateTimePicker {
                                     }
                                 },
                             )),
+                    )
+                    .child(
+                        action_control(
+                            SharedString::from(format!("{prefix}-pick-time")),
+                            cx,
+                            move |view, cx| {
+                                if let Some(picker) = get_mut(view) {
+                                    picker.time_open = true;
+                                    picker.open = false;
+                                    picker.hour_scroll.set_offset(gpui::point(px(0.), px(0.)));
+                                    picker.minute_scroll.set_offset(gpui::point(px(0.), px(0.)));
+                                    picker.second_scroll.set_offset(gpui::point(px(0.), px(0.)));
+                                }
+                                cx.notify();
+                            },
+                        )
+                        .h(px(36.))
+                        .px_3()
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .rounded(px(6.))
+                        .bg(rgb(SOFT))
+                        .border_1()
+                        .border_color(rgb(LINE))
+                        .text_size(px(12.))
+                        .text_color(rgb(INK))
+                        .child("Pick time"),
                     )
                     .into_any_element()
             });
@@ -864,6 +900,322 @@ impl DesktopRoot {
                         get_mut,
                         cx,
                     )),
+            )
+            .into_any_element()
+    }
+
+    pub(crate) fn active_time_popup(&self) -> Option<ActiveDateTimePicker> {
+        if self.draft.as_ref().is_some_and(|d| d.picker.time_open) {
+            return Some(ActiveDateTimePicker::Profile);
+        }
+        if self.time_picker.time_open {
+            return Some(ActiveDateTimePicker::ReferenceTime);
+        }
+        self.candidate_pickers
+            .iter()
+            .position(|p| p.time_open)
+            .map(ActiveDateTimePicker::Candidate)
+    }
+
+    pub(crate) fn close_time_popup(&mut self, target: ActiveDateTimePicker) {
+        match target {
+            ActiveDateTimePicker::Profile => {
+                if let Some(d) = self.draft.as_mut() {
+                    d.picker.time_open = false;
+                }
+            }
+            ActiveDateTimePicker::ReferenceTime => {
+                self.time_picker.time_open = false;
+            }
+            ActiveDateTimePicker::Candidate(idx) => {
+                if let Some(p) = self.candidate_pickers.get_mut(idx) {
+                    p.time_open = false;
+                }
+            }
+        }
+    }
+
+    pub(crate) fn time_picker_overlay(
+        &self,
+        target: ActiveDateTimePicker,
+        cx: &mut Context<Self>,
+    ) -> gpui::AnyElement {
+        let (picker, on_change, get_mut, title): (
+            &DateTimePicker,
+            Option<PickerChangeCallback>,
+            PickerSelector,
+            &'static str,
+        ) = match target {
+            ActiveDateTimePicker::Profile => {
+                let Some(d) = self.draft.as_ref() else {
+                    return div().into_any_element();
+                };
+                (
+                    &d.picker,
+                    None,
+                    |view| view.draft.as_mut().map(|d| &mut d.picker),
+                    "Pick Birth Time",
+                )
+            }
+            ActiveDateTimePicker::ReferenceTime => (
+                &self.time_picker,
+                Some(|view, dt, cx| view.set_time(dt, true, cx)),
+                |view| Some(&mut view.time_picker),
+                "Pick Reference Time",
+            ),
+            ActiveDateTimePicker::Candidate(idx) => {
+                let Some(p) = self.candidate_pickers.get(idx) else {
+                    return div().into_any_element();
+                };
+                let get_mut: PickerSelector = match idx {
+                    0 => |view| view.candidate_pickers.get_mut(0),
+                    1 => |view| view.candidate_pickers.get_mut(1),
+                    _ => |view| view.candidate_pickers.get_mut(2),
+                };
+                (p, None, get_mut, "Pick Candidate Time")
+            }
+        };
+
+        let current = picker.current_datetime(cx);
+        let summary = format!(
+            "{:02}:{:02}:{:02}",
+            current.hour(),
+            current.minute(),
+            current.second()
+        );
+        let prefix = picker.id_prefix;
+
+        let mut build_col = |col_id: &'static str,
+                             col_title: &'static str,
+                             count: i8,
+                             selected: i8,
+                             scroll_handle: gpui::ScrollHandle,
+                             make_dt: fn(DateTime, i8) -> DateTime| {
+            let items: Vec<_> = (0..count)
+                .map(|val| {
+                    let is_sel = val == selected;
+                    action_control(
+                        (
+                            SharedString::from(format!("{prefix}-tp-{col_id}")),
+                            usize::try_from(val).unwrap_or(0),
+                        ),
+                        cx,
+                        move |view, cx| {
+                            if let Some(picker) = get_mut(view) {
+                                let cur = picker.current_datetime(cx);
+                                let next = make_dt(cur, val);
+                                picker.set_datetime(next, cx);
+                                if let Some(cb) = on_change {
+                                    cb(view, next, cx);
+                                }
+                            }
+                            cx.notify();
+                        },
+                    )
+                    .w_full()
+                    .h(px(28.))
+                    .px_2()
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .rounded(px(5.))
+                    .bg(if is_sel {
+                        rgb(GOLD)
+                    } else {
+                        gpui::rgba(0x00000000)
+                    })
+                    .text_size(px(12.))
+                    .font_family("Menlo")
+                    .text_color(if is_sel { rgb(0xffffff) } else { rgb(INK) })
+                    .child(format!("{val:02}"))
+                })
+                .collect();
+
+            column()
+                .flex_1()
+                .min_w(px(0.))
+                .gap_1()
+                .child(div().w_full().text_center().child(caption(col_title)))
+                .child(
+                    div()
+                        .relative()
+                        .w_full()
+                        .h(px(260.))
+                        .rounded(px(8.))
+                        .bg(rgb(SOFT))
+                        .border_1()
+                        .border_color(rgb(crate::SUBTLE_LINE))
+                        .child(
+                            div()
+                                .id((
+                                    SharedString::from(format!("{prefix}-tp-scroll-{col_id}")),
+                                    0,
+                                ))
+                                .size_full()
+                                .overflow_y_scroll()
+                                .track_scroll(&scroll_handle)
+                                .on_scroll_wheel(cx.listener(|_, _, _, cx| {
+                                    cx.stop_propagation();
+                                    cx.notify();
+                                }))
+                                .p_1()
+                                .pr(px(14.))
+                                .flex()
+                                .flex_col()
+                                .gap(px(2.))
+                                .children(items),
+                        )
+                        .child(crate::vertical_scrollbar(&scroll_handle, 260.0)),
+                )
+        };
+
+        let hour_col = build_col(
+            "hour",
+            "Hour",
+            24,
+            current.hour(),
+            picker.hour_scroll.clone(),
+            |dt, h| {
+                jiff::civil::Time::new(h, dt.minute(), dt.second(), 0)
+                    .map(|t| DateTime::from_parts(dt.date(), t))
+                    .unwrap_or(dt)
+            },
+        );
+        let minute_col = build_col(
+            "min",
+            "Minute",
+            60,
+            current.minute(),
+            picker.minute_scroll.clone(),
+            |dt, m| {
+                jiff::civil::Time::new(dt.hour(), m, dt.second(), 0)
+                    .map(|t| DateTime::from_parts(dt.date(), t))
+                    .unwrap_or(dt)
+            },
+        );
+        let second_col = build_col(
+            "sec",
+            "Second",
+            60,
+            current.second(),
+            picker.second_scroll.clone(),
+            |dt, s| {
+                jiff::civil::Time::new(dt.hour(), dt.minute(), s, 0)
+                    .map(|t| DateTime::from_parts(dt.date(), t))
+                    .unwrap_or(dt)
+            },
+        );
+
+        let presets = row()
+            .gap_2()
+            .flex_wrap()
+            .children(
+                [
+                    ("00:00:00", 0i8),
+                    ("06:00:00", 6),
+                    ("12:00:00", 12),
+                    ("18:00:00", 18),
+                ]
+                .map(|(label, hour)| {
+                    small_action_button((prefix, label), label, false, cx, move |view, cx| {
+                        if let Some(picker) = get_mut(view) {
+                            let cur = picker.current_datetime(cx);
+                            let next = jiff::civil::Time::new(hour, 0, 0, 0)
+                                .map(|t| DateTime::from_parts(cur.date(), t))
+                                .unwrap_or(cur);
+                            picker.set_datetime(next, cx);
+                            if let Some(cb) = on_change {
+                                cb(view, next, cx);
+                            }
+                        }
+                        cx.notify();
+                    })
+                }),
+            )
+            .child(small_action_button(
+                (prefix, "Now"),
+                "Now",
+                false,
+                cx,
+                move |view, cx| {
+                    if let Some(picker) = get_mut(view) {
+                        let now = jiff::tz::TimeZone::system().to_datetime(jiff::Timestamp::now());
+                        let cur = picker.current_datetime(cx);
+                        let next =
+                            jiff::civil::Time::new(now.hour(), now.minute(), now.second(), 0)
+                                .map(|t| DateTime::from_parts(cur.date(), t))
+                                .unwrap_or(cur);
+                        picker.set_datetime(next, cx);
+                        if let Some(cb) = on_change {
+                            cb(view, next, cx);
+                        }
+                    }
+                    cx.notify();
+                },
+            ));
+
+        div()
+            .id("time-backdrop")
+            .occlude()
+            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
+            .absolute()
+            .inset_0()
+            .bg(gpui::rgba(0x1f1d1988))
+            .flex()
+            .items_center()
+            .justify_center()
+            .p_4()
+            .child(
+                div()
+                    .id("time-dialog")
+                    .w(px(480.))
+                    .max_w_full()
+                    .rounded(px(14.))
+                    .bg(rgb(PAPER))
+                    .border_1()
+                    .border_color(rgb(LINE))
+                    .p_5()
+                    .flex()
+                    .flex_col()
+                    .gap_4()
+                    .on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
+                    .on_click(|_, _, cx| cx.stop_propagation())
+                    .on_key_down(cx.listener(move |root, event: &gpui::KeyDownEvent, _, cx| {
+                        if event.keystroke.key == "escape" {
+                            root.close_time_popup(target);
+                            cx.notify();
+                        }
+                    }))
+                    .child(
+                        row()
+                            .justify_between()
+                            .items_center()
+                            .gap_2()
+                            .child(
+                                column()
+                                    .gap(px(2.))
+                                    .child(
+                                        div()
+                                            .text_size(px(15.))
+                                            .font_weight(gpui::FontWeight::SEMIBOLD)
+                                            .text_color(rgb(INK))
+                                            .child(title),
+                                    )
+                                    .child(caption(summary)),
+                            )
+                            .child(button("Done", true, cx, move |root, cx| {
+                                root.close_time_popup(target);
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        row()
+                            .gap_3()
+                            .child(hour_col)
+                            .child(minute_col)
+                            .child(second_col),
+                    )
+                    .child(presets),
             )
             .into_any_element()
     }
