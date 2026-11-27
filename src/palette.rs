@@ -93,7 +93,7 @@ impl DesktopRoot {
             entries.push(PaletteEntry {
                 category: "Workspace",
                 label: workspace.label().to_owned(),
-                hint: format!("⌘{}", index + 1),
+                hint: shortcut_label(&(index + 1).to_string()),
                 action: PaletteAction::Workspace(workspace),
             });
         }
@@ -102,25 +102,25 @@ impl DesktopRoot {
             PaletteEntry {
                 category: "Action",
                 label: "New birth chart".into(),
-                hint: "⌘N".into(),
+                hint: shortcut_label("N"),
                 action: PaletteAction::NewBirthChart,
             },
             PaletteEntry {
                 category: "Action",
                 label: "Jump to current time (Now)".into(),
-                hint: "⌘⇧N".into(),
+                hint: shift_shortcut_label("N"),
                 action: PaletteAction::JumpNow,
             },
             PaletteEntry {
                 category: "Action",
                 label: "Toggle sidebar rail".into(),
-                hint: "⌘B".into(),
+                hint: shortcut_label("B"),
                 action: PaletteAction::ToggleSidebar,
             },
             PaletteEntry {
                 category: "Action",
                 label: "Toggle contextual inspector".into(),
-                hint: "⌘I".into(),
+                hint: shortcut_label("I"),
                 action: PaletteAction::ToggleInspector,
             },
             PaletteEntry {
@@ -325,7 +325,7 @@ impl DesktopRoot {
                             .bg(rgb(SOFT))
                             .justify_between()
                             .child(caption("↑↓ Navigate · Enter Open · Esc Close"))
-                            .child(caption("⌘K Quick Jump")),
+                            .child(caption(format!("{} Quick Jump", shortcut_label("K")))),
                     ),
             )
             .into_any_element()

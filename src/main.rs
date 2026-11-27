@@ -890,7 +890,7 @@ impl Render for DesktopRoot {
             .bg(rgb(RAIL))
             .px(px(if collapsed { 8. } else { 12. }))
             .pb_3()
-            .pt(px(56.))
+            .pt(px(if cfg!(target_os = "macos") { 56. } else { 16. }))
             .border_r_1()
             .border_color(rgb(SUBTLE_LINE))
             .child(
@@ -966,7 +966,7 @@ impl Render for DesktopRoot {
                             })
                             .child(entry.label()),
                     )
-                    .child(caption(format!("⌘{}", idx + 1)))
+                    .child(caption(shortcut_label(&(idx + 1).to_string())))
                 }
             }))
             .child(div().flex_1())
@@ -986,9 +986,9 @@ impl Render for DesktopRoot {
                         .justify_center()
                         .hover(|s| s.bg(rgb(SURFACE_HOVER)))
                         .child(caption(if collapsed {
-                            "»"
+                            "»".to_owned()
                         } else {
-                            "« Collapse ⌘B"
+                            format!("« Collapse {}", shortcut_label("B"))
                         })),
                     ),
             );
@@ -1186,7 +1186,7 @@ impl Render for DesktopRoot {
                                             .bg(rgb(PAPER))
                                             .hover(|s| s.bg(rgb(SOFT)))
                                             .child(caption("Quick jump"))
-                                            .child(badge("⌘K", Tone::Neutral)),
+                                            .child(badge(shortcut_label("K"), Tone::Neutral)),
                                     )
                                     .when(
                                         viewport_w >= 1060.
@@ -1199,9 +1199,9 @@ impl Render for DesktopRoot {
                                         |bar| {
                                             bar.child(button(
                                                 if self.inspector_open {
-                                                    "Hide inspector"
+                                                    "Hide inspector".to_owned()
                                                 } else {
-                                                    "Inspector ⌘I"
+                                                    format!("Inspector {}", shortcut_label("I"))
                                                 },
                                                 self.inspector_open,
                                                 cx,
@@ -1466,11 +1466,29 @@ fn profile_database_path() -> Result<PathBuf, String> {
     Ok(directory.join("profiles.sqlite3"))
 }
 
+fn parse_store_screenshots_dir() -> Option<PathBuf> {
+    let mut args = std::env::args().skip(1);
+    while let Some(arg) = args.next() {
+        if arg == "--store-screenshots" {
+            return Some(
+                args.next()
+                    .map(PathBuf::from)
+                    .unwrap_or_else(|| PathBuf::from(".")),
+            );
+        }
+        if let Some(dir) = arg.strip_prefix("--store-screenshots=") {
+            return Some(PathBuf::from(dir));
+        }
+    }
+    None
+}
+
 fn main() {
     let smoke = std::env::args().any(|arg| arg == "--smoke");
     let preview = std::env::args().any(|arg| arg == "--preview");
     let visual_capture = std::env::args().any(|arg| arg == "--visual-capture");
-    let store = if smoke || preview || visual_capture {
+    let store_screenshots = parse_store_screenshots_dir();
+    let store = if smoke || preview || visual_capture || store_screenshots.is_some() {
         rusqlite::Connection::open_in_memory()
             .map_err(|e| e.to_string())
             .and_then(|db| {
@@ -1485,23 +1503,40 @@ fn main() {
         .run(move |cx: &mut App| {
             input::bind_keys(cx);
             cx.bind_keys([
-                KeyBinding::new("cmd-1", Charts, None),
-                KeyBinding::new("cmd-2", Profiles, None),
-                KeyBinding::new("cmd-3", Calculations, None),
-                KeyBinding::new("cmd-4", TimeAnalysis, None),
-                KeyBinding::new("cmd-5", Advanced, None),
-                KeyBinding::new("cmd-k", TogglePalette, None),
-                KeyBinding::new("cmd-b", ToggleSidebar, None),
-                KeyBinding::new("cmd-i", ToggleInspector, None),
-                KeyBinding::new("cmd-[", StepTimeBack, None),
-                KeyBinding::new("cmd-]", StepTimeForward, None),
-                KeyBinding::new("cmd-shift-n", JumpNow, None),
-                KeyBinding::new("cmd-n", NewProfile, None),
+                KeyBinding::new(&primary_keybinding("1"), Charts, None),
+                KeyBinding::new(&primary_keybinding("2"), Profiles, None),
+                KeyBinding::new(&primary_keybinding("3"), Calculations, None),
+                KeyBinding::new(&primary_keybinding("4"), TimeAnalysis, None),
+                KeyBinding::new(&primary_keybinding("5"), Advanced, None),
+                KeyBinding::new(&primary_keybinding("k"), TogglePalette, None),
+                KeyBinding::new(&primary_keybinding("b"), ToggleSidebar, None),
+                KeyBinding::new(&primary_keybinding("i"), ToggleInspector, None),
+                KeyBinding::new(&primary_keybinding("["), StepTimeBack, None),
+                KeyBinding::new(&primary_keybinding("]"), StepTimeForward, None),
+                KeyBinding::new(&primary_keybinding("shift-n"), JumpNow, None),
+                KeyBinding::new(&primary_keybinding("n"), NewProfile, None),
                 KeyBinding::new("tab", TabNext, None),
                 KeyBinding::new("shift-tab", TabPrevious, None),
-                KeyBinding::new("cmd-q", Quit, None),
+                KeyBinding::new(&primary_keybinding("q"), Quit, None),
             ]);
-            let bounds = Bounds::centered(None, size(px(1280.), px(800.)), cx);
+            let window_size = if store_screenshots.is_some() {
+                size(px(1440.), px(900.))
+            } else {
+                size(px(1280.), px(800.))
+            };
+            let bounds = Bounds::centered(None, window_size, cx);
+            #[cfg(target_os = "macos")]
+            let titlebar = Some(gpui::TitlebarOptions {
+                title: Some("MOTAA Desktop".into()),
+                appears_transparent: true,
+                traffic_light_position: Some(gpui::point(px(20.), px(19.))),
+            });
+            #[cfg(not(target_os = "macos"))]
+            let titlebar = Some(gpui::TitlebarOptions {
+                title: Some("MOTAA Desktop".into()),
+                appears_transparent: false,
+                traffic_light_position: None,
+            });
             let window = cx
                 .open_window(
                     WindowOptions {
@@ -1509,11 +1544,7 @@ fn main() {
                         focus: !smoke,
                         window_bounds: Some(WindowBounds::Windowed(bounds)),
                         window_min_size: Some(size(px(1024.), px(680.))),
-                        titlebar: Some(gpui::TitlebarOptions {
-                            title: Some("MOTAA Desktop".into()),
-                            appears_transparent: true,
-                            traffic_light_position: Some(gpui::point(px(20.), px(19.))),
-                        }),
+                        titlebar,
                         ..Default::default()
                     },
                     |window, cx| {
@@ -1570,11 +1601,11 @@ fn main() {
                     };
                     draw(cx);
                     let steps = [
-                        (Workspace::Profiles, "cmd-2"),
-                        (Workspace::Calculations, "cmd-3"),
-                        (Workspace::Time, "cmd-4"),
-                        (Workspace::Advanced, "cmd-5"),
-                        (Workspace::Charts, "cmd-1"),
+                        (Workspace::Profiles, primary_keybinding("2")),
+                        (Workspace::Calculations, primary_keybinding("3")),
+                        (Workspace::Time, primary_keybinding("4")),
+                        (Workspace::Advanced, primary_keybinding("5")),
+                        (Workspace::Charts, primary_keybinding("1")),
                     ];
                     cx.background_executor()
                         .timer(std::time::Duration::from_millis(300))
@@ -1582,8 +1613,8 @@ fn main() {
                     for (route, shortcut) in steps {
                         native
                             .update(cx, |_, window, app| {
-                                let keystroke =
-                                    gpui::Keystroke::parse(shortcut).expect("valid smoke shortcut");
+                                let keystroke = gpui::Keystroke::parse(&shortcut)
+                                    .expect("valid smoke shortcut");
                                 assert!(window.dispatch_keystroke(keystroke, app));
                             })
                             .expect("dispatch native workspace shortcut");
@@ -1709,7 +1740,7 @@ fn main() {
                     draw(cx);
                     native
                         .update(cx, |_, win, app| {
-                            let key = gpui::Keystroke::parse("cmd-2").unwrap();
+                            let key = gpui::Keystroke::parse(&primary_keybinding("2")).unwrap();
                             assert!(win.dispatch_keystroke(key, app));
                         })
                         .expect("open saved profiles while editing a draft");
@@ -1736,12 +1767,10 @@ fn main() {
                     native
                         .update(cx, |_, win, app| {
                             win.focus(&root_focus);
-                            assert!(
-                                win.dispatch_keystroke(
-                                    gpui::Keystroke::parse("cmd-k").unwrap(),
-                                    app
-                                )
-                            );
+                            assert!(win.dispatch_keystroke(
+                                gpui::Keystroke::parse(&primary_keybinding("k")).unwrap(),
+                                app
+                            ));
                         })
                         .expect("open command palette");
                     draw(cx);
@@ -1754,18 +1783,14 @@ fn main() {
                         .expect("verify command palette");
                     native
                         .update(cx, |_, win, app| {
-                            assert!(
-                                win.dispatch_keystroke(
-                                    gpui::Keystroke::parse("cmd-b").unwrap(),
-                                    app
-                                )
-                            );
-                            assert!(
-                                win.dispatch_keystroke(
-                                    gpui::Keystroke::parse("cmd-i").unwrap(),
-                                    app
-                                )
-                            );
+                            assert!(win.dispatch_keystroke(
+                                gpui::Keystroke::parse(&primary_keybinding("b")).unwrap(),
+                                app
+                            ));
+                            assert!(win.dispatch_keystroke(
+                                gpui::Keystroke::parse(&primary_keybinding("i")).unwrap(),
+                                app
+                            ));
                         })
                         .expect("toggle sidebar and inspector");
                     draw(cx);
@@ -2226,6 +2251,68 @@ fn main() {
                     }
                     println!("Rendered compact Tricakka, comparison, and aspect details");
                     cx.update(|cx| cx.quit()).expect("quit smoke window");
+                })
+                .detach();
+            } else if let Some(capture_dir) = store_screenshots {
+                cx.spawn(async move |cx| {
+                    let executor = cx.background_executor().clone();
+                    let wait = |ms| executor.timer(std::time::Duration::from_millis(ms));
+                    let wait_for_ack = |slug: &str| {
+                        let done_path = capture_dir.join(format!("{slug}.done"));
+                        let executor = executor.clone();
+                        async move {
+                            for _ in 0..150 {
+                                if done_path.exists() {
+                                    break;
+                                }
+                                executor.timer(std::time::Duration::from_millis(100)).await;
+                            }
+                        }
+                    };
+                    let emit = |name: &str| {
+                        println!("STORE_CAPTURE_READY {name}");
+                        let _ = std::io::stdout().flush();
+                    };
+                    wait(1200).await;
+                    let chart_shots: &[(&str, &str, bool)] = &[
+                        ("01-rasi-chart", "Rasi", true),
+                        ("02-tricakka-chart", "Tricakka", true),
+                        ("03-dasha-periods", "Dasha periods", false),
+                    ];
+                    for &(slug, mode, munp) in chart_shots {
+                        window
+                            .update(cx, |root, window, cx| {
+                                root.navigate(Workspace::Charts, cx);
+                                root.inspector_open = true;
+                                root.sidebar_collapsed = false;
+                                root.show_munp = munp;
+                                root.select_mode(mode, cx);
+                                window.refresh();
+                            })
+                            .expect("switch store screenshot chart mode");
+                        wait(600).await;
+                        emit(slug);
+                        wait_for_ack(slug).await;
+                    }
+                    let workspace_shots: &[(&str, Workspace)] = &[
+                        ("04-time-analysis", Workspace::Time),
+                        ("05-profiles", Workspace::Profiles),
+                        ("06-advanced-tools", Workspace::Advanced),
+                    ];
+                    for &(slug, route) in workspace_shots {
+                        window
+                            .update(cx, |root, window, cx| {
+                                root.navigate(route, cx);
+                                root.inspector_open = true;
+                                root.sidebar_collapsed = false;
+                                window.refresh();
+                            })
+                            .expect("switch store screenshot workspace");
+                        wait(600).await;
+                        emit(slug);
+                        wait_for_ack(slug).await;
+                    }
+                    cx.update(|cx| cx.quit()).expect("quit store screenshots");
                 })
                 .detach();
             } else if visual_capture {

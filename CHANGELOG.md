@@ -2,6 +2,15 @@
 
 All notable changes to MOTAA Desktop are documented in this file.
 
+## [0.2.1] - 2026-11-27
+
+### Added
+- **Automated Windows Store Screenshot Capture**: Added `--store-screenshots <dir>` mode and `packaging/windows/capture-store-screenshots.ps1` to capture genuine Windows-native screenshots (≥1366×768) in CI/CD alongside the MSIX submission bundle.
+- **Manual Release Pipeline Dispatch**: Added `workflow_dispatch` support to `.github/workflows/release.yml` for generating and validating Store submission artifacts on demand.
+
+### Fixed
+- **Native Windows Chrome & Shortcuts**: Replaced macOS-only `⌘`/`Cmd` UI labels and `cmd-` keybindings with platform-native `Ctrl+` shortcuts on Windows/Linux, and switched non-macOS windows to a standard native OS titlebar without macOS traffic-light spacing.
+
 ## [0.2.0] - 2026-11-25
 
 ### Added

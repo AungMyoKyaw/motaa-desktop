@@ -41,6 +41,50 @@ impl Tone {
     }
 }
 
+pub fn primary_keybinding(key: &str) -> String {
+    #[cfg(target_os = "macos")]
+    {
+        format!("cmd-{key}")
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        format!("ctrl-{key}")
+    }
+}
+
+pub fn shortcut_label(key: &str) -> String {
+    #[cfg(target_os = "macos")]
+    {
+        format!("⌘{key}")
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        format!("Ctrl+{key}")
+    }
+}
+
+pub fn shift_shortcut_label(key: &str) -> String {
+    #[cfg(target_os = "macos")]
+    {
+        format!("⌘⇧{key}")
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        format!("Ctrl+Shift+{key}")
+    }
+}
+
+pub fn zoom_scroll_hint() -> &'static str {
+    #[cfg(target_os = "macos")]
+    {
+        "pinch/Cmd+scroll"
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        "Ctrl+scroll"
+    }
+}
+
 pub fn row() -> Div {
     div().flex().items_center().gap_2()
 }

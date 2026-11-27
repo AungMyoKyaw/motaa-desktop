@@ -93,7 +93,8 @@ impl DesktopRoot {
             "True Rahu"
         };
         let subtitle = format!(
-            "{zodiac} · {ayanamsha} · {houses} · {rahu} · Use +/− or pinch/Cmd+scroll to zoom · Drag to pan · Esc to close"
+            "{zodiac} · {ayanamsha} · {houses} · {rahu} · Use +/− or {} to zoom · Drag to pan · Esc to close",
+            zoom_scroll_hint()
         );
 
         let (title, drawing) = self.lightbox_drawing(target, zoomed_side, cx);
