@@ -2,6 +2,12 @@
 
 All notable changes to MOTAA Desktop are documented in this file.
 
+## [0.2.7] - 2026-11-28
+
+### Fixed
+- **Windows Startup (`VCRUNTIME140.dll`)**: Enabled static MSVC C-runtime linking (`+crt-static`) in `.cargo/config.toml` and explicit `--target x86_64-pc-windows-msvc` builds in the release workflow so `motaa-desktop.exe` runs on clean Windows 10/11 installations without requiring the Visual C++ Redistributable.
+- **MSIX & ZIP Packaging Guard**: Added a PE import verifier in `packaging/windows/build-msix.ps1` that rejects any Windows release binary importing `vcruntime*`, `msvcp*`, `concrt*`, `vcomp*`, `mfc*`, or `atl*` DLLs.
+
 ## [0.2.6] - 2026-11-28
 
 ### Changed

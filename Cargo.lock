@@ -3439,7 +3439,7 @@ dependencies = [
 
 [[package]]
 name = "motaa-desktop"
-version = "0.2.6"
+version = "0.2.7"
 dependencies = [
  "gpui",
  "jiff",

@@ -105,22 +105,24 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          cargo build --locked --release --bin motaa-desktop
+          $target = "x86_64-pc-windows-msvc"
+          $exePath = "target/$target/release/motaa-desktop.exe"
+          cargo build --locked --release --target $target --bin motaa-desktop
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          cargo test --release --locked --workspace
+          cargo test --release --locked --target $target --workspace
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           New-Item -ItemType Directory -Path "stage/$env:PACKAGE", dist, "store-submission/screenshots", "store-submission/assets" -Force | Out-Null
-          Copy-Item target/release/motaa-desktop.exe "stage/$env:PACKAGE/"
+          .\packaging\windows\build-msix.ps1 -ExePath $exePath -Version $env:RELEASE_TAG -OutputMsix "dist/$env:PACKAGE.msix"
+          Copy-Item $exePath "stage/$env:PACKAGE/"
           Copy-Item LICENSE "stage/$env:PACKAGE/LICENSE"
           New-Item -ItemType Directory -Path "stage/$env:PACKAGE/third_party" -Force | Out-Null
           Copy-Item third_party/*LICENSE*, third_party/xattr/LICENSE-* "stage/$env:PACKAGE/third_party/"
           Compress-Archive -Path "stage/$env:PACKAGE" -DestinationPath "dist/$env:PACKAGE.zip" -Force
-          .\packaging\windows\build-msix.ps1 -ExePath target\release\motaa-desktop.exe -Version $env:RELEASE_TAG -OutputMsix "dist/$env:PACKAGE.msix"
           if (Test-Path "packaging/windows/screenshots/screenshots-manifest.json") {
             Write-Host "Using pre-captured Windows 11 Store screenshots from packaging/windows/screenshots/"
             Copy-Item "packaging/windows/screenshots/*" "store-submission/screenshots/" -Force
           } else {
-            .\packaging\windows\capture-store-screenshots.ps1 -ExePath target\release\motaa-desktop.exe -OutputDir "store-submission/screenshots"
+            .\packaging\windows\capture-store-screenshots.ps1 -ExePath $exePath -OutputDir "store-submission/screenshots"
           }
           Copy-Item "dist/$env:PACKAGE.msix" "store-submission/$env:PACKAGE.msix"
           Copy-Item "packaging/windows/assets/StoreIcon300.png" "store-submission/assets/StoreIcon300.png"

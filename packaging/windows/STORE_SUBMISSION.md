@@ -15,15 +15,17 @@ The **Desktop Release** GitHub Actions workflow (`.github/workflows/release.yml`
 - `assets/StoreIcon300.png`: 300×300 Store icon
 - `SUBMISSION_MANIFEST.json`: Version, SHA-256 checksums, and screenshot dimensions
 
-To build locally on Windows:
+To build locally on Windows (with static CRT linking via `.cargo/config.toml` so `motaa-desktop.exe` has no `VCRUNTIME140.dll` dependency):
 ```powershell
+cargo build --locked --release --target x86_64-pc-windows-msvc --bin motaa-desktop
+
 .\packaging\windows\build-msix.ps1 `
-  -ExePath .\target\release\motaa-desktop.exe `
-  -Version 0.2.6 `
-  -OutputMsix .\dist\motaa-desktop-v0.2.6-windows-x64.msix
+  -ExePath .\target\x86_64-pc-windows-msvc\release\motaa-desktop.exe `
+  -Version 0.2.7 `
+  -OutputMsix .\dist\motaa-desktop-v0.2.7-windows-x64.msix
 
 .\packaging\windows\capture-store-screenshots.ps1 `
-  -ExePath .\target\release\motaa-desktop.exe `
+  -ExePath .\target\x86_64-pc-windows-msvc\release\motaa-desktop.exe `
   -OutputDir .\dist\store-screenshots
 ```
 
