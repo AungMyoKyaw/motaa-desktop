@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 72" fill="none">
+  <title>MOTAA Desktop Brand Lockup</title>
+  <style>
+    .wordmark { fill: #28251F; }
+    @media (prefers-color-scheme: dark) {
+      .wordmark { fill: #F8F5EE; }
+    }
+  </style>
+  <defs>
+    <linearGradient id="motaa-gold" x1="12" y1="12" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F3D996"/>
+      <stop offset="48%" stop-color="#D8B468"/>
+      <stop offset="100%" stop-color="#B38B3E"/>
+    </linearGradient>
+    <linearGradient id="motaa-tile" x1="36" y1="4" x2="36" y2="68" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2B2621"/>
+      <stop offset="50%" stop-color="#1E1B17"/>
+      <stop offset="100%" stop-color="#14110E"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="64" height="64" rx="15" fill="url(#motaa-tile)" stroke="#4E4438" stroke-width="1"/>
+  <g stroke="url(#motaa-gold)" stroke-width="2.5" stroke-linecap="butt" stroke-linejoin="miter">
+    <rect x="17" y="17" width="38" height="38"/>
+    <polygon points="36,18.2 53.8,36 36,53.8 18.2,36" stroke-linejoin="bevel"/>
+    <line x1="18" y1="18" x2="27.1" y2="27.1"/>
+    <line x1="54" y1="18" x2="44.9" y2="27.1"/>
+    <line x1="54" y1="54" x2="44.9" y2="44.9"/>
+    <line x1="18" y1="54" x2="27.1" y2="44.9"/>
+  </g>
+  <circle cx="36" cy="36" r="3.4" fill="url(#motaa-gold)"/>
+  <text class="wordmark" x="86" y="47" font-family="Baskerville, Georgia, serif" font-size="34" font-weight="600" letter-spacing="4.5">MOTAA</text>
+</svg>

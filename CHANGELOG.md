@@ -2,6 +2,11 @@
 
 All notable changes to MOTAA Desktop are documented in this file.
 
+## [0.2.6] - 2026-11-28
+
+### Changed
+- **Zata Matrix Brand Identity Redesign**: Reinvented the MOTAA Desktop logo from scratch in VectorCraft as a pure architectural Burmese 12-house *Zata* / Rasi emblem cast in satin champagne-gold on a deep matte espresso-lacquer macOS squircle with a central sculpted golden *Lagna* orb—regenerated across macOS `.icns`, GPUI `256px` PNG, adaptive light/dark SVG favicon (`motaa-mark-mono.svg`), horizontal brand lockup (`motaa-lockup.svg`), and all Windows Store/MSIX tile and splash assets.
+
 ## [0.2.5] - 2026-11-28
 
 ### Changed

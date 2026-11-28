@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <title>MOTAA Zata Matrix Mark</title>
+  <style>
+    .mark { color: #28251F; }
+    @media (prefers-color-scheme: dark) {
+      .mark { color: #D8B468; }
+    }
+  </style>
+  <g class="mark">
+    <g stroke="currentColor" stroke-width="4.2" stroke-linecap="butt" stroke-linejoin="miter">
+      <rect x="8" y="8" width="48" height="48"/>
+      <polygon points="32,10 54,32 32,54 10,32" stroke-linejoin="bevel"/>
+      <line x1="9.5" y1="9.5" x2="21" y2="21"/>
+      <line x1="54.5" y1="9.5" x2="43" y2="21"/>
+      <line x1="54.5" y1="54.5" x2="43" y2="43"/>
+      <line x1="9.5" y1="54.5" x2="21" y2="43"/>
+    </g>
+    <circle cx="32" cy="32" r="4.6" fill="currentColor"/>
+  </g>
+</svg>

@@ -1,26 +1,23 @@
 #!/usr/bin/env python3
 """Generate VectorCraft CLI headless batch commands for the MOTAA Desktop icon.
 
-Design system: Gold Heritage Light / Observatory Manuscript (DESIGN.md)
-Direction: Engraved Burmese Zata (ဇာတာ) on Warm Ivory Parchment with a
-Flush-Inset Burnished-Bronze Center Plaque & Precision Astronomical Origin Reticle (☉).
+Brand Direction: "The Zata Matrix"
+- Pure architectural symbol (zero text inside the app icon)
+- Deep matte warm espresso-lacquer macOS squircle (#2B2621 -> #1E1B17 -> #14110E)
+- Luminous satin champagne-gold (#F3D996 -> #D8B468 -> #B38B3E) traditional Burmese
+  12-house Zata / Rasi chart geometry (outer square, inscribed diamond, four corner
+  diagonals) cast as a single seamless relief with a central sculpted golden Lagna orb.
 Canvas: 1024x1024 px (transparent background), 824x824 continuous-curve squircle (100px margin).
 """
 
 from __future__ import annotations
 
 import json
-import math
 import sys
 from pathlib import Path
 
 CX = 512.0
 CY = 512.0
-
-
-def polar(r: float, deg: float, cx: float = CX, cy: float = CY) -> tuple[float, float]:
-    rad = math.radians(deg)
-    return (round(cx + r * math.cos(rad), 2), round(cy + r * math.sin(rad), 2))
 
 
 def squircle_path(
@@ -44,7 +41,9 @@ def squircle_path(
         u = (x / a) ** n
         return -((x / a) ** (n - 1.0)) * ((1.0 - u) ** (1.0 / n - 1.0))
 
-    q1_segs: list[tuple[tuple[float, float], tuple[float, float], tuple[float, float], tuple[float, float]]] = []
+    q1_segs: list[
+        tuple[tuple[float, float], tuple[float, float], tuple[float, float], tuple[float, float]]
+    ] = []
 
     for i in range(half_quad_segs):
         x0 = x45 * (i / half_quad_segs)
@@ -139,20 +138,20 @@ def build_steps() -> list[dict]:
         },
     )
 
-    # 2. Layer 1 — Apple macOS HIG Warm Ivory Parchment Squircle (824x824, 100px margin)
+    # 2. Layer 1 — Deep Matte Espresso-Lacquer macOS Squircle (824x824, 100px margin)
     tile = add("path.create", {"d": squircle_path(CX, CY, 824.0)})
     style_shape(
         tile,
-        name="MacOS Squircle Base",
+        name="MacOS Lacquer Squircle Base",
         fill={
             "gradient": {
                 "kind": "linear",
                 "start": [512, 100],
                 "end": [512, 924],
                 "stops": [
-                    {"offset": 0.0, "color": "#FFFEFA"},
-                    {"offset": 0.52, "color": "#F7F2E6"},
-                    {"offset": 1.0, "color": "#E8DEC6"},
+                    {"offset": 0.0, "color": "#2B2621"},
+                    {"offset": 0.48, "color": "#1E1B17"},
+                    {"offset": 1.0, "color": "#14110E"},
                 ],
             }
         },
@@ -162,299 +161,227 @@ def build_steps() -> list[dict]:
                 "start": [512, 100],
                 "end": [512, 924],
                 "stops": [
-                    {"offset": 0.0, "color": "#EFE4CA"},
-                    {"offset": 1.0, "color": "#BFA574"},
+                    {"offset": 0.0, "color": "#4E4438"},
+                    {"offset": 0.5, "color": "#26211B"},
+                    {"offset": 1.0, "color": "#120F0C"},
                 ],
             }
         },
-        stroke_opts={"weight": 2.0, "align": "inside"},
-    )
-    add(
-        "effect.apply",
-        {
-            "id": tile,
-            "effect": "stylize.dropShadow",
-            "params": {
-                "mode": "multiply",
-                "opacity": 26.0,
-                "x": 0.0,
-                "y": 12.0,
-                "blur": 22.0,
-                "shade": "color",
-                "color": "#1C140A",
-            },
-        },
-    )
-    add(
-        "effect.apply",
-        {
-            "id": tile,
-            "effect": "stylize.dropShadow",
-            "params": {
-                "mode": "multiply",
-                "opacity": 14.0,
-                "x": 0.0,
-                "y": 3.0,
-                "blur": 6.0,
-                "shade": "color",
-                "color": "#1C140A",
-            },
-        },
-    )
-
-    # Top specular ceramic bevel inside squircle edge
-    spec_rim = add("path.create", {"d": squircle_path(CX, CY, 820.0)})
-    style_shape(
-        spec_rim,
-        name="Squircle Specular Rim",
-        fill={"none": True},
-        stroke={
-            "gradient": {
-                "kind": "linear",
-                "start": [512, 102],
-                "end": [512, 922],
-                "stops": [
-                    {"offset": 0.0, "color": "#FFFFFF", "opacity": 0.92},
-                    {"offset": 0.36, "color": "#FFFFFF", "opacity": 0.0},
-                    {"offset": 1.0, "color": "#7C5B21", "opacity": 0.14},
-                ],
-            }
-        },
-        stroke_opts={"weight": 3.0, "align": "inside"},
-    )
-
-    # 3. Layer 2 — Engraved Burmese Zata Architectural Plate (576x576, exact 192px thirds)
-    z0 = 224.0
-    z_size = 576.0
-    cell = z_size / 3.0  # 192.0
-    gx1 = z0 + cell      # 416.0
-    gx2 = z0 + 2 * cell  # 608.0
-    z1 = z0 + z_size     # 800.0
-
-    zata_plate = add(
-        "shape.rectangle",
-        {"x": z0, "y": z0, "width": z_size, "height": z_size, "radius": 4},
-    )
-    style_shape(
-        zata_plate,
-        name="Zata Rag-Paper Plate",
-        fill={
-            "gradient": {
-                "kind": "linear",
-                "start": [512, z0],
-                "end": [512, z1],
-                "stops": [
-                    {"offset": 0.0, "color": "#FCF9F1"},
-                    {"offset": 1.0, "color": "#EFE6D2"},
-                ],
-            }
-        },
-        stroke={"none": True},
-    )
-
-    # Quiet tonal warmth on the 4 cardinal outer houses
-    for name, rx, ry in [
-        ("Zata North House Tint", gx1, z0),
-        ("Zata South House Tint", gx1, gx2),
-        ("Zata West House Tint", z0, gx1),
-        ("Zata East House Tint", gx2, gx1),
-    ]:
-        card = add("shape.rectangle", {"x": rx, "y": ry, "width": cell, "height": cell})
-        style_shape(card, name=name, fill={"color": "#DFCFAF"}, stroke={"none": True}, opacity=16)
-
-    # Engraved espresso-bronze Zata lines
-    line_stroke = {
-        "gradient": {
-            "kind": "linear",
-            "start": [512, z0],
-            "end": [512, z1],
-            "stops": [
-                {"offset": 0.0, "color": "#7B5A21"},
-                {"offset": 0.5, "color": "#5E4315"},
-                {"offset": 1.0, "color": "#3F2C0C"},
-            ],
-        }
-    }
-
-    # 4 corner diagonals (exact vertex-to-vertex)
-    for name, x1, y1, x2, y2 in [
-        ("Zata Diagonal NW", z0, z0, gx1, gx1),
-        ("Zata Diagonal NE", z1, z0, gx2, gx1),
-        ("Zata Diagonal SW", z0, z1, gx1, gx2),
-        ("Zata Diagonal SE", z1, z1, gx2, gx2),
-    ]:
-        diag = add("shape.line", {"x1": x1, "y1": y1, "x2": x2, "y2": y2})
-        style_shape(
-            diag,
-            name=name,
-            fill={"none": True},
-            stroke=line_stroke,
-            stroke_opts={"weight": 8.0, "cap": "butt"},
-        )
-
-    # 4 internal thirds lines
-    for name, x1, y1, x2, y2 in [
-        ("Zata Vertical Left", gx1, z0, gx1, z1),
-        ("Zata Vertical Right", gx2, z0, gx2, z1),
-        ("Zata Horizontal Top", z0, gx1, z1, gx1),
-        ("Zata Horizontal Bottom", z0, gx2, z1, gx2),
-    ]:
-        line = add("shape.line", {"x1": x1, "y1": y1, "x2": x2, "y2": y2})
-        style_shape(
-            line,
-            name=name,
-            fill={"none": True},
-            stroke=line_stroke,
-            stroke_opts={"weight": 8.5, "cap": "butt"},
-        )
-
-    # Outer Zata frame drawn above internal lines so corners and line ends lock cleanly
-    zata_frame = add(
-        "shape.rectangle",
-        {"x": z0, "y": z0, "width": z_size, "height": z_size, "radius": 4},
-    )
-    style_shape(
-        zata_frame,
-        name="Zata Outer Frame",
-        fill={"none": True},
-        stroke={
-            "gradient": {
-                "kind": "linear",
-                "start": [512, z0],
-                "end": [512, z1],
-                "stops": [
-                    {"offset": 0.0, "color": "#70511C"},
-                    {"offset": 0.5, "color": "#543B12"},
-                    {"offset": 1.0, "color": "#38260A"},
-                ],
-            }
-        },
-        stroke_opts={"weight": 12.0, "align": "center"},
-    )
-
-    # 4. Layer 3 — Flush-Inset Burnished Antique-Bronze Center Square Plaque (192x192 at 416..608)
-    plaque = add(
-        "shape.rectangle",
-        {"x": gx1, "y": gx1, "width": cell, "height": cell, "radius": 2},
-    )
-    style_shape(
-        plaque,
-        name="Center Bronze Plaque",
-        fill={
-            "gradient": {
-                "kind": "linear",
-                "start": [512, gx1],
-                "end": [512, gx2],
-                "stops": [
-                    {"offset": 0.0, "color": "#A47D32"},
-                    {"offset": 0.45, "color": "#7C5B21"},
-                    {"offset": 1.0, "color": "#523A11"},
-                ],
-            }
-        },
-        stroke={"color": "#432E0C"},
         stroke_opts={"weight": 2.5, "align": "inside"},
     )
     add(
         "effect.apply",
         {
-            "id": plaque,
+            "id": tile,
             "effect": "stylize.dropShadow",
             "params": {
                 "mode": "multiply",
-                "opacity": 24.0,
+                "opacity": 34.0,
                 "x": 0.0,
-                "y": 6.0,
-                "blur": 12.0,
+                "y": 14.0,
+                "blur": 24.0,
                 "shade": "color",
-                "color": "#2A1B06",
+                "color": "#0A0806",
+            },
+        },
+    )
+    add(
+        "effect.apply",
+        {
+            "id": tile,
+            "effect": "stylize.dropShadow",
+            "params": {
+                "mode": "multiply",
+                "opacity": 18.0,
+                "x": 0.0,
+                "y": 3.0,
+                "blur": 7.0,
+                "shade": "color",
+                "color": "#0A0806",
             },
         },
     )
 
-    # Machined inner chamfer highlight inside the bronze plaque
-    chamfer = add(
-        "shape.rectangle",
-        {"x": gx1 + 5.0, "y": gx1 + 5.0, "width": cell - 10.0, "height": cell - 10.0, "radius": 1},
-    )
+    # Subtle inner specular rim bevel
+    rim = add("path.create", {"d": squircle_path(CX, CY, 816.0)})
     style_shape(
-        chamfer,
-        name="Plaque Chamfer Highlight",
+        rim,
+        name="Squircle Inner Rim Highlight",
         fill={"none": True},
         stroke={
             "gradient": {
                 "kind": "linear",
-                "start": [512, gx1 + 5.0],
-                "end": [512, gx2 - 5.0],
+                "start": [512, 104],
+                "end": [512, 920],
                 "stops": [
-                    {"offset": 0.0, "color": "#F6E1A4", "opacity": 0.68},
-                    {"offset": 0.42, "color": "#FFFFFF", "opacity": 0.0},
-                    {"offset": 1.0, "color": "#2F1F07", "opacity": 0.30},
+                    {"offset": 0.0, "color": "#6E5E49", "opacity": 0.42},
+                    {"offset": 0.35, "color": "#383026", "opacity": 0.14},
+                    {"offset": 1.0, "color": "#0E0C0A", "opacity": 0.35},
                 ],
             }
         },
-        stroke_opts={"weight": 1.5},
+        stroke_opts={"weight": 2.0, "align": "inside"},
     )
 
-    # 5. Layer 4 — Engraved Ivory Precision Astronomical Origin Mark (☉ Transit Reticle)
-    reticle_ids: list[str] = []
-
-    r_ring = 44.0
-    ecliptic_ring = add(
+    # Subtle warm ambient glow behind the gold Zata Matrix
+    ambient = add(
         "shape.ellipse",
-        {"x": CX - r_ring, "y": CY - r_ring, "width": r_ring * 2, "height": r_ring * 2},
+        {"x": 212.0, "y": 212.0, "width": 600.0, "height": 600.0},
     )
     style_shape(
-        ecliptic_ring,
-        name="Origin Ecliptic Ring",
-        fill={"none": True},
-        stroke={"color": "#FFFDF7"},
-        stroke_opts={"weight": 9.0},
-    )
-    reticle_ids.append(ecliptic_ring)
-
-    r_core = 12.0
-    origin_core = add(
-        "shape.ellipse",
-        {"x": CX - r_core, "y": CY - r_core, "width": r_core * 2, "height": r_core * 2},
-    )
-    style_shape(
-        origin_core,
-        name="Origin Solar Point",
-        fill={"color": "#FFFDF7"},
+        ambient,
+        name="Warm Lacquer Ambient Glow",
+        fill={
+            "gradient": {
+                "kind": "radial",
+                "start": [512, 512],
+                "end": [812, 512],
+                "stops": [
+                    {"offset": 0.0, "color": "#5C4728", "opacity": 0.22},
+                    {"offset": 0.55, "color": "#30261A", "opacity": 0.08},
+                    {"offset": 1.0, "color": "#1E1B17", "opacity": 0.0},
+                ],
+            }
+        },
         stroke={"none": True},
     )
-    reticle_ids.append(origin_core)
 
-    for idx, deg in enumerate((-90.0, 0.0, 90.0, 180.0)):
-        x1, y1 = polar(55.0, deg)
-        x2, y2 = polar(68.0, deg)
-        tick = add("shape.line", {"x1": x1, "y1": y1, "x2": x2, "y2": y2})
+    # 3. Layer 2a — Unified Shadow Underlay Pass (eliminates internal shadow seams)
+    shadow_params = {
+        "mode": "multiply",
+        "opacity": 44.0,
+        "x": 0.0,
+        "y": 7.0,
+        "blur": 14.0,
+        "shade": "color",
+        "color": "#080604",
+    }
+    diagonals = [
+        ("Top-Left", 266.0, 266.0, 390.0, 390.0),
+        ("Top-Right", 758.0, 266.0, 634.0, 390.0),
+        ("Bottom-Right", 758.0, 758.0, 634.0, 634.0),
+        ("Bottom-Left", 266.0, 758.0, 390.0, 634.0),
+    ]
+    for label, x1, y1, x2, y2 in diagonals:
+        s_seg = add("shape.line", {"x1": x1, "y1": y1, "x2": x2, "y2": y2})
         style_shape(
-            tick,
-            name=f"Origin Meridian Tick {idx + 1}",
+            s_seg,
+            name=f"Zata Shadow Diagonal {label}",
             fill={"none": True},
-            stroke={"color": "#F4E6C6"},
-            stroke_opts={"weight": 4.5, "cap": "round"},
-            opacity=85,
+            stroke={"color": "#14110E"},
+            stroke_opts={"weight": 24.0, "cap": "butt", "join": "miter"},
         )
-        reticle_ids.append(tick)
+        add("effect.apply", {"id": s_seg, "effect": "stylize.dropShadow", "params": shadow_params})
 
-    reticle_group = add("object.group", {"ids": reticle_ids})
-    add("object.setProps", {"id": reticle_group, "name": "Astronomical Origin Reticle"})
+    s_diamond = add(
+        "path.create",
+        {"d": "M 512.00 268.00 L 756.00 512.00 L 512.00 756.00 L 268.00 512.00 Z"},
+    )
+    style_shape(
+        s_diamond,
+        name="Zata Shadow Diamond",
+        fill={"none": True},
+        stroke={"color": "#14110E"},
+        stroke_opts={"weight": 24.0, "join": "bevel", "align": "center"},
+    )
+    add("effect.apply", {"id": s_diamond, "effect": "stylize.dropShadow", "params": shadow_params})
+
+    s_outer = add(
+        "shape.rectangle",
+        {"x": 252.0, "y": 252.0, "width": 520.0, "height": 520.0},
+    )
+    style_shape(
+        s_outer,
+        name="Zata Shadow Outer Frame",
+        fill={"none": True},
+        stroke={"color": "#14110E"},
+        stroke_opts={"weight": 26.0, "join": "miter", "miterLimit": 4.0, "align": "inside"},
+    )
+    add("effect.apply", {"id": s_outer, "effect": "stylize.dropShadow", "params": shadow_params})
+
+    # 4. Layer 2b — Seamless Cast-Gold Zata Matrix (global gradient coordinates, zero seam shadows)
+    gold_gradient = {
+        "gradient": {
+            "kind": "linear",
+            "start": [252, 252],
+            "end": [772, 772],
+            "stops": [
+                {"offset": 0.0, "color": "#F3D996"},
+                {"offset": 0.46, "color": "#D8B468"},
+                {"offset": 1.0, "color": "#B38B3E"},
+            ],
+        }
+    }
+
+    for label, x1, y1, x2, y2 in diagonals:
+        seg = add("shape.line", {"x1": x1, "y1": y1, "x2": x2, "y2": y2})
+        style_shape(
+            seg,
+            name=f"Zata Gold Diagonal {label}",
+            fill={"none": True},
+            stroke=gold_gradient,
+            stroke_opts={"weight": 24.0, "cap": "butt", "join": "miter"},
+        )
+
+    diamond = add(
+        "path.create",
+        {"d": "M 512.00 268.00 L 756.00 512.00 L 512.00 756.00 L 268.00 512.00 Z"},
+    )
+    style_shape(
+        diamond,
+        name="Zata Gold Inscribed Diamond",
+        fill={"none": True},
+        stroke=gold_gradient,
+        stroke_opts={"weight": 24.0, "join": "bevel", "align": "center"},
+    )
+
+    outer_sq = add(
+        "shape.rectangle",
+        {"x": 252.0, "y": 252.0, "width": 520.0, "height": 520.0},
+    )
+    style_shape(
+        outer_sq,
+        name="Zata Gold Outer Frame",
+        fill={"none": True},
+        stroke=gold_gradient,
+        stroke_opts={"weight": 26.0, "join": "miter", "miterLimit": 4.0, "align": "inside"},
+    )
+
+    # 5. Layer 3 — Central Celestial Lagna Orb (76x76 sculpted gold sphere)
+    orb = add(
+        "shape.ellipse",
+        {"x": 474.0, "y": 474.0, "width": 76.0, "height": 76.0},
+    )
+    style_shape(
+        orb,
+        name="Lagna Celestial Orb",
+        fill={
+            "gradient": {
+                "kind": "radial",
+                "start": [498, 496],
+                "end": [552, 552],
+                "stops": [
+                    {"offset": 0.0, "color": "#FFF3C8"},
+                    {"offset": 0.45, "color": "#E2BE72"},
+                    {"offset": 1.0, "color": "#A67E33"},
+                ],
+            }
+        },
+        stroke={"none": True},
+    )
     add(
         "effect.apply",
         {
-            "id": reticle_group,
+            "id": orb,
             "effect": "stylize.dropShadow",
             "params": {
                 "mode": "multiply",
-                "opacity": 24.0,
+                "opacity": 52.0,
                 "x": 0.0,
-                "y": 2.0,
-                "blur": 4.0,
+                "y": 6.0,
+                "blur": 14.0,
                 "shade": "color",
-                "color": "#2D1E07",
+                "color": "#080604",
             },
         },
     )
@@ -463,14 +390,10 @@ def build_steps() -> list[dict]:
 
 
 def main() -> None:
-    out_path = Path(sys.argv[1]) if len(sys.argv) > 1 else None
-    steps = build_steps()
-    payload = json.dumps(steps, indent=2) + "\n"
-    if out_path:
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(payload, encoding="utf-8")
-    else:
-        sys.stdout.write(payload)
+    if len(sys.argv) != 2:
+        raise SystemExit(f"Usage: {sys.argv[0]} <output-steps.json>")
+    out = Path(sys.argv[1])
+    out.write_text(json.dumps(build_steps(), indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

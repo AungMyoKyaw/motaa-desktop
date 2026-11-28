@@ -1,3 +1,7 @@
+<p>
+  <img src="assets/icon/motaa-lockup.svg" alt="MOTAA Desktop" width="220">
+</p>
+
 # MOTAA Desktop
 
 MOTAA Desktop is an offline-first Myanmar astrology workspace built with Rust and GPUI. It casts natal and transit charts, manages saved birth profiles, and implements traditional Burmese chart geometry alongside astronomical calculation tools.

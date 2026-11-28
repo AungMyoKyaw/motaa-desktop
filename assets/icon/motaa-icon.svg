@@ -1,101 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
-    <filter id="filter-1" filterUnits="userSpaceOnUse" x="40.994" y="40.994" width="942.011" height="942.011" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="3"/><feOffset dx="0" dy="3" result="shadow"/><feFlood flood-color="#1c140a" flood-opacity="0.14"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    <filter id="filter-2" filterUnits="userSpaceOnUse" x="40.994" y="40.994" width="942.011" height="942.011" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="11"/><feOffset dx="0" dy="12" result="shadow"/><feFlood flood-color="#1c140a" flood-opacity="0.26"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="filter-1" filterUnits="userSpaceOnUse" x="34.494" y="34.494" width="955.011" height="955.011" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="3.5"/><feOffset dx="0" dy="3" result="shadow"/><feFlood flood-color="#0a0806" flood-opacity="0.18"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="filter-2" filterUnits="userSpaceOnUse" x="34.494" y="34.494" width="955.011" height="955.011" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="12"/><feOffset dx="0" dy="14" result="shadow"/><feFlood flood-color="#0a0806" flood-opacity="0.34"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     <linearGradient id="linear-gradient-1" x1="512" y1="100" x2="512" y2="924" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#fffefa"/>
-      <stop offset="0.52" stop-color="#f7f2e6"/>
-      <stop offset="1" stop-color="#e8dec6"/>
+      <stop offset="0" stop-color="#2b2621"/>
+      <stop offset="0.48" stop-color="#1e1b17"/>
+      <stop offset="1" stop-color="#14110e"/>
     </linearGradient>
     <clipPath id="clip-path-1">
       <path d="M512 100 C541.8 100 571.61 99.97 601.41 100.05 C631.22 100.12 661.02 100.25 690.83 101.42 C720.63 102.58 750.44 104.61 780.24 110.81 C810.04 117.01 839.85 124.54 869.65 154.35 C899.46 184.15 906.99 213.96 913.19 243.76 C919.39 273.56 921.42 303.37 922.58 333.17 C923.75 362.98 923.88 392.78 923.95 422.59 C924.03 452.39 924 482.2 924 512 C924 541.8 924.03 571.61 923.95 601.41 C923.88 631.22 923.75 661.02 922.58 690.83 C921.42 720.63 919.39 750.44 913.19 780.24 C906.99 810.04 899.46 839.85 869.65 869.65 C839.85 899.46 810.04 906.99 780.24 913.19 C750.44 919.39 720.63 921.42 690.83 922.58 C661.02 923.75 631.22 923.88 601.41 923.95 C571.61 924.03 541.8 924 512 924 C482.2 924 452.39 924.03 422.59 923.95 C392.78 923.88 362.98 923.75 333.17 922.58 C303.37 921.42 273.56 919.39 243.76 913.19 C213.96 906.99 184.15 899.46 154.35 869.65 C124.54 839.85 117.01 810.04 110.81 780.24 C104.61 750.44 102.58 720.63 101.42 690.83 C100.25 661.02 100.12 631.22 100.05 601.41 C99.97 571.61 100 541.8 100 512 C100 482.2 99.97 452.39 100.05 422.59 C100.12 392.78 100.25 362.98 101.42 333.17 C102.58 303.37 104.61 273.56 110.81 243.76 C117.01 213.96 124.54 184.15 154.35 154.35 C184.15 124.54 213.96 117.01 243.76 110.81 C273.56 104.61 303.37 102.58 333.17 101.42 C362.98 100.25 392.78 100.12 422.59 100.05 C452.39 99.97 482.2 100 512 100 Z"/>
     </clipPath>
     <linearGradient id="linear-gradient-2" x1="512" y1="100" x2="512" y2="924" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#efe4ca"/>
-      <stop offset="1" stop-color="#bfa574"/>
+      <stop offset="0" stop-color="#4e4438"/>
+      <stop offset="0.5" stop-color="#26211b"/>
+      <stop offset="1" stop-color="#120f0c"/>
     </linearGradient>
     <clipPath id="clip-path-2">
-      <path d="M512 102 C541.66 102 571.32 101.97 600.98 102.05 C630.64 102.12 660.3 102.25 689.96 103.41 C719.62 104.57 749.28 106.58 778.94 112.75 C808.6 118.92 838.26 126.42 867.92 156.08 C897.58 185.74 905.08 215.4 911.25 245.06 C917.42 274.72 919.43 304.38 920.59 334.04 C921.75 363.7 921.88 393.36 921.95 423.02 C922.03 452.68 922 482.34 922 512 C922 541.66 922.03 571.32 921.95 600.98 C921.88 630.64 921.75 660.3 920.59 689.96 C919.43 719.62 917.42 749.28 911.25 778.94 C905.08 808.6 897.58 838.26 867.92 867.92 C838.26 897.58 808.6 905.08 778.94 911.25 C749.28 917.42 719.62 919.43 689.96 920.59 C660.3 921.75 630.64 921.88 600.98 921.95 C571.32 922.03 541.66 922 512 922 C482.34 922 452.68 922.03 423.02 921.95 C393.36 921.88 363.7 921.75 334.04 920.59 C304.38 919.43 274.72 917.42 245.06 911.25 C215.4 905.08 185.74 897.58 156.08 867.92 C126.42 838.26 118.92 808.6 112.75 778.94 C106.58 749.28 104.57 719.62 103.41 689.96 C102.25 660.3 102.12 630.64 102.05 600.98 C101.97 571.32 102 541.66 102 512 C102 482.34 101.97 452.68 102.05 423.02 C102.12 393.36 102.25 363.7 103.41 334.04 C104.57 304.38 106.58 274.72 112.75 245.06 C118.92 215.4 126.42 185.74 156.08 156.08 C185.74 126.42 215.4 118.92 245.06 112.75 C274.72 106.58 304.38 104.57 334.04 103.41 C363.7 102.25 393.36 102.12 423.02 102.05 C452.68 101.97 482.34 102 512 102 Z"/>
+      <path d="M512 104 C541.52 104 571.03 103.97 600.55 104.05 C630.06 104.12 659.58 104.25 689.09 105.4 C718.61 106.56 748.12 108.56 777.64 114.7 C807.15 120.84 836.67 128.3 866.18 157.82 C895.7 187.33 903.16 216.85 909.3 246.36 C915.44 275.88 917.44 305.39 918.6 334.91 C919.75 364.42 919.88 393.94 919.95 423.45 C920.03 452.97 920 482.48 920 512 C920 541.52 920.03 571.03 919.95 600.55 C919.88 630.06 919.75 659.58 918.6 689.09 C917.44 718.61 915.44 748.12 909.3 777.64 C903.16 807.15 895.7 836.67 866.18 866.18 C836.67 895.7 807.15 903.16 777.64 909.3 C748.12 915.44 718.61 917.44 689.09 918.6 C659.58 919.75 630.06 919.88 600.55 919.95 C571.03 920.03 541.52 920 512 920 C482.48 920 452.97 920.03 423.45 919.95 C393.94 919.88 364.42 919.75 334.91 918.6 C305.39 917.44 275.88 915.44 246.36 909.3 C216.85 903.16 187.33 895.7 157.82 866.18 C128.3 836.67 120.84 807.15 114.7 777.64 C108.56 748.12 106.56 718.61 105.4 689.09 C104.25 659.58 104.12 630.06 104.05 600.55 C103.97 571.03 104 541.52 104 512 C104 482.48 103.97 452.97 104.05 423.45 C104.12 393.94 104.25 364.42 105.4 334.91 C106.56 305.39 108.56 275.88 114.7 246.36 C120.84 216.85 128.3 187.33 157.82 157.82 C187.33 128.3 216.85 120.84 246.36 114.7 C275.88 108.56 305.39 106.56 334.91 105.4 C364.42 104.25 393.94 104.12 423.45 104.05 C452.97 103.97 482.48 104 512 104 Z"/>
     </clipPath>
-    <linearGradient id="linear-gradient-3" x1="512" y1="102" x2="512" y2="922" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.92"/>
-      <stop offset="0.36" stop-color="#ffffff" stop-opacity="0"/>
-      <stop offset="1" stop-color="#7c5b21" stop-opacity="0.14"/>
+    <linearGradient id="linear-gradient-3" x1="512" y1="104" x2="512" y2="920" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6e5e49" stop-opacity="0.42"/>
+      <stop offset="0.35" stop-color="#383026" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#0e0c0a" stop-opacity="0.35"/>
     </linearGradient>
-    <linearGradient id="linear-gradient-4" x1="512" y1="224" x2="512" y2="800" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#fcf9f1"/>
-      <stop offset="1" stop-color="#efe6d2"/>
-    </linearGradient>
-    <linearGradient id="linear-gradient-5" x1="512" y1="224" x2="512" y2="800" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#7b5a21"/>
-      <stop offset="0.5" stop-color="#5e4315"/>
-      <stop offset="1" stop-color="#3f2c0c"/>
-    </linearGradient>
-    <linearGradient id="linear-gradient-6" x1="512" y1="224" x2="512" y2="800" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#70511c"/>
-      <stop offset="0.5" stop-color="#543b12"/>
-      <stop offset="1" stop-color="#38260a"/>
-    </linearGradient>
-    <filter id="filter-3" filterUnits="userSpaceOnUse" x="390" y="390" width="244" height="244" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="6"/><feOffset dx="0" dy="6" result="shadow"/><feFlood flood-color="#2a1b06" flood-opacity="0.24"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    <linearGradient id="linear-gradient-7" x1="512" y1="416" x2="512" y2="608" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#a47d32"/>
-      <stop offset="0.45" stop-color="#7c5b21"/>
-      <stop offset="1" stop-color="#523a11"/>
-    </linearGradient>
+    <radialGradient id="radial-gradient-1" cx="512" cy="512" r="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5c4728" stop-opacity="0.22"/>
+      <stop offset="0.55" stop-color="#30261a" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#1e1b17" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="filter-3" filterUnits="userSpaceOnUse" x="227.515" y="227.515" width="200.971" height="200.971" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="7"/><feOffset dx="0" dy="7" result="shadow"/><feFlood flood-color="#080604" flood-opacity="0.44"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="filter-4" filterUnits="userSpaceOnUse" x="595.515" y="227.515" width="200.971" height="200.971" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="7"/><feOffset dx="0" dy="7" result="shadow"/><feFlood flood-color="#080604" flood-opacity="0.44"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="filter-5" filterUnits="userSpaceOnUse" x="595.515" y="595.515" width="200.971" height="200.971" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="7"/><feOffset dx="0" dy="7" result="shadow"/><feFlood flood-color="#080604" flood-opacity="0.44"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="filter-6" filterUnits="userSpaceOnUse" x="227.515" y="595.515" width="200.971" height="200.971" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="7"/><feOffset dx="0" dy="7" result="shadow"/><feFlood flood-color="#080604" flood-opacity="0.44"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="filter-7" filterUnits="userSpaceOnUse" x="229.515" y="229.515" width="564.971" height="564.971" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="7"/><feOffset dx="0" dy="7" result="shadow"/><feFlood flood-color="#080604" flood-opacity="0.44"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="filter-8" filterUnits="userSpaceOnUse" x="222" y="222" width="580" height="580" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="7"/><feOffset dx="0" dy="7" result="shadow"/><feFlood flood-color="#080604" flood-opacity="0.44"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     <clipPath id="clip-path-3">
-      <path d="M418 416 L606 416 C607.105 416 608 416.895 608 418 L608 606 C608 607.105 607.105 608 606 608 L418 608 C416.895 608 416 607.105 416 606 L416 418 C416 416.895 416.895 416 418 416 Z"/>
+      <path d="M252 252 L772 252 L772 772 L252 772 Z"/>
     </clipPath>
-    <linearGradient id="linear-gradient-8" x1="512" y1="421" x2="512" y2="603" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#f6e1a4" stop-opacity="0.68"/>
-      <stop offset="0.42" stop-color="#ffffff" stop-opacity="0"/>
-      <stop offset="1" stop-color="#2f1f07" stop-opacity="0.3"/>
+    <linearGradient id="linear-gradient-4" x1="252" y1="252" x2="772" y2="772" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f3d996"/>
+      <stop offset="0.46" stop-color="#d8b468"/>
+      <stop offset="1" stop-color="#b38b3e"/>
     </linearGradient>
-    <filter id="filter-4" filterUnits="userSpaceOnUse" x="431.75" y="431.75" width="160.5" height="160.5" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="2"/><feOffset dx="0" dy="2" result="shadow"/><feFlood flood-color="#2d1e07" flood-opacity="0.24"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <clipPath id="clip-path-4">
+      <path d="M252 252 L772 252 L772 772 L252 772 Z"/>
+    </clipPath>
+    <filter id="filter-9" filterUnits="userSpaceOnUse" x="445" y="445" width="134" height="134" data-vc-blend="multiply" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceAlpha" stdDeviation="7"/><feOffset dx="0" dy="6" result="shadow"/><feFlood flood-color="#080604" flood-opacity="0.52"/><feComposite in2="shadow" operator="in" result="paint"/><feMerge><feMergeNode in="paint"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <radialGradient id="radial-gradient-2" cx="498" cy="496" r="77.795" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff3c8"/>
+      <stop offset="0.45" stop-color="#e2be72"/>
+      <stop offset="1" stop-color="#a67e33"/>
+    </radialGradient>
   </defs>
   <title>MOTAA Desktop Icon</title>
   <g id="Layer_1" data-name="Layer 1">
     <g filter="url(#filter-1)">
       <g filter="url(#filter-2)">
-        <g id="MacOS_Squircle_Base" data-name="MacOS Squircle Base">
+        <g id="MacOS_Lacquer_Squircle_Base" data-name="MacOS Lacquer Squircle Base">
           <path d="M512 100 C541.8 100 571.61 99.97 601.41 100.05 C631.22 100.12 661.02 100.25 690.83 101.42 C720.63 102.58 750.44 104.61 780.24 110.81 C810.04 117.01 839.85 124.54 869.65 154.35 C899.46 184.15 906.99 213.96 913.19 243.76 C919.39 273.56 921.42 303.37 922.58 333.17 C923.75 362.98 923.88 392.78 923.95 422.59 C924.03 452.39 924 482.2 924 512 C924 541.8 924.03 571.61 923.95 601.41 C923.88 631.22 923.75 661.02 922.58 690.83 C921.42 720.63 919.39 750.44 913.19 780.24 C906.99 810.04 899.46 839.85 869.65 869.65 C839.85 899.46 810.04 906.99 780.24 913.19 C750.44 919.39 720.63 921.42 690.83 922.58 C661.02 923.75 631.22 923.88 601.41 923.95 C571.61 924.03 541.8 924 512 924 C482.2 924 452.39 924.03 422.59 923.95 C392.78 923.88 362.98 923.75 333.17 922.58 C303.37 921.42 273.56 919.39 243.76 913.19 C213.96 906.99 184.15 899.46 154.35 869.65 C124.54 839.85 117.01 810.04 110.81 780.24 C104.61 750.44 102.58 720.63 101.42 690.83 C100.25 661.02 100.12 631.22 100.05 601.41 C99.97 571.61 100 541.8 100 512 C100 482.2 99.97 452.39 100.05 422.59 C100.12 392.78 100.25 362.98 101.42 333.17 C102.58 303.37 104.61 273.56 110.81 243.76 C117.01 213.96 124.54 184.15 154.35 154.35 C184.15 124.54 213.96 117.01 243.76 110.81 C273.56 104.61 303.37 102.58 333.17 101.42 C362.98 100.25 392.78 100.12 422.59 100.05 C452.39 99.97 482.2 100 512 100 Z" fill="url(#linear-gradient-1)"/>
-          <path d="M512 100 C541.8 100 571.61 99.97 601.41 100.05 C631.22 100.12 661.02 100.25 690.83 101.42 C720.63 102.58 750.44 104.61 780.24 110.81 C810.04 117.01 839.85 124.54 869.65 154.35 C899.46 184.15 906.99 213.96 913.19 243.76 C919.39 273.56 921.42 303.37 922.58 333.17 C923.75 362.98 923.88 392.78 923.95 422.59 C924.03 452.39 924 482.2 924 512 C924 541.8 924.03 571.61 923.95 601.41 C923.88 631.22 923.75 661.02 922.58 690.83 C921.42 720.63 919.39 750.44 913.19 780.24 C906.99 810.04 899.46 839.85 869.65 869.65 C839.85 899.46 810.04 906.99 780.24 913.19 C750.44 919.39 720.63 921.42 690.83 922.58 C661.02 923.75 631.22 923.88 601.41 923.95 C571.61 924.03 541.8 924 512 924 C482.2 924 452.39 924.03 422.59 923.95 C392.78 923.88 362.98 923.75 333.17 922.58 C303.37 921.42 273.56 919.39 243.76 913.19 C213.96 906.99 184.15 899.46 154.35 869.65 C124.54 839.85 117.01 810.04 110.81 780.24 C104.61 750.44 102.58 720.63 101.42 690.83 C100.25 661.02 100.12 631.22 100.05 601.41 C99.97 571.61 100 541.8 100 512 C100 482.2 99.97 452.39 100.05 422.59 C100.12 392.78 100.25 362.98 101.42 333.17 C102.58 303.37 104.61 273.56 110.81 243.76 C117.01 213.96 124.54 184.15 154.35 154.35 C184.15 124.54 213.96 117.01 243.76 110.81 C273.56 104.61 303.37 102.58 333.17 101.42 C362.98 100.25 392.78 100.12 422.59 100.05 C452.39 99.97 482.2 100 512 100 Z" fill="none" stroke="url(#linear-gradient-2)" stroke-width="4" stroke-miterlimit="10" clip-path="url(#clip-path-1)"/>
+          <path d="M512 100 C541.8 100 571.61 99.97 601.41 100.05 C631.22 100.12 661.02 100.25 690.83 101.42 C720.63 102.58 750.44 104.61 780.24 110.81 C810.04 117.01 839.85 124.54 869.65 154.35 C899.46 184.15 906.99 213.96 913.19 243.76 C919.39 273.56 921.42 303.37 922.58 333.17 C923.75 362.98 923.88 392.78 923.95 422.59 C924.03 452.39 924 482.2 924 512 C924 541.8 924.03 571.61 923.95 601.41 C923.88 631.22 923.75 661.02 922.58 690.83 C921.42 720.63 919.39 750.44 913.19 780.24 C906.99 810.04 899.46 839.85 869.65 869.65 C839.85 899.46 810.04 906.99 780.24 913.19 C750.44 919.39 720.63 921.42 690.83 922.58 C661.02 923.75 631.22 923.88 601.41 923.95 C571.61 924.03 541.8 924 512 924 C482.2 924 452.39 924.03 422.59 923.95 C392.78 923.88 362.98 923.75 333.17 922.58 C303.37 921.42 273.56 919.39 243.76 913.19 C213.96 906.99 184.15 899.46 154.35 869.65 C124.54 839.85 117.01 810.04 110.81 780.24 C104.61 750.44 102.58 720.63 101.42 690.83 C100.25 661.02 100.12 631.22 100.05 601.41 C99.97 571.61 100 541.8 100 512 C100 482.2 99.97 452.39 100.05 422.59 C100.12 392.78 100.25 362.98 101.42 333.17 C102.58 303.37 104.61 273.56 110.81 243.76 C117.01 213.96 124.54 184.15 154.35 154.35 C184.15 124.54 213.96 117.01 243.76 110.81 C273.56 104.61 303.37 102.58 333.17 101.42 C362.98 100.25 392.78 100.12 422.59 100.05 C452.39 99.97 482.2 100 512 100 Z" fill="none" stroke="url(#linear-gradient-2)" stroke-width="5" stroke-miterlimit="10" clip-path="url(#clip-path-1)"/>
         </g>
       </g>
     </g>
-    <g id="Squircle_Specular_Rim" data-name="Squircle Specular Rim">
-      <path d="M512 102 C541.66 102 571.32 101.97 600.98 102.05 C630.64 102.12 660.3 102.25 689.96 103.41 C719.62 104.57 749.28 106.58 778.94 112.75 C808.6 118.92 838.26 126.42 867.92 156.08 C897.58 185.74 905.08 215.4 911.25 245.06 C917.42 274.72 919.43 304.38 920.59 334.04 C921.75 363.7 921.88 393.36 921.95 423.02 C922.03 452.68 922 482.34 922 512 C922 541.66 922.03 571.32 921.95 600.98 C921.88 630.64 921.75 660.3 920.59 689.96 C919.43 719.62 917.42 749.28 911.25 778.94 C905.08 808.6 897.58 838.26 867.92 867.92 C838.26 897.58 808.6 905.08 778.94 911.25 C749.28 917.42 719.62 919.43 689.96 920.59 C660.3 921.75 630.64 921.88 600.98 921.95 C571.32 922.03 541.66 922 512 922 C482.34 922 452.68 922.03 423.02 921.95 C393.36 921.88 363.7 921.75 334.04 920.59 C304.38 919.43 274.72 917.42 245.06 911.25 C215.4 905.08 185.74 897.58 156.08 867.92 C126.42 838.26 118.92 808.6 112.75 778.94 C106.58 749.28 104.57 719.62 103.41 689.96 C102.25 660.3 102.12 630.64 102.05 600.98 C101.97 571.32 102 541.66 102 512 C102 482.34 101.97 452.68 102.05 423.02 C102.12 393.36 102.25 363.7 103.41 334.04 C104.57 304.38 106.58 274.72 112.75 245.06 C118.92 215.4 126.42 185.74 156.08 156.08 C185.74 126.42 215.4 118.92 245.06 112.75 C274.72 106.58 304.38 104.57 334.04 103.41 C363.7 102.25 393.36 102.12 423.02 102.05 C452.68 101.97 482.34 102 512 102 Z" fill="none" stroke="url(#linear-gradient-3)" stroke-width="6" stroke-miterlimit="10" clip-path="url(#clip-path-2)"/>
+    <g id="Squircle_Inner_Rim_Highlight" data-name="Squircle Inner Rim Highlight">
+      <path d="M512 104 C541.52 104 571.03 103.97 600.55 104.05 C630.06 104.12 659.58 104.25 689.09 105.4 C718.61 106.56 748.12 108.56 777.64 114.7 C807.15 120.84 836.67 128.3 866.18 157.82 C895.7 187.33 903.16 216.85 909.3 246.36 C915.44 275.88 917.44 305.39 918.6 334.91 C919.75 364.42 919.88 393.94 919.95 423.45 C920.03 452.97 920 482.48 920 512 C920 541.52 920.03 571.03 919.95 600.55 C919.88 630.06 919.75 659.58 918.6 689.09 C917.44 718.61 915.44 748.12 909.3 777.64 C903.16 807.15 895.7 836.67 866.18 866.18 C836.67 895.7 807.15 903.16 777.64 909.3 C748.12 915.44 718.61 917.44 689.09 918.6 C659.58 919.75 630.06 919.88 600.55 919.95 C571.03 920.03 541.52 920 512 920 C482.48 920 452.97 920.03 423.45 919.95 C393.94 919.88 364.42 919.75 334.91 918.6 C305.39 917.44 275.88 915.44 246.36 909.3 C216.85 903.16 187.33 895.7 157.82 866.18 C128.3 836.67 120.84 807.15 114.7 777.64 C108.56 748.12 106.56 718.61 105.4 689.09 C104.25 659.58 104.12 630.06 104.05 600.55 C103.97 571.03 104 541.52 104 512 C104 482.48 103.97 452.97 104.05 423.45 C104.12 393.94 104.25 364.42 105.4 334.91 C106.56 305.39 108.56 275.88 114.7 246.36 C120.84 216.85 128.3 187.33 157.82 157.82 C187.33 128.3 216.85 120.84 246.36 114.7 C275.88 108.56 305.39 106.56 334.91 105.4 C364.42 104.25 393.94 104.12 423.45 104.05 C452.97 103.97 482.48 104 512 104 Z" fill="none" stroke="url(#linear-gradient-3)" stroke-width="4" stroke-miterlimit="10" clip-path="url(#clip-path-2)"/>
     </g>
-    <path id="Zata_Rag-Paper_Plate" data-name="Zata Rag-Paper Plate" d="M228 224 L796 224 C798.209 224 800 225.791 800 228 L800 796 C800 798.209 798.209 800 796 800 L228 800 C225.791 800 224 798.209 224 796 L224 228 C224 225.791 225.791 224 228 224 Z" fill="url(#linear-gradient-4)"/>
-    <rect id="Zata_North_House_Tint" data-name="Zata North House Tint" x="416" y="224" width="192" height="192" fill="#dfcfaf" opacity="0.16"/>
-    <rect id="Zata_South_House_Tint" data-name="Zata South House Tint" x="416" y="608" width="192" height="192" fill="#dfcfaf" opacity="0.16"/>
-    <rect id="Zata_West_House_Tint" data-name="Zata West House Tint" x="224" y="416" width="192" height="192" fill="#dfcfaf" opacity="0.16"/>
-    <rect id="Zata_East_House_Tint" data-name="Zata East House Tint" x="608" y="416" width="192" height="192" fill="#dfcfaf" opacity="0.16"/>
-    <line id="Zata_Diagonal_NW" data-name="Zata Diagonal NW" x1="224" y1="224" x2="416" y2="416" fill="none" stroke="url(#linear-gradient-5)" stroke-width="8" stroke-miterlimit="10"/>
-    <line id="Zata_Diagonal_NE" data-name="Zata Diagonal NE" x1="800" y1="224" x2="608" y2="416" fill="none" stroke="url(#linear-gradient-5)" stroke-width="8" stroke-miterlimit="10"/>
-    <line id="Zata_Diagonal_SW" data-name="Zata Diagonal SW" x1="224" y1="800" x2="416" y2="608" fill="none" stroke="url(#linear-gradient-5)" stroke-width="8" stroke-miterlimit="10"/>
-    <line id="Zata_Diagonal_SE" data-name="Zata Diagonal SE" x1="800" y1="800" x2="608" y2="608" fill="none" stroke="url(#linear-gradient-5)" stroke-width="8" stroke-miterlimit="10"/>
-    <line id="Zata_Vertical_Left" data-name="Zata Vertical Left" x1="416" y1="224" x2="416" y2="800" fill="none" stroke="url(#linear-gradient-5)" stroke-width="8.5" stroke-miterlimit="10"/>
-    <line id="Zata_Vertical_Right" data-name="Zata Vertical Right" x1="608" y1="224" x2="608" y2="800" fill="none" stroke="url(#linear-gradient-5)" stroke-width="8.5" stroke-miterlimit="10"/>
-    <line id="Zata_Horizontal_Top" data-name="Zata Horizontal Top" x1="224" y1="416" x2="800" y2="416" fill="none" stroke="url(#linear-gradient-5)" stroke-width="8.5" stroke-miterlimit="10"/>
-    <line id="Zata_Horizontal_Bottom" data-name="Zata Horizontal Bottom" x1="224" y1="608" x2="800" y2="608" fill="none" stroke="url(#linear-gradient-5)" stroke-width="8.5" stroke-miterlimit="10"/>
-    <path id="Zata_Outer_Frame" data-name="Zata Outer Frame" d="M228 224 L796 224 C798.209 224 800 225.791 800 228 L800 796 C800 798.209 798.209 800 796 800 L228 800 C225.791 800 224 798.209 224 796 L224 228 C224 225.791 225.791 224 228 224 Z" fill="none" stroke="url(#linear-gradient-6)" stroke-width="12" stroke-miterlimit="10"/>
+    <circle id="Warm_Lacquer_Ambient_Glow" data-name="Warm Lacquer Ambient Glow" cx="512" cy="512" r="300" fill="url(#radial-gradient-1)"/>
     <g filter="url(#filter-3)">
-      <g id="Center_Bronze_Plaque" data-name="Center Bronze Plaque">
-        <path d="M418 416 L606 416 C607.105 416 608 416.895 608 418 L608 606 C608 607.105 607.105 608 606 608 L418 608 C416.895 608 416 607.105 416 606 L416 418 C416 416.895 416.895 416 418 416 Z" fill="url(#linear-gradient-7)"/>
-        <path d="M418 416 L606 416 C607.105 416 608 416.895 608 418 L608 606 C608 607.105 607.105 608 606 608 L418 608 C416.895 608 416 607.105 416 606 L416 418 C416 416.895 416.895 416 418 416 Z" fill="none" stroke="#432e0c" stroke-width="5" stroke-miterlimit="10" clip-path="url(#clip-path-3)"/>
+      <line id="Zata_Shadow_Diagonal_Top-Left" data-name="Zata Shadow Diagonal Top-Left" x1="266" y1="266" x2="390" y2="390" fill="none" stroke="#14110e" stroke-width="24" stroke-miterlimit="10"/>
+    </g>
+    <g filter="url(#filter-4)">
+      <line id="Zata_Shadow_Diagonal_Top-Right" data-name="Zata Shadow Diagonal Top-Right" x1="758" y1="266" x2="634" y2="390" fill="none" stroke="#14110e" stroke-width="24" stroke-miterlimit="10"/>
+    </g>
+    <g filter="url(#filter-5)">
+      <line id="Zata_Shadow_Diagonal_Bottom-Right" data-name="Zata Shadow Diagonal Bottom-Right" x1="758" y1="758" x2="634" y2="634" fill="none" stroke="#14110e" stroke-width="24" stroke-miterlimit="10"/>
+    </g>
+    <g filter="url(#filter-6)">
+      <line id="Zata_Shadow_Diagonal_Bottom-Left" data-name="Zata Shadow Diagonal Bottom-Left" x1="266" y1="758" x2="390" y2="634" fill="none" stroke="#14110e" stroke-width="24" stroke-miterlimit="10"/>
+    </g>
+    <g filter="url(#filter-7)">
+      <polygon id="Zata_Shadow_Diamond" data-name="Zata Shadow Diamond" points="512,268 756,512 512,756 268,512" fill="none" stroke="#14110e" stroke-width="24" stroke-linejoin="bevel"/>
+    </g>
+    <g filter="url(#filter-8)">
+      <g id="Zata_Shadow_Outer_Frame" data-name="Zata Shadow Outer Frame">
+        <rect x="252" y="252" width="520" height="520" fill="none" stroke="#14110e" stroke-width="52" clip-path="url(#clip-path-3)"/>
       </g>
     </g>
-    <path id="Plaque_Chamfer_Highlight" data-name="Plaque Chamfer Highlight" d="M422 421 L602 421 C602.552 421 603 421.448 603 422 L603 602 C603 602.552 602.552 603 602 603 L422 603 C421.448 603 421 602.552 421 602 L421 422 C421 421.448 421.448 421 422 421 Z" fill="none" stroke="url(#linear-gradient-8)" stroke-width="1.5" stroke-miterlimit="10"/>
-    <g filter="url(#filter-4)">
-      <g id="Astronomical_Origin_Reticle" data-name="Astronomical Origin Reticle">
-        <circle id="Origin_Ecliptic_Ring" data-name="Origin Ecliptic Ring" cx="512" cy="512" r="44" fill="none" stroke="#fffdf7" stroke-width="9" stroke-miterlimit="10"/>
-        <circle id="Origin_Solar_Point" data-name="Origin Solar Point" cx="512" cy="512" r="12" fill="#fffdf7"/>
-        <line id="Origin_Meridian_Tick_1" data-name="Origin Meridian Tick 1" x1="512" y1="457" x2="512" y2="444" fill="none" stroke="#f4e6c6" stroke-width="4.5" stroke-linecap="round" stroke-miterlimit="10" opacity="0.85"/>
-        <line id="Origin_Meridian_Tick_2" data-name="Origin Meridian Tick 2" x1="567" y1="512" x2="580" y2="512" fill="none" stroke="#f4e6c6" stroke-width="4.5" stroke-linecap="round" stroke-miterlimit="10" opacity="0.85"/>
-        <line id="Origin_Meridian_Tick_3" data-name="Origin Meridian Tick 3" x1="512" y1="567" x2="512" y2="580" fill="none" stroke="#f4e6c6" stroke-width="4.5" stroke-linecap="round" stroke-miterlimit="10" opacity="0.85"/>
-        <line id="Origin_Meridian_Tick_4" data-name="Origin Meridian Tick 4" x1="457" y1="512" x2="444" y2="512" fill="none" stroke="#f4e6c6" stroke-width="4.5" stroke-linecap="round" stroke-miterlimit="10" opacity="0.85"/>
-      </g>
+    <line id="Zata_Gold_Diagonal_Top-Left" data-name="Zata Gold Diagonal Top-Left" x1="266" y1="266" x2="390" y2="390" fill="none" stroke="url(#linear-gradient-4)" stroke-width="24" stroke-miterlimit="10"/>
+    <line id="Zata_Gold_Diagonal_Top-Right" data-name="Zata Gold Diagonal Top-Right" x1="758" y1="266" x2="634" y2="390" fill="none" stroke="url(#linear-gradient-4)" stroke-width="24" stroke-miterlimit="10"/>
+    <line id="Zata_Gold_Diagonal_Bottom-Right" data-name="Zata Gold Diagonal Bottom-Right" x1="758" y1="758" x2="634" y2="634" fill="none" stroke="url(#linear-gradient-4)" stroke-width="24" stroke-miterlimit="10"/>
+    <line id="Zata_Gold_Diagonal_Bottom-Left" data-name="Zata Gold Diagonal Bottom-Left" x1="266" y1="758" x2="390" y2="634" fill="none" stroke="url(#linear-gradient-4)" stroke-width="24" stroke-miterlimit="10"/>
+    <polygon id="Zata_Gold_Inscribed_Diamond" data-name="Zata Gold Inscribed Diamond" points="512,268 756,512 512,756 268,512" fill="none" stroke="url(#linear-gradient-4)" stroke-width="24" stroke-linejoin="bevel"/>
+    <g id="Zata_Gold_Outer_Frame" data-name="Zata Gold Outer Frame">
+      <rect x="252" y="252" width="520" height="520" fill="none" stroke="url(#linear-gradient-4)" stroke-width="52" clip-path="url(#clip-path-4)"/>
+    </g>
+    <g filter="url(#filter-9)">
+      <circle id="Lagna_Celestial_Orb" data-name="Lagna Celestial Orb" cx="512" cy="512" r="38" fill="url(#radial-gradient-2)"/>
     </g>
   </g>
 </svg>
