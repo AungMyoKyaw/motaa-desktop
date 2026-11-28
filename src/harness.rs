@@ -139,15 +139,15 @@ pub(crate) fn run(
                 .expect("verify space returned to Charts");
             println!("Verified keyboard control activation");
             let smoke_profile_id = window
-                .update(cx, |root, _, cx| {
-                    root.open_draft(ChartRequest::default(), None, cx);
+                .update(cx, |root, win, cx| {
+                    root.open_draft(ChartRequest::default(), None, win, cx);
                     let draft = root.draft.as_ref().expect("open profile draft");
                     draft
                         .name
-                        .update(cx, |input, cx| input.set_value("Smoke Unknown".into(), cx));
+                        .update(cx, |input, cx| input.set_value("Smoke Unknown", win, cx));
                     draft
                         .datetime
-                        .update(cx, |input, cx| input.set_value("invalid-date".into(), cx));
+                        .update(cx, |input, cx| input.set_value("invalid-date", win, cx));
                     root.save_draft(cx);
                     assert!(root.draft.is_some());
                     assert!(!root.session.read(cx).status.is_empty());
@@ -156,16 +156,16 @@ pub(crate) fn run(
                         .unwrap()
                         .datetime
                         .update(cx, |input, cx| {
-                            input.set_value("1992-08-14 00:00:00".into(), cx)
+                            input.set_value("1992-08-14 00:00:00", win, cx)
                         });
-                    root.sync_datetime_pickers(cx);
+                    root.sync_datetime_pickers(win, cx);
                     assert_eq!(root.draft.as_ref().unwrap().picker.view_year, 1992);
                     assert_eq!(root.draft.as_ref().unwrap().picker.view_month, 8);
-                    root.draft
-                        .as_mut()
-                        .unwrap()
-                        .picker
-                        .select_calendar_date(jiff::civil::Date::constant(1992, 8, 14), cx);
+                    root.draft.as_mut().unwrap().picker.select_calendar_date(
+                        jiff::civil::Date::constant(1992, 8, 14),
+                        win,
+                        cx,
+                    );
                     root.draft.as_mut().unwrap().unknown = true;
                     root.save_draft(cx);
                     assert!(root.draft.is_none());
@@ -183,11 +183,11 @@ pub(crate) fn run(
                 })
                 .expect("verify profile error and unknown birth time");
             window
-                .update(cx, |root, _, cx| {
-                    root.open_draft(ChartRequest::default(), None, cx);
+                .update(cx, |root, win, cx| {
+                    root.open_draft(ChartRequest::default(), None, win, cx);
                     assert!(root.show_profile_editor);
                     root.draft.as_ref().unwrap().name.update(cx, |input, cx| {
-                        input.set_value("Unfinished profile".into(), cx)
+                        input.set_value("Unfinished profile", win, cx)
                     });
                 })
                 .expect("open a second profile draft");
@@ -298,18 +298,18 @@ pub(crate) fn run(
                 .expect("verify profile switching preserves the draft");
             draw(cx);
             window
-                .update(cx, |root, _, cx| {
+                .update(cx, |root, win, cx| {
                     root.navigate(Workspace::Profiles, cx);
                     root.search.update(cx, |input, cx| {
-                        input.set_value("__no_such_profile__".into(), cx)
+                        input.set_value("__no_such_profile__", win, cx)
                     });
                 })
                 .expect("search non-matching profile");
             draw(cx);
             window
-                .update(cx, |root, _, cx| {
+                .update(cx, |root, win, cx| {
                     root.search
-                        .update(cx, |input, cx| input.set_value(String::new(), cx));
+                        .update(cx, |input, cx| input.set_value(String::new(), win, cx));
                     root.delete_confirmation = Some(smoke_profile_id);
                 })
                 .expect("open delete confirmation");
@@ -385,30 +385,28 @@ pub(crate) fn run(
                 .expect("restore default chart flags");
             println!("Verified MUNP modes");
             window
-                .update(cx, |root, _, cx| {
+                .update(cx, |root, win, cx| {
                     root.navigate(Workspace::Time, cx);
                     let selected_time = parse_time("2024-07-01 12:00:00").unwrap();
-                    root.set_time(selected_time, true, cx);
+                    root.set_time(selected_time, true, win, cx);
                     let before = root.session.read(cx).calculate(false).unwrap();
-                    root.edit_reference_location(cx);
+                    root.edit_reference_location(win, cx);
                     let draft = root.reference_location_draft.as_ref().unwrap();
                     draft
                         .place
-                        .update(cx, |input, cx| input.set_value("New York".into(), cx));
+                        .update(cx, |input, cx| input.set_value("New York", win, cx));
                     draft
                         .latitude
-                        .update(cx, |input, cx| input.set_value("40 42 46 N".into(), cx));
+                        .update(cx, |input, cx| input.set_value("40 42 46 N", win, cx));
                     draft
                         .longitude
-                        .update(cx, |input, cx| input.set_value("74 0 22 W".into(), cx));
+                        .update(cx, |input, cx| input.set_value("74 0 22 W", win, cx));
                     let timezone = draft.timezone.clone();
-                    timezone.update(cx, |input, cx| input.set_value("Invalid/Zone".into(), cx));
+                    timezone.update(cx, |input, cx| input.set_value("Invalid/Zone", win, cx));
                     root.apply_reference_location(cx);
                     assert!(root.reference_location_draft.is_some());
                     assert!(root.session.read(cx).transit.is_none());
-                    timezone.update(cx, |input, cx| {
-                        input.set_value("America/New_York".into(), cx)
-                    });
+                    timezone.update(cx, |input, cx| input.set_value("America/New_York", win, cx));
                     root.apply_reference_location(cx);
                     assert!(root.reference_location_draft.is_none());
                     let session = root.session.read(cx);
@@ -434,9 +432,9 @@ pub(crate) fn run(
                 .expect("verify native reference location edit");
             println!("Verified independent reference location");
             window
-                .update(cx, |root, _, cx| {
-                    root.open_draft(ChartRequest::default(), None, cx);
-                    root.toggle_map_picker(false, cx);
+                .update(cx, |root, win, cx| {
+                    root.open_draft(ChartRequest::default(), None, win, cx);
+                    root.toggle_map_picker(false, win, cx);
                     assert_eq!(root.active_map_popup(), Some(false));
                     root.close_map_popup(false);
                     assert_eq!(root.active_map_popup(), None);
@@ -444,17 +442,17 @@ pub(crate) fn run(
                         draft.location.tz_open = true;
                         draft
                             .latitude
-                            .update(cx, |input, cx| input.set_value("42.2495".into(), cx));
+                            .update(cx, |input, cx| input.set_value("42.2495", win, cx));
                         draft
                             .longitude
-                            .update(cx, |input, cx| input.set_value("-71.0662".into(), cx));
+                            .update(cx, |input, cx| input.set_value("-71.0662", win, cx));
                     }
-                    root.autodetect_timezone(false, cx);
+                    root.autodetect_timezone(false, win, cx);
                     assert_eq!(
                         root.draft.as_ref().unwrap().timezone.read(cx).value(),
                         "America/New_York"
                     );
-                    root.select_timezone_name(false, "Europe/London", cx);
+                    root.select_timezone_name(false, "Europe/London", win, cx);
                     assert_eq!(
                         root.draft.as_ref().unwrap().timezone.read(cx).value(),
                         "Europe/London"
@@ -482,12 +480,12 @@ pub(crate) fn run(
                 println!("Exercised chart mode {mode}");
             }
             window
-                .update(cx, |root, _, cx| {
+                .update(cx, |root, win, cx| {
                     root.select_mode("Rahu wheel", cx);
                     root.rahu.divisions_28 = true;
                     root.rahu.reference = RahuReference::Manual;
                     root.rahu.manual_angle = Some(195.);
-                    root.step_rahu_mansion(1, cx);
+                    root.step_rahu_mansion(1, win, cx);
                     assert_eq!(root.rahu.manual_angle, Some(201.));
                 })
                 .expect("render 28-division Rahu with manual reference");
@@ -571,11 +569,12 @@ pub(crate) fn run(
                 .expect("reset advanced interactive states");
             println!("Verified premium interactive states");
             window
-                .update(cx, |root, _, cx| {
+                .update(cx, |root, win, cx| {
                     root.update(cx, |session| session.tool = Some("Ephemeris calendar"));
                     root.set_time(
                         parse_time("2024-02-01 12:00:00").expect("smoke date"),
                         true,
+                        win,
                         cx,
                     );
                     root.load_ephemeris_month(cx);
@@ -612,10 +611,11 @@ pub(crate) fn run(
             assert!(monthly_checked, "monthly ephemeris worker timed out");
             println!("Verified leap-month ephemeris");
             window
-                .update(cx, |root, _, cx| {
+                .update(cx, |root, win, cx| {
                     root.set_time(
                         parse_time("2024-03-15 12:00:00").expect("smoke date"),
                         true,
+                        win,
                         cx,
                     );
                     root.update(cx, |session| {
@@ -869,7 +869,7 @@ pub(crate) fn run(
                 .update(cx, |root, window, cx| {
                     root.rahu.divisions_28 = true;
                     root.rahu.reference = RahuReference::Manual;
-                    root.step_rahu_mansion(1, cx);
+                    root.step_rahu_mansion(1, window, cx);
                     root.open_chart_lightbox(LightboxTarget::ActiveChart, cx);
                     window.refresh();
                 })

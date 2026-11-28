@@ -18,15 +18,20 @@ struct LocationFields<'a> {
 }
 
 impl DesktopRoot {
-    pub(super) fn open_saved_profile(&mut self, id: i64, cx: &mut Context<Self>) {
-        self.choose_profile(id, ProfileAction::OpenChart, cx);
+    pub(super) fn open_saved_profile(
+        &mut self,
+        id: i64,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.choose_profile(id, ProfileAction::OpenChart, window, cx);
     }
 
     pub(super) fn profiles_view(&self, cx: &mut Context<Self>) -> AnyElement {
         if self.show_profile_editor
             && let Some(draft) = &self.draft
         {
-            let effective_dt = parse_time(draft.datetime.read(cx).value())
+            let effective_dt = parse_time(draft.datetime.read(cx).value().as_ref())
                 .unwrap_or_else(|_| self.session.read(cx).time);
             return column()
                 .child(heading(if draft.id.is_some() {
@@ -118,7 +123,7 @@ impl DesktopRoot {
                             .flex_1()
                             .min_w(px(220.))
                             .max_w(px(360.))
-                            .child(self.search.clone()),
+                            .child(render_input(&self.search)),
                     )
                     .child(
                         row()
@@ -151,12 +156,14 @@ impl DesktopRoot {
                                     DesktopRoot::resume_profile_draft,
                                 )
                             } else {
-                                compact_button(
+                                compact_button_in(
                                     "profiles-new",
                                     "+ New profile",
                                     false,
                                     cx,
-                                    |view, cx| view.open_draft(ChartRequest::default(), None, cx),
+                                    |view, window, cx| {
+                                        view.open_draft(ChartRequest::default(), None, window, cx)
+                                    },
                                 )
                             }),
                     ),
@@ -276,15 +283,16 @@ impl DesktopRoot {
                                                 }))
                                             })
                                             .child(
-                                                action_control(
+                                                action_control_in(
                                                     ("profile-row", id as usize),
                                                     cx,
-                                                    move |view, cx| {
+                                                    move |view, window, cx| {
                                                         view.selected = None;
                                                         view.delete_confirmation = None;
                                                         view.choose_profile(
                                                             id,
                                                             ProfileAction::OpenChart,
+                                                            window,
                                                             cx,
                                                         );
                                                     },
@@ -416,8 +424,8 @@ impl DesktopRoot {
                                     "Try another name or birthplace query."
                                 },
                                 search.is_empty().then(|| {
-                                    button("New profile", true, cx, |view, cx| {
-                                        view.open_draft(ChartRequest::default(), None, cx)
+                                    button_in("New profile", true, cx, |view, window, cx| {
+                                        view.open_draft(ChartRequest::default(), None, window, cx)
                                     })
                                 }),
                             ))
@@ -493,45 +501,45 @@ impl DesktopRoot {
                         )
                 })
                 .when(!confirming, |menu| {
-                    menu.child(menu_item(
+                    menu.child(menu_item_in(
                         ("profile-open", id as usize),
                         "Open chart",
                         false,
                         cx,
-                        move |view, cx| {
+                        move |view, window, cx| {
                             view.selected = None;
-                            view.choose_profile(id, ProfileAction::OpenChart, cx);
+                            view.choose_profile(id, ProfileAction::OpenChart, window, cx);
                         },
                     ))
-                    .child(menu_item(
+                    .child(menu_item_in(
                         ("profile-transit", id as usize),
                         "Use for transit",
                         false,
                         cx,
-                        move |view, cx| {
+                        move |view, window, cx| {
                             view.selected = None;
-                            view.choose_profile(id, ProfileAction::UseForTransit, cx);
+                            view.choose_profile(id, ProfileAction::UseForTransit, window, cx);
                         },
                     ))
                     .child(menu_divider())
-                    .child(menu_item(
+                    .child(menu_item_in(
                         ("profile-edit", id as usize),
                         "Edit profile",
                         false,
                         cx,
-                        move |view, cx| {
+                        move |view, window, cx| {
                             view.selected = None;
-                            view.choose_profile(id, ProfileAction::Edit, cx);
+                            view.choose_profile(id, ProfileAction::Edit, window, cx);
                         },
                     ))
-                    .child(menu_item(
+                    .child(menu_item_in(
                         ("profile-dup", id as usize),
                         "Duplicate",
                         false,
                         cx,
-                        move |view, cx| {
+                        move |view, window, cx| {
                             view.selected = None;
-                            view.choose_profile(id, ProfileAction::Duplicate, cx);
+                            view.choose_profile(id, ProfileAction::Duplicate, window, cx);
                         },
                     ))
                     .child(menu_divider())
@@ -548,7 +556,13 @@ impl DesktopRoot {
         )
     }
 
-    fn choose_profile(&mut self, id: i64, action: ProfileAction, cx: &mut Context<Self>) {
+    fn choose_profile(
+        &mut self,
+        id: i64,
+        action: ProfileAction,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         let result = (|| {
             let session = self.session.read(cx);
             let profile = session
@@ -559,14 +573,14 @@ impl DesktopRoot {
             let mut request: ChartRequest =
                 serde_json::from_str(&profile.data_json).map_err(|error| error.to_string())?;
             match action {
-                ProfileAction::Edit => self.open_draft(request, Some(id), cx),
+                ProfileAction::Edit => self.open_draft(request, Some(id), window, cx),
                 ProfileAction::Duplicate => {
                     if self.draft.is_some() {
                         self.navigate(Workspace::Profiles, cx);
                         self.set_status("Save or discard the open draft first.", cx);
                     } else {
                         request.name.push_str(" — copy");
-                        self.open_draft(request, None, cx);
+                        self.open_draft(request, None, window, cx);
                         if let Some(draft) = &mut self.draft {
                             draft.copy_from = Some(id);
                         }
@@ -619,7 +633,12 @@ impl DesktopRoot {
         }
     }
 
-    pub(super) fn toggle_town_picker(&mut self, reference: bool, cx: &mut Context<Self>) {
+    pub(super) fn toggle_town_picker(
+        &mut self,
+        reference: bool,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         self.close_town_popup(!reference);
         let field = if reference {
             self.reference_location_draft
@@ -632,9 +651,9 @@ impl DesktopRoot {
             *field = if field.is_some() {
                 None
             } else {
-                let input = text_input("", "Town name in Myanmar script", cx);
-                cx.observe(&input, |_, _, cx| cx.notify()).detach();
-                self.town_scroll.reset();
+                let input = text_input("", "Town name in Myanmar script", window, cx);
+                subscribe_input(&input, window, cx, |_, _, cx| cx.notify());
+                self.town_scroll.set_offset(gpui::point(px(0.), px(0.)));
                 Some(input)
             };
         }
@@ -689,19 +708,19 @@ impl DesktopRoot {
                 panel.child(caption("No matching towns."))
             })
             .when(!matching.is_empty(), |panel| {
+                use gpui::component::scroll::ScrollableElement as _;
                 panel.child(
-                    row()
+                    div()
+                        .relative()
                         .w_full()
-                        .gap_2()
-                        .items_start()
+                        .h(px(400.))
                         .child(
                             div()
                                 .id("town-list-scroll")
-                                .flex_1()
-                                .min_w(px(0.))
+                                .w_full()
                                 .h(px(400.))
                                 .overflow_y_scroll()
-                                .track_scroll(&self.town_scroll.handle)
+                                .track_scroll(&self.town_scroll)
                                 .on_scroll(cx.listener(|_, _, _, cx| cx.notify()))
                                 .child(column().gap_1().children(matching.into_iter().map(
                                     |(index, town)| {
@@ -709,9 +728,13 @@ impl DesktopRoot {
                                             "{:.2}°, {:.2}°",
                                             town.latitude, town.longitude
                                         );
-                                        action_control(("town", index), cx, move |view, cx| {
-                                            view.select_town(index, reference, cx);
-                                        })
+                                        action_control_in(
+                                            ("town", index),
+                                            cx,
+                                            move |view, window, cx| {
+                                                view.select_town(index, reference, window, cx);
+                                            },
+                                        )
                                         .w_full()
                                         .px_3()
                                         .py(px(6.))
@@ -737,15 +760,18 @@ impl DesktopRoot {
                                     },
                                 ))),
                         )
-                        .child(crate::interactive_vertical_scrollbar(
-                            &self.town_scroll,
-                            Some(400.),
-                        )),
+                        .vertical_scrollbar(&self.town_scroll),
                 )
             })
     }
 
-    fn select_town(&mut self, index: usize, reference: bool, cx: &mut Context<Self>) {
+    fn select_town(
+        &mut self,
+        index: usize,
+        reference: bool,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         let Some(town) = self.towns.towns.get(index) else {
             return;
         };
@@ -765,7 +791,7 @@ impl DesktopRoot {
             (fields.longitude, lon),
             (fields.timezone, "Asia/Yangon".into()),
         ] {
-            input.update(cx, |field, cx| field.set_value(value, cx));
+            input.update(cx, |field, cx| field.set_value(value, window, cx));
         }
         fields.location.map_center_lat = raw_lat;
         fields.location.map_center_lon = raw_lon;

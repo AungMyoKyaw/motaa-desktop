@@ -9,14 +9,16 @@ use jiff::{
 
 use crate::{
     DesktopRoot, ERROR, GOLD, INK, LINE, MUTED, PAPER, SELECTED, SOFT, SUBTLE_LINE, SURFACE_HOVER,
-    action_control, caption, column, format_time, input::TextInput, panel, row, text_input,
+    TextInput, action_control, action_control_in, caption, column, format_time, panel,
+    render_input, row, subscribe_input, text_input,
 };
 
 pub use parse::{MONTH_NAMES, MONTH_SHORT, days_in_month, parse_flexible_datetime};
 use parse::{WEEKDAYS, parse_time_only, parse_time_part};
 
 pub type PickerSelector = fn(&mut DesktopRoot) -> Option<&mut DateTimePicker>;
-pub type PickerChangeCallback = fn(&mut DesktopRoot, DateTime, &mut Context<DesktopRoot>);
+pub type PickerChangeCallback =
+    fn(&mut DesktopRoot, DateTime, &mut gpui::Window, &mut Context<DesktopRoot>);
 pub type ToggleCallback = fn(&mut DesktopRoot, &mut Context<DesktopRoot>);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -57,6 +59,7 @@ impl DateTimePicker {
         id_prefix: &'static str,
         initial: DateTime,
         open: bool,
+        window: &mut gpui::Window,
         cx: &mut Context<DesktopRoot>,
     ) -> Self {
         let formatted = format_time(initial);
@@ -64,12 +67,12 @@ impl DateTimePicker {
         let hour_text = format!("{:02}", initial.hour());
         let minute_text = format!("{:02}", initial.minute());
         let second_text = format!("{:02}", initial.second());
-        let datetime = text_input(&formatted, "YYYY-MM-DD HH:MM:SS", cx);
-        let date_input = text_input(&date_text, "YYYY-MM-DD", cx);
-        let time_input = text_input(&time_text, "HH:MM:SS", cx);
-        let hour_input = text_input(&hour_text, "HH", cx);
-        let minute_input = text_input(&minute_text, "MM", cx);
-        let second_input = text_input(&second_text, "SS", cx);
+        let datetime = text_input(&formatted, "YYYY-MM-DD HH:MM:SS", window, cx);
+        let date_input = text_input(&date_text, "YYYY-MM-DD", window, cx);
+        let time_input = text_input(&time_text, "HH:MM:SS", window, cx);
+        let hour_input = text_input(&hour_text, "HH", window, cx);
+        let minute_input = text_input(&minute_text, "MM", window, cx);
+        let second_input = text_input(&second_text, "SS", window, cx);
 
         for input in [
             &datetime,
@@ -79,11 +82,10 @@ impl DateTimePicker {
             &minute_input,
             &second_input,
         ] {
-            cx.observe(input, |root, _, cx| {
-                root.sync_datetime_pickers(cx);
+            subscribe_input(input, window, cx, |root, window, cx| {
+                root.sync_datetime_pickers(window, cx);
                 cx.notify();
-            })
-            .detach();
+            });
         }
 
         Self {
@@ -113,7 +115,12 @@ impl DateTimePicker {
         }
     }
 
-    pub fn sync_modal_inputs(&mut self, dt: DateTime, cx: &mut Context<DesktopRoot>) {
+    pub fn sync_modal_inputs(
+        &mut self,
+        dt: DateTime,
+        window: &mut gpui::Window,
+        cx: &mut Context<DesktopRoot>,
+    ) {
         let h_str = format!("{:02}", dt.hour());
         let m_str = format!("{:02}", dt.minute());
         let s_str = format!("{:02}", dt.second());
@@ -124,15 +131,15 @@ impl DateTimePicker {
 
         if self.hour_input.read(cx).value() != h_str {
             self.hour_input
-                .update(cx, |input, cx| input.set_value(h_str, cx));
+                .update(cx, |input, cx| input.set_value(h_str, window, cx));
         }
         if self.minute_input.read(cx).value() != m_str {
             self.minute_input
-                .update(cx, |input, cx| input.set_value(m_str, cx));
+                .update(cx, |input, cx| input.set_value(m_str, window, cx));
         }
         if self.second_input.read(cx).value() != s_str {
             self.second_input
-                .update(cx, |input, cx| input.set_value(s_str, cx));
+                .update(cx, |input, cx| input.set_value(s_str, window, cx));
         }
     }
 
@@ -144,34 +151,42 @@ impl DateTimePicker {
     }
 
     pub fn current_datetime(&self, cx: &gpui::App) -> DateTime {
-        parse_flexible_datetime(self.datetime.read(cx).value(), true).unwrap_or_else(|_| {
-            let date = Date::strptime("%Y-%m-%d", self.date_input.read(cx).value().trim())
-                .unwrap_or_else(|_| Date::constant(2000, 1, 1));
-            let time = parse_time_only(self.time_input.read(cx).value())
-                .unwrap_or_else(|_| jiff::civil::Time::constant(12, 0, 0, 0));
-            date.to_datetime(time)
-        })
+        parse_flexible_datetime(self.datetime.read(cx).value().as_ref(), true).unwrap_or_else(
+            |_| {
+                let date = Date::strptime("%Y-%m-%d", self.date_input.read(cx).value().trim())
+                    .unwrap_or_else(|_| Date::constant(2000, 1, 1));
+                let time = parse_time_only(self.time_input.read(cx).value().as_ref())
+                    .unwrap_or_else(|_| jiff::civil::Time::constant(12, 0, 0, 0));
+                date.to_datetime(time)
+            },
+        )
     }
 
     fn sync_date_time_inputs(
         &self,
         date_text: &str,
         time_text: &str,
+        window: &mut gpui::Window,
         cx: &mut Context<DesktopRoot>,
     ) {
         if self.date_input.read(cx).value() != date_text {
             let next = date_text.to_owned();
             self.date_input
-                .update(cx, |input, cx| input.set_value(next, cx));
+                .update(cx, |input, cx| input.set_value(next, window, cx));
         }
         if self.time_input.read(cx).value() != time_text {
             let next = time_text.to_owned();
             self.time_input
-                .update(cx, |input, cx| input.set_value(next, cx));
+                .update(cx, |input, cx| input.set_value(next, window, cx));
         }
     }
 
-    pub fn set_datetime(&mut self, dt: DateTime, cx: &mut Context<DesktopRoot>) {
+    pub fn set_datetime(
+        &mut self,
+        dt: DateTime,
+        window: &mut gpui::Window,
+        cx: &mut Context<DesktopRoot>,
+    ) {
         self.view_year = i32::from(dt.year());
         self.view_month = u32::from(dt.month() as u8);
         self.parts_error = None;
@@ -183,16 +198,20 @@ impl DateTimePicker {
 
         if self.datetime.read(cx).value() != formatted {
             self.datetime
-                .update(cx, |input, cx| input.set_value(formatted, cx));
+                .update(cx, |input, cx| input.set_value(formatted, window, cx));
         }
-        self.sync_date_time_inputs(&date_text, &time_text, cx);
+        self.sync_date_time_inputs(&date_text, &time_text, window, cx);
     }
 
-    pub fn sync_from_inputs(&mut self, cx: &mut Context<DesktopRoot>) -> Option<DateTime> {
+    pub fn sync_from_inputs(
+        &mut self,
+        window: &mut gpui::Window,
+        cx: &mut Context<DesktopRoot>,
+    ) -> Option<DateTime> {
         if self.time_open {
-            let h_text = self.hour_input.read(cx).value().to_owned();
-            let m_text = self.minute_input.read(cx).value().to_owned();
-            let s_text = self.second_input.read(cx).value().to_owned();
+            let h_text = self.hour_input.read(cx).value().to_string();
+            let m_text = self.minute_input.read(cx).value().to_string();
+            let s_text = self.second_input.read(cx).value().to_string();
             if h_text != self.last_hour_text
                 || m_text != self.last_minute_text
                 || s_text != self.last_second_text
@@ -223,9 +242,9 @@ impl DateTimePicker {
                             self.last_time_text = time_text.clone();
                             if self.datetime.read(cx).value() != formatted {
                                 self.datetime
-                                    .update(cx, |input, cx| input.set_value(formatted, cx));
+                                    .update(cx, |input, cx| input.set_value(formatted, window, cx));
                             }
-                            self.sync_date_time_inputs(&date_text, &time_text, cx);
+                            self.sync_date_time_inputs(&date_text, &time_text, window, cx);
                             return Some(dt);
                         }
                     }
@@ -238,7 +257,7 @@ impl DateTimePicker {
             }
         }
 
-        let dt_text = self.datetime.read(cx).value().to_owned();
+        let dt_text = self.datetime.read(cx).value().to_string();
         if dt_text != self.last_datetime_text {
             self.last_datetime_text = dt_text.clone();
             if let Ok(dt) = parse_flexible_datetime(&dt_text, true) {
@@ -248,15 +267,15 @@ impl DateTimePicker {
                 let (date_text, time_text) = Self::format_date_time(dt);
                 self.last_date_text = date_text.clone();
                 self.last_time_text = time_text.clone();
-                self.sync_date_time_inputs(&date_text, &time_text, cx);
+                self.sync_date_time_inputs(&date_text, &time_text, window, cx);
             } else {
                 self.parts_error = None;
             }
             return None;
         }
 
-        let date_text = self.date_input.read(cx).value().to_owned();
-        let time_text = self.time_input.read(cx).value().to_owned();
+        let date_text = self.date_input.read(cx).value().to_string();
+        let time_text = self.time_input.read(cx).value().to_string();
         if date_text == self.last_date_text && time_text == self.last_time_text {
             return None;
         }
@@ -279,7 +298,7 @@ impl DateTimePicker {
                 self.last_datetime_text = formatted.clone();
                 if self.datetime.read(cx).value() != formatted {
                     self.datetime
-                        .update(cx, |input, cx| input.set_value(formatted, cx));
+                        .update(cx, |input, cx| input.set_value(formatted, window, cx));
                 }
             }
             Err(error) => {
@@ -296,7 +315,13 @@ impl DateTimePicker {
         Ok(())
     }
 
-    pub fn set_year_month(&mut self, year: i32, month: u32, cx: &mut Context<DesktopRoot>) {
+    pub fn set_year_month(
+        &mut self,
+        year: i32,
+        month: u32,
+        window: &mut gpui::Window,
+        cx: &mut Context<DesktopRoot>,
+    ) {
         let current = self.current_datetime(cx);
         let year = year.clamp(1, 9999);
         let month = month.clamp(1, 12);
@@ -306,27 +331,46 @@ impl DateTimePicker {
         {
             self.set_datetime(
                 date.at(current.hour(), current.minute(), current.second(), 0),
+                window,
                 cx,
             );
         }
     }
 
-    pub fn shift_month(&mut self, delta_months: i32, cx: &mut Context<DesktopRoot>) {
+    pub fn shift_month(
+        &mut self,
+        delta_months: i32,
+        window: &mut gpui::Window,
+        cx: &mut Context<DesktopRoot>,
+    ) {
         let total = self.view_year * 12 + (self.view_month as i32 - 1) + delta_months;
         let year = total.div_euclid(12).clamp(1, 9999);
         let month = (total.rem_euclid(12) + 1) as u32;
-        self.set_year_month(year, month, cx);
+        self.set_year_month(year, month, window, cx);
     }
 
-    pub fn select_calendar_date(&mut self, date: Date, cx: &mut Context<DesktopRoot>) {
+    pub fn select_calendar_date(
+        &mut self,
+        date: Date,
+        window: &mut gpui::Window,
+        cx: &mut Context<DesktopRoot>,
+    ) {
         let current = self.current_datetime(cx);
         self.set_datetime(
             date.at(current.hour(), current.minute(), current.second(), 0),
+            window,
             cx,
         );
     }
 
-    pub fn set_hms(&mut self, hour: u32, minute: u32, second: u32, cx: &mut Context<DesktopRoot>) {
+    pub fn set_hms(
+        &mut self,
+        hour: u32,
+        minute: u32,
+        second: u32,
+        window: &mut gpui::Window,
+        cx: &mut Context<DesktopRoot>,
+    ) {
         let current = self.current_datetime(cx);
         let dt = current.date().at(
             hour.min(23) as i8,
@@ -334,7 +378,7 @@ impl DateTimePicker {
             second.min(59) as i8,
             0,
         );
-        self.set_datetime(dt, cx);
+        self.set_datetime(dt, window, cx);
     }
 
     pub fn render(
@@ -356,12 +400,12 @@ impl DateTimePicker {
                 "Now",
                 false,
                 cx,
-                move |view, cx| {
+                move |view, window, cx| {
                     let now = view.session.read(cx).now();
                     if let Some(picker) = get_mut(view) {
-                        picker.set_datetime(now, cx);
+                        picker.set_datetime(now, window, cx);
                         if let Some(cb) = on_change {
-                            cb(view, now, cx);
+                            cb(view, now, window, cx);
                         }
                     }
                 },
@@ -374,7 +418,7 @@ impl DateTimePicker {
                 "Unknown birth time",
                 unknown_time,
                 cx,
-                toggle_unknown,
+                move |view, _, cx| toggle_unknown(view, cx),
             ));
         }
 
@@ -382,7 +426,12 @@ impl DateTimePicker {
             row()
                 .w_full()
                 .gap_2()
-                .child(div().flex_1().min_w(px(0.)).child(self.date_input.clone()))
+                .child(
+                    div()
+                        .flex_1()
+                        .min_w(px(0.))
+                        .child(render_input(&self.date_input)),
+                )
                 .child(
                     action_control(
                         SharedString::from(format!("{prefix}-toggle-open")),
@@ -417,7 +466,7 @@ impl DateTimePicker {
                 picker.time_dropdown = Some(TimeSegment::Hour);
                 picker.time_open = true;
                 picker.open = false;
-                picker.sync_modal_inputs(current, cx);
+                picker.sync_modal_inputs(current, window, cx);
                 let focus = picker.time_focus.clone();
                 window.focus(&focus, cx);
             }
@@ -445,7 +494,12 @@ impl DateTimePicker {
                 row()
                     .w_full()
                     .gap_2()
-                    .child(div().flex_1().min_w(px(0.)).child(self.time_input.clone()))
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w(px(0.))
+                            .child(render_input(&self.time_input)),
+                    )
                     .child(
                         row()
                             .gap_1()
@@ -456,7 +510,7 @@ impl DateTimePicker {
                                         text,
                                         is_pm == pm,
                                         cx,
-                                        move |view, cx| {
+                                        move |view, window, cx| {
                                             if let Some(picker) = get_mut(view) {
                                                 let cur = picker.current_datetime(cx);
                                                 let target_hour = if pm && cur.hour() < 12 {
@@ -471,11 +525,12 @@ impl DateTimePicker {
                                                         nh,
                                                         cur.minute() as u32,
                                                         cur.second() as u32,
+                                                        window,
                                                         cx,
                                                     );
                                                     let dt = picker.current_datetime(cx);
                                                     if let Some(cb) = on_change {
-                                                        cb(view, dt, cx);
+                                                        cb(view, dt, window, cx);
                                                     }
                                                 }
                                             }
@@ -573,15 +628,15 @@ impl DateTimePicker {
                 let is_selected = cell_date == current.date();
                 let day_label = format!("{}", cell_date.day());
 
-                action_control(
+                action_control_in(
                     (SharedString::from(format!("{prefix}-cal-day")), index),
                     cx,
-                    move |view, cx| {
+                    move |view, window, cx| {
                         if let Some(picker) = get_mut(view) {
-                            picker.select_calendar_date(cell_date, cx);
+                            picker.select_calendar_date(cell_date, window, cx);
                             let dt = picker.current_datetime(cx);
                             if let Some(cb) = on_change {
-                                cb(view, dt, cx);
+                                cb(view, dt, window, cx);
                             }
                         }
                     },
@@ -625,16 +680,16 @@ impl DateTimePicker {
                 .children(MONTH_SHORT.into_iter().enumerate().map(|(idx, m_name)| {
                     let m_num = (idx + 1) as u32;
                     let active = m_num == view_month;
-                    action_control(
+                    action_control_in(
                         (SharedString::from(format!("{prefix}-month-pill")), idx),
                         cx,
-                        move |view, cx| {
+                        move |view, window, cx| {
                             if let Some(picker) = get_mut(view) {
                                 let yr = picker.view_year;
-                                picker.set_year_month(yr, m_num, cx);
+                                picker.set_year_month(yr, m_num, window, cx);
                                 let dt = picker.current_datetime(cx);
                                 if let Some(cb) = on_change {
-                                    cb(view, dt, cx);
+                                    cb(view, dt, window, cx);
                                 }
                             }
                         },
@@ -655,15 +710,21 @@ impl DateTimePicker {
                          label: &'static str,
                          delta_months: i32,
                          cx: &mut Context<DesktopRoot>| {
-            small_action_button((prefix, id_suffix), label, false, cx, move |view, cx| {
-                if let Some(picker) = get_mut(view) {
-                    picker.shift_month(delta_months, cx);
-                    let dt = picker.current_datetime(cx);
-                    if let Some(cb) = on_change {
-                        cb(view, dt, cx);
+            small_action_button(
+                (prefix, id_suffix),
+                label,
+                false,
+                cx,
+                move |view, window, cx| {
+                    if let Some(picker) = get_mut(view) {
+                        picker.shift_month(delta_months, window, cx);
+                        let dt = picker.current_datetime(cx);
+                        if let Some(cb) = on_change {
+                            cb(view, dt, window, cx);
+                        }
                     }
-                }
-            })
+                },
+            )
         };
 
         panel()
@@ -714,9 +775,9 @@ fn small_action_button(
     label: &'static str,
     active: bool,
     cx: &mut Context<DesktopRoot>,
-    action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
+    action: impl Fn(&mut DesktopRoot, &mut gpui::Window, &mut Context<DesktopRoot>) + 'static,
 ) -> gpui::Stateful<Div> {
-    action_control(SharedString::from(format!("{}-{}", id.0, id.1)), cx, action)
+    action_control_in(SharedString::from(format!("{}-{}", id.0, id.1)), cx, action)
         .px_2()
         .h(px(30.))
         .justify_center()

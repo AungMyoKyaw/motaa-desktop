@@ -8,7 +8,6 @@ mod chart;
 mod chart_view;
 mod datetime_picker;
 mod harness;
-mod input;
 mod inspector;
 mod interpretations;
 mod location_picker;
@@ -39,11 +38,12 @@ use gpui::{
     AnyElement, App, Bounds, ClickEvent, Context, Div, Entity, FocusHandle, Image, ImageFormat,
     KeyBinding, Window, WindowBounds, WindowOptions, actions, div, img, prelude::*, px, rgb, size,
 };
-use input::TextInput;
 use jiff::civil::DateTime;
 use model::{AYANAMSHAS, HOUSES, Settings, Step, Workspace, WorkspaceSession};
 use motaa_engine::ChartRequest;
 pub(crate) use theme::*;
+
+pub(crate) type TextInput = gpui::component::input::InputState;
 
 const MODES: [&str; 12] = [
     "Rasi",
@@ -252,11 +252,11 @@ struct DesktopRoot {
     sidebar_collapsed: bool,
     inspector_open: bool,
     palette_open: bool,
-    workspace_scroll: ScrollTrack,
-    inspector_scroll: ScrollTrack,
-    palette_scroll: ScrollTrack,
-    town_scroll: ScrollTrack,
-    tz_scroll: ScrollTrack,
+    workspace_scroll: gpui::ScrollHandle,
+    inspector_scroll: gpui::ScrollHandle,
+    palette_scroll: gpui::ScrollHandle,
+    town_scroll: gpui::ScrollHandle,
+    tz_scroll: gpui::ScrollHandle,
     palette_query: Entity<TextInput>,
     palette_index: usize,
     date: Entity<TextInput>,
@@ -428,40 +428,79 @@ pub(crate) fn ui_icon(path: &'static str, size_px: f32, color: u32) -> impl Into
         .text_color(rgb(color))
 }
 
+pub(crate) fn render_input(state: &Entity<TextInput>) -> gpui::component::input::Input {
+    gpui::component::input::Input::new(state)
+}
+
 fn field(label: &'static str, input: Entity<TextInput>) -> Div {
-    column().gap_1().child(caption(label)).child(input)
+    column()
+        .gap_1()
+        .child(caption(label))
+        .child(render_input(&input))
 }
-fn text_input(value: &str, placeholder: &str, cx: &mut Context<DesktopRoot>) -> Entity<TextInput> {
-    cx.new(|cx| TextInput::new(value, placeholder, cx))
+
+fn text_input(
+    value: &str,
+    placeholder: &str,
+    window: &mut Window,
+    cx: &mut Context<DesktopRoot>,
+) -> Entity<TextInput> {
+    let value = value.to_owned();
+    let placeholder = placeholder.to_owned();
+    cx.new(|cx| {
+        TextInput::new(window, cx)
+            .placeholder(placeholder)
+            .default_value(value)
+    })
 }
+
+pub(crate) fn subscribe_input(
+    input: &Entity<TextInput>,
+    window: &mut Window,
+    cx: &mut Context<DesktopRoot>,
+    mut on_change: impl FnMut(&mut DesktopRoot, &mut Window, &mut Context<DesktopRoot>) + 'static,
+) {
+    cx.subscribe_in(
+        input,
+        window,
+        move |root, _, event: &gpui::component::input::InputEvent, window, cx| {
+            if matches!(event, gpui::component::input::InputEvent::Change) {
+                on_change(root, window, cx);
+            }
+        },
+    )
+    .detach();
+}
+
 fn button(
     label: impl Into<gpui::SharedString>,
     primary: bool,
     cx: &mut Context<DesktopRoot>,
     action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
 ) -> AnyElement {
+    button_in(label, primary, cx, move |view, _, cx| action(view, cx))
+}
+
+fn button_in(
+    label: impl Into<gpui::SharedString>,
+    primary: bool,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Window, &mut Context<DesktopRoot>) + 'static,
+) -> AnyElement {
+    use gpui::component::{Sizable as _, button::ButtonVariants as _};
     let label = label.into();
-    action_control(label.clone(), cx, action)
-        .px_3()
-        .h(px(32.))
-        .justify_center()
-        .rounded(px(RADIUS_CONTROL))
-        .text_size(px(13.))
-        .font_weight(gpui::FontWeight::MEDIUM)
-        .border_1()
-        .border_color(rgb(if primary { GOLD } else { LINE }))
-        .bg(rgb(if primary { GOLD } else { PAPER }))
-        .text_color(rgb(if primary { PAPER } else { INK }))
-        .when(primary, |el| el.shadow(pill_shadow()))
-        .hover(|style| style.bg(rgb(if primary { ACTION_HOVER } else { SOFT })))
-        .active(|style| style.bg(rgb(if primary { ACTION_PRESSED } else { SELECTED })))
-        .focus(|style| {
-            style
-                .border_2()
-                .border_color(rgb(if primary { INK } else { GOLD }))
-        })
-        .child(label)
-        .into_any_element()
+    let btn = gpui::component::button::Button::new(label.clone())
+        .small()
+        .label(label)
+        .on_click(cx.listener(move |view, _, window, cx| {
+            action(view, window, cx);
+            cx.notify();
+        }));
+    if primary {
+        btn.primary().into_any_element()
+    } else {
+        btn.outline().into_any_element()
+    }
 }
 
 fn pill_control(
@@ -486,17 +525,29 @@ fn compact_button(
     cx: &mut Context<DesktopRoot>,
     action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
 ) -> AnyElement {
-    pill_control(id, RADIUS_CONTROL, 12., cx, action)
-        .font_weight(gpui::FontWeight::MEDIUM)
-        .border_1()
-        .border_color(rgb(if active { GOLD } else { LINE }))
-        .bg(rgb(if active { GOLD } else { PAPER }))
-        .text_color(rgb(if active { PAPER } else { INK }))
-        .when(active, |el| el.shadow(pill_shadow()))
-        .hover(|style| style.bg(rgb(if active { ACTION_HOVER } else { SOFT })))
-        .active(|style| style.bg(rgb(if active { ACTION_PRESSED } else { SELECTED })))
-        .child(label.into())
-        .into_any_element()
+    compact_button_in(id, label, active, cx, move |view, _, cx| action(view, cx))
+}
+
+fn compact_button_in(
+    id: impl Into<gpui::ElementId>,
+    label: impl Into<gpui::SharedString>,
+    active: bool,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Window, &mut Context<DesktopRoot>) + 'static,
+) -> AnyElement {
+    use gpui::component::{Sizable as _, button::ButtonVariants as _};
+    let btn = gpui::component::button::Button::new(id)
+        .xsmall()
+        .label(label)
+        .on_click(cx.listener(move |view, _, window, cx| {
+            action(view, window, cx);
+            cx.notify();
+        }));
+    if active {
+        btn.primary().into_any_element()
+    } else {
+        btn.outline().into_any_element()
+    }
 }
 
 pub(crate) fn icon_compact_button(
@@ -634,17 +685,24 @@ fn ghost_button(
     cx: &mut Context<DesktopRoot>,
     action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
 ) -> AnyElement {
-    action_control(id, cx, action)
-        .px_2()
-        .h(px(24.))
-        .justify_center()
-        .rounded(px(5.))
-        .text_size(px(11.5))
-        .font_weight(gpui::FontWeight::MEDIUM)
-        .text_color(rgb(MUTED))
-        .hover(|style| style.bg(rgb(SOFT)).text_color(rgb(INK)))
-        .active(|style| style.bg(rgb(SELECTED)))
-        .child(label.into())
+    ghost_button_in(id, label, cx, move |view, _, cx| action(view, cx))
+}
+
+fn ghost_button_in(
+    id: impl Into<gpui::ElementId>,
+    label: impl Into<gpui::SharedString>,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Window, &mut Context<DesktopRoot>) + 'static,
+) -> AnyElement {
+    use gpui::component::{Sizable as _, button::ButtonVariants as _};
+    gpui::component::button::Button::new(id)
+        .ghost()
+        .xsmall()
+        .label(label)
+        .on_click(cx.listener(move |view, _, window, cx| {
+            action(view, window, cx);
+            cx.notify();
+        }))
         .into_any_element()
 }
 
@@ -761,7 +819,17 @@ fn menu_item(
     cx: &mut Context<DesktopRoot>,
     action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
 ) -> AnyElement {
-    action_control(id, cx, action)
+    menu_item_in(id, label, checked, cx, move |view, _, cx| action(view, cx))
+}
+
+fn menu_item_in(
+    id: impl Into<gpui::ElementId>,
+    label: impl Into<gpui::SharedString>,
+    checked: bool,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Window, &mut Context<DesktopRoot>) + 'static,
+) -> AnyElement {
+    action_control_in(id, cx, action)
         .w_full()
         .h(px(30.))
         .px(px(10.))
@@ -812,6 +880,14 @@ fn action_control(
     cx: &mut Context<DesktopRoot>,
     action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
 ) -> gpui::Stateful<Div> {
+    action_control_in(id, cx, move |view, _, cx| action(view, cx))
+}
+
+fn action_control_in(
+    id: impl Into<gpui::ElementId>,
+    cx: &mut Context<DesktopRoot>,
+    action: impl Fn(&mut DesktopRoot, &mut Window, &mut Context<DesktopRoot>) + 'static,
+) -> gpui::Stateful<Div> {
     let action = Rc::new(action);
     let keyboard_action = action.clone();
     div()
@@ -824,17 +900,19 @@ fn action_control(
         .border_1()
         .border_color(gpui::transparent_black())
         .focus(|style| style.border_color(rgb(GOLD)))
-        .on_click(cx.listener(move |view, _: &ClickEvent, _, cx| {
-            action(view, cx);
+        .on_click(cx.listener(move |view, _: &ClickEvent, window, cx| {
+            action(view, window, cx);
             cx.notify();
         }))
-        .on_key_down(cx.listener(move |view, event: &gpui::KeyDownEvent, _, cx| {
-            if matches!(event.keystroke.key.as_str(), "enter" | "space") {
-                keyboard_action(view, cx);
-                cx.stop_propagation();
-                cx.notify();
-            }
-        }))
+        .on_key_down(
+            cx.listener(move |view, event: &gpui::KeyDownEvent, window, cx| {
+                if matches!(event.keystroke.key.as_str(), "enter" | "space") {
+                    keyboard_action(view, window, cx);
+                    cx.stop_propagation();
+                    cx.notify();
+                }
+            }),
+        )
 }
 
 fn directory_link(
@@ -854,7 +932,11 @@ fn directory_link(
 }
 
 impl DesktopRoot {
-    fn new(store: Result<rusqlite::Connection, String>, cx: &mut Context<Self>) -> Self {
+    fn new(
+        store: Result<rusqlite::Connection, String>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Self {
         let session = cx.new(|_| {
             let mut session = WorkspaceSession::new(
                 store,
@@ -868,40 +950,45 @@ impl DesktopRoot {
             session
         });
         let now = session.read(cx).time;
-        let time_picker = datetime_picker::DateTimePicker::new("reference-dt", now, false, cx);
+        let time_picker =
+            datetime_picker::DateTimePicker::new("reference-dt", now, false, window, cx);
         let date = time_picker.datetime.clone();
         let candidate_pickers = [
-            datetime_picker::DateTimePicker::new("candidate-1-dt", now, false, cx),
-            datetime_picker::DateTimePicker::new("candidate-2-dt", now, false, cx),
-            datetime_picker::DateTimePicker::new("candidate-3-dt", now, false, cx),
+            datetime_picker::DateTimePicker::new("candidate-1-dt", now, false, window, cx),
+            datetime_picker::DateTimePicker::new("candidate-2-dt", now, false, window, cx),
+            datetime_picker::DateTimePicker::new("candidate-3-dt", now, false, window, cx),
         ];
         let candidate_inputs = [
             candidate_pickers[0].datetime.clone(),
             candidate_pickers[1].datetime.clone(),
             candidate_pickers[2].datetime.clone(),
         ];
-        let search = text_input("", "Search by name or birthplace", cx);
-        let tool_search = text_input("", "Search chart modes and advanced tools", cx);
-        let palette_query = text_input("", "Jump to chart mode, tool, profile, or action…", cx);
-        cx.observe(&tool_search, |_, _, cx| cx.notify()).detach();
+        let search = text_input("", "Search by name or birthplace", window, cx);
+        let tool_search = text_input("", "Search chart modes and advanced tools", window, cx);
+        let palette_query = text_input(
+            "",
+            "Jump to chart mode, tool, profile, or action…",
+            window,
+            cx,
+        );
+        subscribe_input(&tool_search, window, cx, |_, _, cx| cx.notify());
         cx.observe(&session, |_, _, cx| cx.notify()).detach();
-        cx.observe(&search, |_, _, cx| cx.notify()).detach();
-        cx.observe(&palette_query, |view, _, cx| {
+        subscribe_input(&search, window, cx, |_, _, cx| cx.notify());
+        subscribe_input(&palette_query, window, cx, |view, _, cx| {
             view.palette_index = 0;
             cx.notify();
-        })
-        .detach();
+        });
         Self {
             session,
             focus: cx.focus_handle(),
             sidebar_collapsed: false,
             inspector_open: false,
             palette_open: false,
-            workspace_scroll: ScrollTrack::new(),
-            inspector_scroll: ScrollTrack::new(),
-            palette_scroll: ScrollTrack::new(),
-            town_scroll: ScrollTrack::new(),
-            tz_scroll: ScrollTrack::new(),
+            workspace_scroll: gpui::ScrollHandle::new(),
+            inspector_scroll: gpui::ScrollHandle::new(),
+            palette_scroll: gpui::ScrollHandle::new(),
+            town_scroll: gpui::ScrollHandle::new(),
+            tz_scroll: gpui::ScrollHandle::new(),
             palette_query,
             palette_index: 0,
             date,
@@ -940,7 +1027,7 @@ impl DesktopRoot {
             rahu: RahuState {
                 divisions_28: false,
                 reference: RahuReference::Node,
-                manual_input: text_input("", "Longitude 0° to <360°", cx),
+                manual_input: text_input("", "Longitude 0° to <360°", window, cx),
                 manual_angle: None,
             },
             sky_rotation: 0.,
@@ -952,7 +1039,7 @@ impl DesktopRoot {
             },
             selected_varga: varga::Varga::Navamsa,
             name_wheel: NameWheelState {
-                reference: text_input("", "Myanmar syllable", cx),
+                reference: text_input("", "Myanmar syllable", window, cx),
                 matches: Vec::new(),
                 sector: None,
                 satapati_lagna: None,
@@ -1003,7 +1090,8 @@ impl DesktopRoot {
 
     fn navigate(&mut self, route: Workspace, cx: &mut Context<Self>) {
         let was_editing_profile = std::mem::take(&mut self.show_profile_editor);
-        self.workspace_scroll.reset();
+        self.workspace_scroll
+            .set_offset(gpui::point(px(0.), px(0.)));
         self.delete_confirmation = None;
         self.lightbox.target = None;
         self.update(cx, |session| {
@@ -1017,14 +1105,15 @@ impl DesktopRoot {
     fn resume_profile_draft(&mut self, cx: &mut Context<Self>) {
         self.navigate(Workspace::Profiles, cx);
         self.show_profile_editor = true;
-        self.workspace_scroll.reset();
+        self.workspace_scroll
+            .set_offset(gpui::point(px(0.), px(0.)));
     }
 
-    fn sync_datetime_pickers(&mut self, cx: &mut Context<Self>) {
+    fn sync_datetime_pickers(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if let Some(draft) = &mut self.draft {
-            draft.picker.sync_from_inputs(cx);
+            draft.picker.sync_from_inputs(window, cx);
         }
-        if let Some(dt) = self.time_picker.sync_from_inputs(cx)
+        if let Some(dt) = self.time_picker.sync_from_inputs(window, cx)
             && self.time_picker.time_open
         {
             self.update(cx, |session| {
@@ -1033,11 +1122,17 @@ impl DesktopRoot {
             });
         }
         for picker in &mut self.candidate_pickers {
-            picker.sync_from_inputs(cx);
+            picker.sync_from_inputs(window, cx);
         }
     }
 
-    fn open_draft(&mut self, request: ChartRequest, id: Option<i64>, cx: &mut Context<Self>) {
+    fn open_draft(
+        &mut self,
+        request: ChartRequest,
+        id: Option<i64>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         if self.draft.is_some() {
             self.navigate(Workspace::Profiles, cx);
             self.set_status("Save or discard the open draft first.", cx);
@@ -1049,22 +1144,24 @@ impl DesktopRoot {
         );
         let initial_dt =
             parse_time(&timestamp).unwrap_or_else(|_| DateTime::constant(2000, 1, 1, 12, 0, 0, 0));
-        let picker = datetime_picker::DateTimePicker::new("profile-dt", initial_dt, false, cx);
+        let picker =
+            datetime_picker::DateTimePicker::new("profile-dt", initial_dt, false, window, cx);
         let datetime = picker.datetime.clone();
         self.draft = Some(ProfileDraft {
             copy_from: None,
-            name: text_input(&request.name, "Name", cx),
+            name: text_input(&request.name, "Name", window, cx),
             datetime,
             picker,
-            place: text_input(&request.birthplace, "Birthplace", cx),
-            latitude: text_input(&request.latitude.to_string(), "Latitude", cx),
-            longitude: text_input(&request.longitude.to_string(), "Longitude", cx),
+            place: text_input(&request.birthplace, "Birthplace", window, cx),
+            latitude: text_input(&request.latitude.to_string(), "Latitude", window, cx),
+            longitude: text_input(&request.longitude.to_string(), "Longitude", window, cx),
             timezone: text_input(
                 &request
                     .timezone_id
                     .clone()
                     .unwrap_or_else(|| request.timezone_offset_minutes.to_string()),
                 "IANA zone or offset minutes",
+                window,
                 cx,
             ),
             unknown: request.unknown_birth_time,
@@ -1072,6 +1169,7 @@ impl DesktopRoot {
             location: location_picker::LocationPickerState::new(
                 request.latitude,
                 request.longitude,
+                window,
                 cx,
             ),
             original: request,
@@ -1090,7 +1188,8 @@ impl DesktopRoot {
         let mut request = draft.original.clone();
         request.name = draft.name.read(cx).value().trim().into();
         request.birthplace = draft.place.read(cx).value().trim().into();
-        let timestamp = draft.datetime.read(cx).value().trim();
+        let timestamp_raw = draft.datetime.read(cx).value();
+        let timestamp = timestamp_raw.trim();
         let timestamp = if draft.unknown && timestamp.len() == 10 {
             format!("{timestamp} 00:00:00")
         } else {
@@ -1103,9 +1202,9 @@ impl DesktopRoot {
         request.hour = time.hour() as u8;
         request.minute = time.minute() as u8;
         request.second = time.second() as u8;
-        request.latitude = parse_coordinate(draft.latitude.read(cx).value(), true)?;
-        request.longitude = parse_coordinate(draft.longitude.read(cx).value(), false)?;
-        set_timezone(&mut request, draft.timezone.read(cx).value());
+        request.latitude = parse_coordinate(draft.latitude.read(cx).value().as_ref(), true)?;
+        request.longitude = parse_coordinate(draft.longitude.read(cx).value().as_ref(), false)?;
+        set_timezone(&mut request, draft.timezone.read(cx).value().as_ref());
         request.unknown_birth_time = draft.unknown;
         motaa_engine::validate(&request)?;
         motaa_engine::effective_utc_offset(&request)?;
@@ -1156,8 +1255,14 @@ impl DesktopRoot {
         });
     }
 
-    fn set_time(&mut self, time: DateTime, reset_anchor: bool, cx: &mut Context<Self>) {
-        self.time_picker.set_datetime(time, cx);
+    fn set_time(
+        &mut self,
+        time: DateTime,
+        reset_anchor: bool,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.time_picker.set_datetime(time, window, cx);
         if reset_anchor {
             self.scrub_offset = 0;
         }
@@ -1170,7 +1275,7 @@ impl DesktopRoot {
         });
     }
 
-    fn step_time(&mut self, count: i32, scrub: bool, cx: &mut Context<Self>) {
+    fn step_time(&mut self, count: i32, scrub: bool, window: &mut Window, cx: &mut Context<Self>) {
         let s = self.session.read(cx);
         let base = if scrub { s.now() } else { s.time };
         match s.step.offset(base, count) {
@@ -1179,7 +1284,7 @@ impl DesktopRoot {
                     self.scrub_offset = count;
                     self.update(cx, |session| session.anchor = base);
                 }
-                self.set_time(time, !scrub, cx);
+                self.set_time(time, !scrub, window, cx);
             }
             None => self.set_status("The requested time is outside the supported calendar.", cx),
         }
@@ -1222,14 +1327,14 @@ impl DesktopRoot {
     fn profile_edit_save_buttons(&self, cx: &mut Context<Self>) -> Div {
         row()
             .gap_2()
-            .child(compact_button(
+            .child(compact_button_in(
                 "profile-edit-btn",
                 "Edit",
                 false,
                 cx,
-                |view, cx| {
+                |view, window, cx| {
                     let s = view.session.read(cx);
-                    view.open_draft(s.natal.clone(), s.natal_id, cx);
+                    view.open_draft(s.natal.clone(), s.natal_id, window, cx);
                 },
             ))
             .child(compact_button(
@@ -1452,8 +1557,8 @@ impl Render for DesktopRoot {
             )
             .child(div().h(px(14.)))
             .child(
-                action_control("sidebar-new-chart", cx, |view, cx| {
-                    view.open_draft(ChartRequest::default(), None, cx)
+                action_control_in("sidebar-new-chart", cx, |view, window, cx| {
+                    view.open_draft(ChartRequest::default(), None, window, cx)
                 })
                 .w_full()
                 .h(px(32.))
@@ -1605,17 +1710,17 @@ impl Render for DesktopRoot {
                 if matches!(key, "pageup" | "pagedown") {
                     let dir = if key == "pageup" { 1.0 } else { -1.0 };
                     let scrolled = if view.active_town_popup().is_some() {
-                        view.town_scroll.scroll_page(dir)
+                        scroll_handle_page(&view.town_scroll, dir)
                     } else if view.active_timezone_popup().is_some() {
-                        view.tz_scroll.scroll_page(dir)
+                        scroll_handle_page(&view.tz_scroll, dir)
                     } else if view.palette_open {
-                        view.palette_scroll.scroll_page(dir)
+                        scroll_handle_page(&view.palette_scroll, dir)
                     } else if view.lightbox.target.is_none()
                         && view.active_map_popup().is_none()
                         && view.active_datetime_popup().is_none()
                         && view.active_time_popup().is_none()
                     {
-                        view.workspace_scroll.scroll_page(dir)
+                        scroll_handle_page(&view.workspace_scroll, dir)
                     } else {
                         false
                     };
@@ -1690,17 +1795,17 @@ impl Render for DesktopRoot {
                 view.inspector_open = !view.inspector_open;
                 cx.notify();
             }))
-            .on_action(cx.listener(|view, _: &StepTimeBack, _, cx| {
-                view.step_time(-1, false, cx);
+            .on_action(cx.listener(|view, _: &StepTimeBack, window, cx| {
+                view.step_time(-1, false, window, cx);
             }))
-            .on_action(cx.listener(|view, _: &StepTimeForward, _, cx| {
-                view.step_time(1, false, cx);
+            .on_action(cx.listener(|view, _: &StepTimeForward, window, cx| {
+                view.step_time(1, false, window, cx);
             }))
-            .on_action(cx.listener(|view, _: &JumpNow, _, cx| {
-                view.set_time(view.session.read(cx).now(), true, cx);
+            .on_action(cx.listener(|view, _: &JumpNow, window, cx| {
+                view.set_time(view.session.read(cx).now(), true, window, cx);
             }))
-            .on_action(cx.listener(|view, _: &NewProfile, _, cx| {
-                view.open_draft(ChartRequest::default(), None, cx);
+            .on_action(cx.listener(|view, _: &NewProfile, window, cx| {
+                view.open_draft(ChartRequest::default(), None, window, cx);
             }))
             .on_action(cx.listener(|view, _: &TabNext, window, cx| {
                 if !view.palette_open && view.active_time_popup().is_none() {
@@ -1895,36 +2000,45 @@ impl Render for DesktopRoot {
                             ),
                     )
                     .child(
-                        div()
-                            .flex_1()
-                            .min_h(px(0.))
-                            .w_full()
-                            .flex()
-                            .child(
-                                div()
-                                    .id(
-                                        if route == Workspace::Profiles && self.show_profile_editor
-                                        {
-                                            ("profile-editor", 0)
-                                        } else {
-                                            ("workspace-content", route as usize)
-                                        },
-                                    )
-                                    .h_full()
-                                    .min_h(px(0.))
-                                    .overflow_y_scroll()
-                                    .track_scroll(&self.workspace_scroll.handle)
-                                    .on_scroll(cx.listener(|_, _, _, cx| cx.notify()))
-                                    .flex_1()
-                                    .min_w(px(0.))
-                                    .px_6()
-                                    .py_4()
-                                    .child(content),
-                            )
-                            .child(interactive_vertical_scrollbar(&self.workspace_scroll, None))
-                            .when(show_inspector, |body| {
-                                body.child(self.right_inspector(cx))
-                            }),
+                        {
+                            use gpui::component::scroll::ScrollableElement as _;
+                            div()
+                                .flex_1()
+                                .min_h(px(0.))
+                                .w_full()
+                                .flex()
+                                .child(
+                                    div()
+                                        .relative()
+                                        .flex_1()
+                                        .min_w(px(0.))
+                                        .h_full()
+                                        .min_h(px(0.))
+                                        .child(
+                                            div()
+                                                .id(
+                                                    if route == Workspace::Profiles
+                                                        && self.show_profile_editor
+                                                    {
+                                                        ("profile-editor", 0)
+                                                    } else {
+                                                        ("workspace-content", route as usize)
+                                                    },
+                                                )
+                                                .size_full()
+                                                .overflow_y_scroll()
+                                                .track_scroll(&self.workspace_scroll)
+                                                .on_scroll(cx.listener(|_, _, _, cx| cx.notify()))
+                                                .px_6()
+                                                .py_4()
+                                                .child(content),
+                                        )
+                                        .vertical_scrollbar(&self.workspace_scroll),
+                                )
+                                .when(show_inspector, |body| {
+                                    body.child(self.right_inspector(cx))
+                                })
+                        },
                     )
                     .when(!status.is_empty() && !lightbox_open, |view| {
                         view.child(
@@ -2233,7 +2347,6 @@ fn main() {
                     gpui::MenuItem::action("Quit MOTAA Desktop", Quit),
                 ],
             }]);
-            input::bind_keys(cx);
             let key = |suffix: &str| -> &'static str {
                 Box::leak(primary_keybinding(suffix).into_boxed_str())
             };
@@ -2273,7 +2386,7 @@ fn main() {
                 ..gpui::component::TitleBar::window_options()
             };
             let (window, root_entity) = gpui::open_window(window_options, cx, |window, cx| {
-                let root = cx.new(|cx| DesktopRoot::new(store, cx));
+                let root = cx.new(|cx| DesktopRoot::new(store, window, cx));
                 window.focus(&root.read(cx).focus.clone(), cx);
                 root
             })

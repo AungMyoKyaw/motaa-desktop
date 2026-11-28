@@ -58,7 +58,9 @@ impl DesktopRoot {
             HOUSES[settings.houses]
         };
 
+        use gpui::component::scroll::ScrollableElement as _;
         div()
+            .relative()
             .w(px(268.))
             .flex_shrink_0()
             .h_full()
@@ -74,7 +76,7 @@ impl DesktopRoot {
                     .h_full()
                     .min_h(px(0.))
                     .overflow_y_scroll()
-                    .track_scroll(&self.inspector_scroll.handle)
+                    .track_scroll(&self.inspector_scroll)
                     .on_scroll(cx.listener(|_, _, _, cx| cx.notify()))
                     .p_4()
                     .flex()
@@ -236,7 +238,7 @@ impl DesktopRoot {
                         },
                     ),
             )
-            .child(interactive_vertical_scrollbar(&self.inspector_scroll, None))
+            .vertical_scrollbar(&self.inspector_scroll)
             .into_any_element()
     }
 }

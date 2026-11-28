@@ -9,8 +9,8 @@ use std::{
 
 use gpui::{
     AnyElement, Bounds, Context, Div, Entity, Image, ImageFormat, MouseButton, MouseDownEvent,
-    MouseMoveEvent, MouseUpEvent, Pixels, Point, ScrollDelta, ScrollEvent, canvas, div, img,
-    prelude::*, px, rgb,
+    MouseMoveEvent, MouseUpEvent, Pixels, Point, ScrollDelta, ScrollEvent, Window, canvas, div,
+    img, prelude::*, px, rgb,
 };
 use jiff::{
     civil::DateTime,
@@ -20,8 +20,9 @@ use serde::Deserialize;
 
 use crate::{
     DesktopRoot, GOLD, INK, LINE, MUTED, PAPER, RADIUS_CONTROL, RADIUS_FIELD, SELECTED, SOFT,
-    SUBTLE_LINE, action_control, button, caption, column, error_banner, field, input::TextInput,
-    modal_dialog, panel, parse_coordinate, row, section_label, text_input,
+    SUBTLE_LINE, TextInput, action_control, action_control_in, button, caption, column,
+    error_banner, field, modal_dialog, panel, parse_coordinate, render_input, row, section_label,
+    subscribe_input, text_input,
 };
 
 const USER_AGENT: &str = concat!(
@@ -97,19 +98,26 @@ pub struct LocationPickerState {
 }
 
 impl LocationPickerState {
-    pub fn new(initial_lat: f64, initial_lon: f64, cx: &mut Context<DesktopRoot>) -> Self {
+    pub fn new(
+        initial_lat: f64,
+        initial_lon: f64,
+        window: &mut Window,
+        cx: &mut Context<DesktopRoot>,
+    ) -> Self {
         let osm_query = text_input(
             "",
             "Search city, town, or address (e.g. Milton Massachusetts)",
+            window,
             cx,
         );
         let tz_query = text_input(
             "",
             "Filter by city, region, or UTC offset (e.g. +06:30)",
+            window,
             cx,
         );
-        cx.observe(&osm_query, |_, _, cx| cx.notify()).detach();
-        cx.observe(&tz_query, |_, _, cx| cx.notify()).detach();
+        subscribe_input(&osm_query, window, cx, |_, _, cx| cx.notify());
+        subscribe_input(&tz_query, window, cx, |_, _, cx| cx.notify());
         Self {
             osm_open: false,
             osm_query,
@@ -542,8 +550,8 @@ impl DesktopRoot {
             row()
                 .flex_wrap()
                 .child(
-                    action_control((prefix, 101usize), cx, move |view, cx| {
-                        view.toggle_map_picker(reference, cx);
+                    action_control_in((prefix, 101usize), cx, move |view, window, cx| {
+                        view.toggle_map_picker(reference, window, cx);
                     })
                     .px_3()
                     .h(px(34.))
@@ -561,8 +569,8 @@ impl DesktopRoot {
                     .child("Search & pick on map"),
                 )
                 .child(
-                    action_control((prefix, 102usize), cx, move |view, cx| {
-                        view.toggle_town_picker(reference, cx);
+                    action_control_in((prefix, 102usize), cx, move |view, window, cx| {
+                        view.toggle_town_picker(reference, window, cx);
                     })
                     .px_3()
                     .h(px(34.))
@@ -615,9 +623,13 @@ impl DesktopRoot {
                                 .child("Choose timezone"),
                             )
                             .child(
-                                action_control((prefix, 104usize), cx, move |view, cx| {
-                                    view.autodetect_timezone(reference, cx);
-                                })
+                                action_control_in(
+                                    (prefix, 104usize),
+                                    cx,
+                                    move |view, window, cx| {
+                                        view.autodetect_timezone(reference, window, cx);
+                                    },
+                                )
                                 .px_3()
                                 .h(px(38.))
                                 .rounded(px(RADIUS_CONTROL))
@@ -680,14 +692,20 @@ impl DesktopRoot {
         }
     }
 
-    pub(super) fn toggle_map_picker(&mut self, reference: bool, cx: &mut Context<Self>) {
+    pub(super) fn toggle_map_picker(
+        &mut self,
+        reference: bool,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         let (lat, lon, place) = {
             let Some(handles) = self.draft_handles(reference) else {
                 return;
             };
-            let lat = parse_coordinate(handles.latitude.read(cx).value(), true).unwrap_or(16.8409);
-            let lon =
-                parse_coordinate(handles.longitude.read(cx).value(), false).unwrap_or(96.1735);
+            let lat = parse_coordinate(handles.latitude.read(cx).value().as_ref(), true)
+                .unwrap_or(16.8409);
+            let lon = parse_coordinate(handles.longitude.read(cx).value().as_ref(), false)
+                .unwrap_or(96.1735);
             let place = handles.place.read(cx).value().trim().to_owned();
             (lat, lon, place)
         };
@@ -714,7 +732,7 @@ impl DesktopRoot {
                     handles
                         .location
                         .osm_query
-                        .update(cx, |input, cx| input.set_value(place, cx));
+                        .update(cx, |input, cx| input.set_value(place, window, cx));
                 }
             }
         }
@@ -774,7 +792,13 @@ impl DesktopRoot {
         .detach();
     }
 
-    fn apply_osm_place(&mut self, reference: bool, index: usize, cx: &mut Context<Self>) {
+    fn apply_osm_place(
+        &mut self,
+        reference: bool,
+        index: usize,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         let Some(place) = self
             .draft_handles(reference)
             .and_then(|h| h.location.osm_results.get(index).cloned())
@@ -787,19 +811,19 @@ impl DesktopRoot {
         let Some(handles) = self.draft_handles_mut(reference) else {
             return;
         };
-        handles
-            .place
-            .update(cx, |input, cx| input.set_value(place.short_name, cx));
+        handles.place.update(cx, |input, cx| {
+            input.set_value(place.short_name, window, cx)
+        });
         handles
             .latitude
-            .update(cx, |input, cx| input.set_value(lat_str, cx));
+            .update(cx, |input, cx| input.set_value(lat_str, window, cx));
         handles
             .longitude
-            .update(cx, |input, cx| input.set_value(lon_str, cx));
+            .update(cx, |input, cx| input.set_value(lon_str, window, cx));
         if let Some(tz_name) = tz {
             handles
                 .timezone
-                .update(cx, |input, cx| input.set_value(tz_name, cx));
+                .update(cx, |input, cx| input.set_value(tz_name, window, cx));
         }
         handles.location.map_center_lat = place.lat.clamp(-MAX_MERCATOR_LAT, MAX_MERCATOR_LAT);
         handles.location.map_center_lon = place.lon.clamp(-180., 180.);
@@ -808,14 +832,19 @@ impl DesktopRoot {
         handles.location.map_open = true;
     }
 
-    pub(super) fn autodetect_timezone(&mut self, reference: bool, cx: &mut Context<Self>) {
+    pub(super) fn autodetect_timezone(
+        &mut self,
+        reference: bool,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         let (lat_str, lon_str) = {
             let Some(handles) = self.draft_handles(reference) else {
                 return;
             };
             (
-                handles.latitude.read(cx).value().to_owned(),
-                handles.longitude.read(cx).value().to_owned(),
+                handles.latitude.read(cx).value().to_string(),
+                handles.longitude.read(cx).value().to_string(),
             )
         };
         let Ok(lat) = parse_coordinate(&lat_str, true) else {
@@ -831,7 +860,7 @@ impl DesktopRoot {
                 if let Some(handles) = self.draft_handles_mut(reference) {
                     handles
                         .timezone
-                        .update(cx, |input, cx| input.set_value(tz_name.clone(), cx));
+                        .update(cx, |input, cx| input.set_value(tz_name.clone(), window, cx));
                 }
                 self.set_status(format!("Detected timezone: {tz_name}"), cx);
             }
@@ -843,17 +872,25 @@ impl DesktopRoot {
         &mut self,
         reference: bool,
         name: &str,
+        window: &mut Window,
         cx: &mut Context<Self>,
     ) {
         if let Some(handles) = self.draft_handles_mut(reference) {
             handles
                 .timezone
-                .update(cx, |input, cx| input.set_value(name.to_owned(), cx));
+                .update(cx, |input, cx| input.set_value(name.to_owned(), window, cx));
             handles.location.tz_open = false;
         }
     }
 
-    fn set_pin_from_map(&mut self, reference: bool, lat: f64, lon: f64, cx: &mut Context<Self>) {
+    fn set_pin_from_map(
+        &mut self,
+        reference: bool,
+        lat: f64,
+        lon: f64,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         let lat = lat.clamp(-MAX_MERCATOR_LAT, MAX_MERCATOR_LAT);
         let lon = lon.clamp(-180., 180.);
         let tz = timezone_for_coords(lat, lon);
@@ -861,40 +898,43 @@ impl DesktopRoot {
             let Some(handles) = self.draft_handles_mut(reference) else {
                 return;
             };
-            handles
-                .latitude
-                .update(cx, |input, cx| input.set_value(format!("{lat:.4}"), cx));
-            handles
-                .longitude
-                .update(cx, |input, cx| input.set_value(format!("{lon:.4}"), cx));
+            handles.latitude.update(cx, |input, cx| {
+                input.set_value(format!("{lat:.4}"), window, cx)
+            });
+            handles.longitude.update(cx, |input, cx| {
+                input.set_value(format!("{lon:.4}"), window, cx)
+            });
             if let Some(tz_name) = tz {
                 handles
                     .timezone
-                    .update(cx, |input, cx| input.set_value(tz_name, cx));
+                    .update(cx, |input, cx| input.set_value(tz_name, window, cx));
             }
             handles.location.reverse_request_id += 1;
             handles.location.reverse_request_id
         };
-        cx.spawn(async move |view, cx| {
-            let result = cx
-                .background_executor()
-                .spawn(async move { reverse_osm_place(lat, lon) })
-                .await;
-            if let Ok(place_name) = result {
-                let _ = view.update(cx, |root, cx| {
-                    let Some(handles) = root.draft_handles(reference) else {
-                        return;
-                    };
-                    if handles.location.reverse_request_id != req_id {
-                        return;
-                    }
-                    handles
-                        .place
-                        .update(cx, |input, cx| input.set_value(place_name, cx));
-                });
-            }
-        })
-        .detach();
+        let entity = cx.entity().downgrade();
+        window
+            .spawn(cx, async move |cx| {
+                let result = cx
+                    .background_executor()
+                    .spawn(async move { reverse_osm_place(lat, lon) })
+                    .await;
+                if let Ok(place_name) = result {
+                    let _ = cx.update(|window, cx| {
+                        let _ = entity.update(cx, |root, cx| {
+                            if let Some(handles) = root.draft_handles_mut(reference)
+                                && handles.location.reverse_request_id == req_id
+                            {
+                                handles.place.update(cx, |input, cx| {
+                                    input.set_value(place_name, window, cx)
+                                });
+                                cx.notify();
+                            }
+                        });
+                    });
+                }
+            })
+            .detach();
     }
 
     fn request_map_tile(&self, z: u8, x: u32, y: u32, cx: &mut Context<Self>) {
@@ -954,7 +994,7 @@ impl DesktopRoot {
                                     cx.stop_propagation();
                                 }
                             }))
-                            .child(query_input),
+                            .child(render_input(&query_input)),
                     )
                     .child(button(
                         if loading { "Searching…" } else { "Search" },
@@ -969,8 +1009,8 @@ impl DesktopRoot {
                     column().gap_1().children(results.into_iter().enumerate().map(
                         |(idx, place)| {
                             let coords = format!("{:.4}°, {:.4}°", place.lat, place.lon);
-                            action_control((prefix, idx), cx, move |view, cx| {
-                                view.apply_osm_place(reference, idx, cx);
+                            action_control_in((prefix, idx), cx, move |view, window, cx| {
+                                view.apply_osm_place(reference, idx, window, cx);
                             })
                             .w_full()
                             .px_3()
@@ -1021,10 +1061,10 @@ impl DesktopRoot {
         let center_lon = handles.location.map_center_lon;
         let zoom = handles.location.map_zoom;
         let bounds_cell = handles.location.map_bounds.clone();
-        let pin_lat =
-            parse_coordinate(handles.latitude.read(cx).value(), true).unwrap_or(center_lat);
-        let pin_lon =
-            parse_coordinate(handles.longitude.read(cx).value(), false).unwrap_or(center_lon);
+        let pin_lat = parse_coordinate(handles.latitude.read(cx).value().as_ref(), true)
+            .unwrap_or(center_lat);
+        let pin_lon = parse_coordinate(handles.longitude.read(cx).value().as_ref(), false)
+            .unwrap_or(center_lon);
 
         let viewport_w = bounds_cell
             .get()
@@ -1126,7 +1166,7 @@ impl DesktopRoot {
             }))
             .on_mouse_up(
                 MouseButton::Left,
-                cx.listener(move |view, event: &MouseUpEvent, _, cx| {
+                cx.listener(move |view, event: &MouseUpEvent, window, cx| {
                     let drag = view
                         .draft_handles_mut(reference)
                         .and_then(|h| h.location.map_drag.take());
@@ -1155,7 +1195,7 @@ impl DesktopRoot {
                         dx,
                         dy,
                     );
-                    view.set_pin_from_map(reference, lat, lon, cx);
+                    view.set_pin_from_map(reference, lat, lon, window, cx);
                 }),
             )
             .on_scroll(cx.listener(move |view, event: &ScrollEvent, _, cx| {
@@ -1301,9 +1341,9 @@ impl DesktopRoot {
             "Pick Birthplace on Map"
         };
         let (pin_summary, tz_summary) = if let Some(handles) = self.draft_handles(reference) {
-            let lat = parse_coordinate(handles.latitude.read(cx).value(), true)
+            let lat = parse_coordinate(handles.latitude.read(cx).value().as_ref(), true)
                 .unwrap_or(handles.location.map_center_lat);
-            let lon = parse_coordinate(handles.longitude.read(cx).value(), false)
+            let lon = parse_coordinate(handles.longitude.read(cx).value().as_ref(), false)
                 .unwrap_or(handles.location.map_center_lon);
             let tz = handles.timezone.read(cx).value().trim().to_owned();
             (
@@ -1352,7 +1392,9 @@ impl DesktopRoot {
         };
         let tz_summary = self
             .draft_handles(reference)
-            .and_then(|h| describe_timezone_at(h.timezone.read(cx).value(), effective_dt).ok())
+            .and_then(|h| {
+                describe_timezone_at(h.timezone.read(cx).value().as_ref(), effective_dt).ok()
+            })
             .unwrap_or_else(|| "Select an IANA timezone or UTC offset".to_owned());
 
         modal_dialog(
@@ -1392,8 +1434,8 @@ impl DesktopRoot {
             .child(row().flex_wrap().gap_1().children(
                 COMMON_TIMEZONES.into_iter().enumerate().map(|(idx, zone)| {
                     let active = current_tz == zone;
-                    action_control((prefix, 200usize + idx), cx, move |view, cx| {
-                        view.select_timezone_name(reference, zone, cx);
+                    action_control_in((prefix, 200usize + idx), cx, move |view, window, cx| {
+                        view.select_timezone_name(reference, zone, window, cx);
                     })
                     .px_2()
                     .py(px(4.))
@@ -1407,31 +1449,37 @@ impl DesktopRoot {
                     .child(zone)
                 }),
             ))
-            .child(tz_query)
+            .child(render_input(&tz_query))
             .when(matches.is_empty(), |p| {
                 p.child(caption("No matching IANA timezones."))
             })
             .when(!matches.is_empty(), |p| {
+                use gpui::component::scroll::ScrollableElement as _;
                 p.child(
-                    row()
+                    div()
+                        .relative()
                         .w_full()
-                        .gap_2()
-                        .items_start()
+                        .h(px(340.))
                         .child(
                             div()
                                 .id("tz-list-scroll")
-                                .flex_1()
-                                .min_w(px(0.))
+                                .w_full()
                                 .h(px(340.))
                                 .overflow_y_scroll()
-                                .track_scroll(&self.tz_scroll.handle)
+                                .track_scroll(&self.tz_scroll)
                                 .on_scroll(cx.listener(|_, _, _, cx| cx.notify()))
                                 .child(column().gap_1().children(
                                     matches.into_iter().enumerate().map(|(idx, opt)| {
                                         let active = current_tz == opt.name;
-                                        action_control((prefix, idx), cx, move |view, cx| {
-                                            view.select_timezone_name(reference, opt.name, cx);
-                                        })
+                                        action_control_in(
+                                            (prefix, idx),
+                                            cx,
+                                            move |view, window, cx| {
+                                                view.select_timezone_name(
+                                                    reference, opt.name, window, cx,
+                                                );
+                                            },
+                                        )
                                         .w_full()
                                         .px_3()
                                         .py(px(6.))
@@ -1460,10 +1508,7 @@ impl DesktopRoot {
                                     }),
                                 )),
                         )
-                        .child(crate::interactive_vertical_scrollbar(
-                            &self.tz_scroll,
-                            Some(340.),
-                        )),
+                        .vertical_scrollbar(&self.tz_scroll),
                 )
             })
     }

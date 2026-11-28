@@ -2,8 +2,8 @@ use gpui::{Context, SharedString, div, prelude::*, px, rgb, rgba};
 use jiff::civil::DateTime;
 
 use crate::{
-    ACTION_HOVER, BACKDROP_DARK, DesktopRoot, ERROR, GOLD, HEADER_BG, INK, LINE, MUTED, PAPER,
-    SELECTED, SOFT, SUBTLE_LINE, SURFACE_HOVER, TRANSPARENT, WHITE, button, modal_dialog,
+    BACKDROP_DARK, DesktopRoot, ERROR, GOLD, HEADER_BG, INK, LINE, MUTED, PAPER, SELECTED, SOFT,
+    SUBTLE_LINE, SURFACE_HOVER, TRANSPARENT, WHITE, button_in, modal_dialog, render_input,
 };
 
 use super::parse::{nudge_time_seconds, step_time_segment, time_of_day_label};
@@ -21,13 +21,14 @@ fn apply_picker_time(
     get_mut: PickerSelector,
     on_change: Option<PickerChangeCallback>,
     next: DateTime,
+    window: &mut gpui::Window,
     cx: &mut Context<DesktopRoot>,
 ) {
     if let Some(picker) = get_mut(view) {
-        picker.set_datetime(next, cx);
-        picker.sync_modal_inputs(next, cx);
+        picker.set_datetime(next, window, cx);
+        picker.sync_modal_inputs(next, window, cx);
         if let Some(cb) = on_change {
-            cb(view, next, cx);
+            cb(view, next, window, cx);
         }
     }
 }
@@ -59,7 +60,7 @@ impl DesktopRoot {
             }),
             ActiveDateTimePicker::ReferenceTime => Some((
                 &self.time_picker,
-                Some(|view, dt, cx| view.set_time(dt, true, cx)),
+                Some(|view, dt, window, cx| view.set_time(dt, true, window, cx)),
                 |view| Some(&mut view.time_picker),
                 if is_time {
                     "Pick Reference Time"
@@ -184,7 +185,7 @@ impl DesktopRoot {
         };
         if let Some(picker) = picker {
             if let Some(dt) = current {
-                picker.sync_modal_inputs(dt, cx);
+                picker.sync_modal_inputs(dt, window, cx);
             }
             picker.time_open = false;
             picker.time_dropdown = None;
@@ -226,19 +227,19 @@ impl DesktopRoot {
             match target {
                 ActiveDateTimePicker::Profile => {
                     if let Some(d) = self.draft.as_mut() {
-                        d.picker.set_datetime(orig, cx);
-                        d.picker.sync_modal_inputs(orig, cx);
+                        d.picker.set_datetime(orig, window, cx);
+                        d.picker.sync_modal_inputs(orig, window, cx);
                     }
                 }
                 ActiveDateTimePicker::ReferenceTime => {
-                    self.time_picker.set_datetime(orig, cx);
-                    self.time_picker.sync_modal_inputs(orig, cx);
-                    self.set_time(orig, true, cx);
+                    self.time_picker.set_datetime(orig, window, cx);
+                    self.time_picker.sync_modal_inputs(orig, window, cx);
+                    self.set_time(orig, true, window, cx);
                 }
                 ActiveDateTimePicker::Candidate(idx) => {
                     if let Some(p) = self.candidate_pickers.get_mut(idx) {
-                        p.set_datetime(orig, cx);
-                        p.sync_modal_inputs(orig, cx);
+                        p.set_datetime(orig, window, cx);
+                        p.sync_modal_inputs(orig, window, cx);
                     }
                 }
             }
@@ -298,7 +299,11 @@ impl DesktopRoot {
                         .border_1()
                         .border_color(rgb(if is_active { GOLD } else { LINE }))
                         .overflow_hidden()
-                        .child(div().w(px(52.)).child(input))
+                        .child(
+                            div()
+                                .w(px(52.))
+                                .child(render_input(&input).appearance(false)),
+                        )
                         .child(
                             div()
                                 .id(SharedString::from(format!("{prefix}-tp-dd-{id_suffix}")))
@@ -359,7 +364,7 @@ impl DesktopRoot {
                                 .rounded(px(5.))
                                 .text_size(px(11.5))
                                 .font_weight(gpui::FontWeight::SEMIBOLD)
-                                .on_click(cx.listener(move |view, _, _, cx| {
+                                .on_click(cx.listener(move |view, _, window, cx| {
                                     if let Some(picker) = get_mut(view) {
                                         let cur = picker.current_datetime(cx);
                                         let next_h = if target_pm && cur.hour() < 12 {
@@ -378,7 +383,9 @@ impl DesktopRoot {
                                             )
                                             .map(|t| DateTime::from_parts(cur.date(), t))
                                             .unwrap_or(cur);
-                                            apply_picker_time(view, get_mut, on_change, next, cx);
+                                            apply_picker_time(
+                                                view, get_mut, on_change, next, window, cx,
+                                            );
                                         }
                                     }
                                     cx.notify();
@@ -515,7 +522,7 @@ impl DesktopRoot {
                     .justify_center()
                     .font_family("Menlo")
                     .text_size(px(12.))
-                    .on_click(cx.listener(move |view, _, _, cx| {
+                    .on_click(cx.listener(move |view, _, window, cx| {
                         if let Some(picker) = get_mut(view) {
                             let cur = picker.current_datetime(cx);
                             let next = make_dt(cur, val);
@@ -524,7 +531,7 @@ impl DesktopRoot {
                                 picker.time_dropdown = Some(next_dd);
                                 picker.time_segment = next_dd;
                             }
-                            apply_picker_time(view, get_mut, on_change, next, cx);
+                            apply_picker_time(view, get_mut, on_change, next, window, cx);
                         }
                         cx.notify();
                     }))
@@ -658,11 +665,13 @@ impl DesktopRoot {
                                     .flex()
                                     .items_center()
                                     .justify_center()
-                                    .on_click(cx.listener(move |view, _, _, cx| {
+                                    .on_click(cx.listener(move |view, _, window, cx| {
                                         if let Some(picker) = get_mut(view) {
                                             let cur = picker.current_datetime(cx);
                                             let next = sec_dt(cur, val);
-                                            apply_picker_time(view, get_mut, on_change, next, cx);
+                                            apply_picker_time(
+                                                view, get_mut, on_change, next, window, cx,
+                                            );
                                         }
                                         cx.notify();
                                     }))
@@ -727,11 +736,11 @@ impl DesktopRoot {
                     .font_family("Menlo")
                     .text_size(px(11.))
                     .text_color(rgb(INK))
-                    .on_click(cx.listener(move |view, _, _, cx| {
+                    .on_click(cx.listener(move |view, _, window, cx| {
                         if let Some(picker) = get_mut(view) {
                             let cur = picker.current_datetime(cx);
                             let next = nudge_time_seconds(cur, delta);
-                            apply_picker_time(view, get_mut, on_change, next, cx);
+                            apply_picker_time(view, get_mut, on_change, next, window, cx);
                         }
                         cx.notify();
                     }))
@@ -752,13 +761,13 @@ impl DesktopRoot {
                     .items_center()
                     .justify_center()
                     .text_size(px(12.))
-                    .on_click(cx.listener(move |view, _, _, cx| {
+                    .on_click(cx.listener(move |view, _, window, cx| {
                         if let Some(picker) = get_mut(view) {
                             let cur = picker.current_datetime(cx);
                             let next = jiff::civil::Time::new(hour, 0, 0, 0)
                                 .map(|t| DateTime::from_parts(cur.date(), t))
                                 .unwrap_or(cur);
-                            apply_picker_time(view, get_mut, on_change, next, cx);
+                            apply_picker_time(view, get_mut, on_change, next, window, cx);
                         }
                         cx.notify();
                     }))
@@ -780,42 +789,13 @@ impl DesktopRoot {
             }),
         );
 
-        let cancel_btn = div()
-            .id(SharedString::from(format!("{prefix}-tp-cancel")))
-            .cursor_pointer()
-            .px_3()
-            .py(px(6.))
-            .rounded(px(6.))
-            .bg(rgb(PAPER))
-            .border_1()
-            .border_color(rgb(LINE))
-            .hover(|s| s.bg(rgb(SURFACE_HOVER)))
-            .text_size(px(12.5))
-            .text_color(rgb(INK))
-            .on_click(cx.listener(move |root, _, window, cx| {
-                root.cancel_time_popup(target, window, cx);
-                cx.notify();
-            }))
-            .child("Cancel");
+        let cancel_btn = button_in("Cancel", false, cx, move |root, window, cx| {
+            root.cancel_time_popup(target, window, cx);
+        });
 
-        let done_btn = div()
-            .id(SharedString::from(format!("{prefix}-tp-done")))
-            .cursor_pointer()
-            .px_4()
-            .py(px(6.))
-            .rounded(px(6.))
-            .bg(rgb(GOLD))
-            .border_1()
-            .border_color(rgb(GOLD))
-            .hover(|s| s.bg(rgb(ACTION_HOVER)))
-            .text_size(px(12.5))
-            .font_weight(gpui::FontWeight::SEMIBOLD)
-            .text_color(rgb(WHITE))
-            .on_click(cx.listener(move |root, _, window, cx| {
-                root.close_time_popup(target, window, cx);
-                cx.notify();
-            }))
-            .child("Done");
+        let done_btn = button_in("Done", true, cx, move |root, window, cx| {
+            root.close_time_popup(target, window, cx);
+        });
 
         let footer = crate::row()
             .w_full()
@@ -824,16 +804,15 @@ impl DesktopRoot {
             .border_color(rgb(SUBTLE_LINE))
             .justify_between()
             .items_center()
-            .child(button("Now", false, cx, move |view, cx| {
+            .child(button_in("Now", false, cx, move |view, window, cx| {
                 if let Some(picker) = get_mut(view) {
                     let now = jiff::tz::TimeZone::system().to_datetime(jiff::Timestamp::now());
                     let cur = picker.current_datetime(cx);
                     let next = jiff::civil::Time::new(now.hour(), now.minute(), now.second(), 0)
                         .map(|t| DateTime::from_parts(cur.date(), t))
                         .unwrap_or(cur);
-                    apply_picker_time(view, get_mut, on_change, next, cx);
+                    apply_picker_time(view, get_mut, on_change, next, window, cx);
                 }
-                cx.notify();
             }))
             .child(crate::row().gap_2().child(cancel_btn).child(done_btn));
 
@@ -887,7 +866,7 @@ impl DesktopRoot {
                                 let delta = if key == "up" { step } else { -step };
                                 let cur = picker.current_datetime(cx);
                                 let next = step_time_segment(cur, picker.time_segment, delta);
-                                apply_picker_time(root, get_mut, on_change, next, cx);
+                                apply_picker_time(root, get_mut, on_change, next, window, cx);
                                 cx.stop_propagation();
                                 cx.notify();
                             }

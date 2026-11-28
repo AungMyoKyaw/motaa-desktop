@@ -39,17 +39,23 @@ impl DesktopRoot {
             .child(
                 row()
                     .gap_1()
-                    .child(ghost_button("time-step-back", "‹", cx, |view, cx| {
-                        view.step_time(-1, false, cx)
-                    }))
+                    .child(ghost_button_in(
+                        "time-step-back",
+                        "‹",
+                        cx,
+                        |view, window, cx| view.step_time(-1, false, window, cx),
+                    ))
                     .child(
                         div()
                             .w(px(200.))
                             .child(self.time_scrubber("chart-time-scrubber", cx)),
                     )
-                    .child(ghost_button("time-step-forward", "›", cx, |view, cx| {
-                        view.step_time(1, false, cx)
-                    })),
+                    .child(ghost_button_in(
+                        "time-step-forward",
+                        "›",
+                        cx,
+                        |view, window, cx| view.step_time(1, false, window, cx),
+                    )),
             )
             .child(
                 row()
@@ -64,12 +70,14 @@ impl DesktopRoot {
                             view.navigate(Workspace::Time, cx);
                         },
                     ))
-                    .child(compact_button(
+                    .child(compact_button_in(
                         "time-jump-now",
                         "Now",
                         true,
                         cx,
-                        |view, cx| view.set_time(view.session.read(cx).now(), true, cx),
+                        |view, window, cx| {
+                            view.set_time(view.session.read(cx).now(), true, window, cx)
+                        },
                     )),
             )
             .into_any_element()
@@ -122,25 +130,25 @@ impl DesktopRoot {
                 };
 
                 let down = view.clone();
-                window.on_mouse_event(move |event: &MouseDownEvent, phase, _, cx| {
+                window.on_mouse_event(move |event: &MouseDownEvent, phase, window, cx| {
                     if phase.bubble()
                         && event.button == MouseButton::Left
                         && bounds.contains(&event.position)
                     {
                         let _ = down.update(cx, |root, cx| {
                             root.scrub_dragging = true;
-                            root.step_time(to_offset(event.position.x), true, cx);
+                            root.step_time(to_offset(event.position.x), true, window, cx);
                         });
                         cx.stop_propagation();
                     }
                 });
                 let drag = view.clone();
-                window.on_mouse_event(move |event: &MouseMoveEvent, phase, _, cx| {
+                window.on_mouse_event(move |event: &MouseMoveEvent, phase, window, cx| {
                     if phase.bubble() && event.pressed_button == Some(MouseButton::Left) {
                         let _ = drag.update(cx, |root, cx| {
                             let next = to_offset(event.position.x);
                             if root.scrub_dragging && next != root.scrub_offset {
-                                root.step_time(next, true, cx);
+                                root.step_time(next, true, window, cx);
                             }
                         });
                     }
@@ -163,7 +171,7 @@ impl DesktopRoot {
             .border_1()
             .border_color(gpui::transparent_black())
             .focus(|style| style.border_color(rgb(GOLD)))
-            .on_key_down(cx.listener(|view, event: &gpui::KeyDownEvent, _, cx| {
+            .on_key_down(cx.listener(|view, event: &gpui::KeyDownEvent, window, cx| {
                 let offset = match event.keystroke.key.as_str() {
                     "left" => (view.scrub_offset - 1).max(-60),
                     "right" => (view.scrub_offset + 1).min(60),
@@ -171,27 +179,28 @@ impl DesktopRoot {
                     "end" => 60,
                     _ => return,
                 };
-                view.step_time(offset, true, cx);
+                view.step_time(offset, true, window, cx);
                 cx.stop_propagation();
             }))
             .child(track)
             .into_any_element()
     }
 
-    pub(super) fn edit_reference_location(&mut self, cx: &mut Context<Self>) {
+    pub(super) fn edit_reference_location(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let profile = self.session.read(cx).reference_profile().clone();
         let zone = profile
             .timezone_id
             .unwrap_or_else(|| profile.timezone_offset_minutes.to_string());
         self.reference_location_draft = Some(ReferenceLocationDraft {
             town_search: None,
-            place: text_input(&profile.birthplace, "Place name", cx),
-            latitude: text_input(&profile.latitude.to_string(), "Latitude", cx),
-            longitude: text_input(&profile.longitude.to_string(), "Longitude", cx),
-            timezone: text_input(&zone, "IANA zone or offset minutes", cx),
+            place: text_input(&profile.birthplace, "Place name", window, cx),
+            latitude: text_input(&profile.latitude.to_string(), "Latitude", window, cx),
+            longitude: text_input(&profile.longitude.to_string(), "Longitude", window, cx),
+            timezone: text_input(&zone, "IANA zone or offset minutes", window, cx),
             location: location_picker::LocationPickerState::new(
                 profile.latitude,
                 profile.longitude,
+                window,
                 cx,
             ),
         });
@@ -210,9 +219,9 @@ impl DesktopRoot {
             if request.birthplace.is_empty() {
                 return Err("Enter a reference place name.".to_owned());
             }
-            request.latitude = parse_coordinate(draft.latitude.read(cx).value(), true)?;
-            request.longitude = parse_coordinate(draft.longitude.read(cx).value(), false)?;
-            set_timezone(&mut request, draft.timezone.read(cx).value());
+            request.latitude = parse_coordinate(draft.latitude.read(cx).value().as_ref(), true)?;
+            request.longitude = parse_coordinate(draft.longitude.read(cx).value().as_ref(), false)?;
+            set_timezone(&mut request, draft.timezone.read(cx).value().as_ref());
             motaa_engine::validate(&request)?;
             motaa_engine::effective_utc_offset(&request)?;
             session.store_reference_for_active_profile(Some(&request))?;
@@ -290,7 +299,7 @@ impl DesktopRoot {
             )
             .child(
                 row()
-                    .child(button(
+                    .child(button_in(
                         "Edit reference location",
                         false,
                         cx,
@@ -340,27 +349,27 @@ impl DesktopRoot {
                         "Reference date and time",
                         false,
                         None,
-                        Some(|view, dt, cx| view.set_time(dt, true, cx)),
+                        Some(|view, dt, window, cx| view.set_time(dt, true, window, cx)),
                         |view| Some(&mut view.time_picker),
                         cx,
                     ))
                     .child(
                         row()
-                            .child(button("Apply date", true, cx, |view, cx| {
+                            .child(button_in("Apply date", true, cx, |view, window, cx| {
                                 if let Err(err) = view.time_picker.validate() {
                                     view.set_status(err, cx);
                                     return;
                                 }
-                                match parse_time(view.date.read(cx).value()) {
-                                    Ok(time) => view.set_time(time, true, cx),
+                                match parse_time(view.date.read(cx).value().as_ref()) {
+                                    Ok(time) => view.set_time(time, true, window, cx),
                                     Err(error) => view.set_status(error, cx),
                                 }
                             }))
                             .child(button("View transit", false, cx, |view, cx| {
                                 view.select_mode("Natal + transit", cx)
                             }))
-                            .child(button("Use current time", false, cx, |view, cx| {
-                                view.set_time(view.session.read(cx).now(), true, cx)
+                            .child(button_in("Use current time", false, cx, |view, window, cx| {
+                                view.set_time(view.session.read(cx).now(), true, window, cx)
                             })),
                     ),
             )
@@ -379,20 +388,20 @@ impl DesktopRoot {
             )
             .child(
                 row()
-                    .child(button(
+                    .child(button_in(
                         format!("Previous {}", step.label().to_lowercase()),
                         false,
                         cx,
-                        |view, cx| {
-                            view.step_time(-1, false, cx);
+                        |view, window, cx| {
+                            view.step_time(-1, false, window, cx);
                         },
                     ))
-                    .child(button(
+                    .child(button_in(
                         format!("Next {}", step.label().to_lowercase()),
                         false,
                         cx,
-                        |view, cx| {
-                            view.step_time(1, false, cx);
+                        |view, window, cx| {
+                            view.step_time(1, false, window, cx);
                         },
                     )),
             )

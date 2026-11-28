@@ -27,9 +27,9 @@ impl DesktopRoot {
     pub(super) fn open_palette(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         self.palette_open = true;
         self.palette_index = 0;
-        self.palette_scroll.reset();
+        self.palette_scroll.set_offset(gpui::point(px(0.), px(0.)));
         self.palette_query
-            .update(cx, |input, cx| input.set_value(String::new(), cx));
+            .update(cx, |input, cx| input.set_value(String::new(), window, cx));
         let focus = self.palette_query.read(cx).focus_handle(cx);
         window.focus(&focus, cx);
         cx.notify();
@@ -172,11 +172,13 @@ impl DesktopRoot {
                 session.workspace = Workspace::Advanced;
             }),
             PaletteAction::Profile(id) => {
-                self.open_saved_profile(id, cx);
+                self.open_saved_profile(id, window, cx);
             }
             PaletteAction::Workspace(route) => self.navigate(route, cx),
-            PaletteAction::NewBirthChart => self.open_draft(ChartRequest::default(), None, cx),
-            PaletteAction::JumpNow => self.set_time(self.session.read(cx).now(), true, cx),
+            PaletteAction::NewBirthChart => {
+                self.open_draft(ChartRequest::default(), None, window, cx)
+            }
+            PaletteAction::JumpNow => self.set_time(self.session.read(cx).now(), true, window, cx),
             PaletteAction::ToggleSidebar => {
                 self.sidebar_collapsed = !self.sidebar_collapsed;
             }
@@ -268,21 +270,21 @@ impl DesktopRoot {
                             .border_b_1()
                             .border_color(rgb(LINE))
                             .bg(rgb(HEADER_BG))
-                            .child(self.palette_query.clone()),
+                            .child(render_input(&self.palette_query)),
                     )
-                    .child(
-                        row()
+                    .child({
+                        use gpui::component::scroll::ScrollableElement as _;
+                        div()
+                            .relative()
                             .w_full()
                             .max_h(px(380.))
-                            .items_start()
                             .child(
                                 div()
                                     .id("command-palette-results")
-                                    .flex_1()
-                                    .min_w(px(0.))
+                                    .w_full()
                                     .max_h(px(380.))
                                     .overflow_y_scroll()
-                                    .track_scroll(&self.palette_scroll.handle)
+                                    .track_scroll(&self.palette_scroll)
                                     .on_scroll(cx.listener(|_, _, _, cx| cx.notify()))
                                     .p_2()
                                     .when(entries.is_empty(), |list| {
@@ -338,11 +340,8 @@ impl DesktopRoot {
                                         },
                                     )),
                             )
-                            .child(interactive_vertical_scrollbar(
-                                &self.palette_scroll,
-                                Some(380.),
-                            )),
-                    )
+                            .vertical_scrollbar(&self.palette_scroll)
+                    })
                     .child(
                         row()
                             .px_3()

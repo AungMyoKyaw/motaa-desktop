@@ -1,8 +1,4 @@
-use gpui::{
-    AnyElement, BorderStyle, Bounds, BoxShadow, Corners, Div, Edges, MouseButton, MouseDownEvent,
-    MouseMoveEvent, MouseUpEvent, SharedString, canvas, div, fill, point, prelude::*, px, rgb,
-    rgba, size,
-};
+use gpui::{AnyElement, BoxShadow, Div, SharedString, div, point, prelude::*, px, rgb, rgba};
 
 // Observatory Manuscript (Light-only Heritage Gold) tokens.
 pub const GOLD: u32 = 0x7c5b21;
@@ -75,9 +71,10 @@ pub fn zoom_scroll_hint() -> &'static str {
 }
 
 pub fn apply_gold_heritage_theme(cx: &mut gpui::App) {
-    use gpui::component::{Theme, ThemeMode};
+    use gpui::component::{Theme, ThemeMode, scroll::ScrollbarMode};
 
     Theme::change(ThemeMode::Light, None, cx);
+    Theme::set_scrollbar_mode(ScrollbarMode::Always, cx);
     Theme::update(cx, |theme| {
         theme.font_family = "Helvetica Neue".into();
         theme.mono_font_family = "Menlo".into();
@@ -267,161 +264,19 @@ pub fn shortcut_keycap(label: impl Into<SharedString>) -> Div {
         .child(label.into())
 }
 
-#[derive(Clone)]
-pub struct ScrollTrack {
-    pub handle: gpui::ScrollHandle,
-    drag_grab_y: std::rc::Rc<std::cell::Cell<Option<f32>>>,
-}
-
-impl Default for ScrollTrack {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl ScrollTrack {
-    pub fn new() -> Self {
-        Self {
-            handle: gpui::ScrollHandle::new(),
-            drag_grab_y: std::rc::Rc::new(std::cell::Cell::new(None)),
-        }
-    }
-
-    pub fn reset(&self) {
-        self.drag_grab_y.set(None);
-        self.handle.set_offset(point(px(0.), px(0.)));
-    }
-
-    pub fn scroll_by(&self, delta_y: f32) -> bool {
-        let max_y = f32::from(self.handle.max_offset().y).max(0.0);
-        if max_y <= 0.5 {
-            return false;
-        }
-        let cur = self.handle.offset();
-        let next_y = (f32::from(cur.y) + delta_y).clamp(-max_y, 0.0);
-        if (next_y - f32::from(cur.y)).abs() > 0.1 {
-            self.handle.set_offset(point(cur.x, px(next_y)));
-            true
-        } else {
-            false
-        }
-    }
-
-    pub fn scroll_page(&self, direction: f32) -> bool {
-        let page = f32::from(self.handle.bounds().size.height).max(240.0) * 0.85;
-        self.scroll_by(page * direction)
-    }
-}
-
-fn scrollbar_metrics(handle: &gpui::ScrollHandle, track_height: f32) -> (f32, f32, f32) {
+pub fn scroll_handle_page(handle: &gpui::ScrollHandle, direction: f32) -> bool {
     let max_y = f32::from(handle.max_offset().y).max(0.0);
-    let viewport_h = f32::from(handle.bounds().size.height).max(track_height);
-    let scroll_y = (-f32::from(handle.offset().y)).clamp(0.0, max_y);
-    let thumb_h = ((viewport_h / (viewport_h + max_y)) * track_height).clamp(28.0, track_height);
-    let thumb_y = if max_y > 0.5 {
-        (scroll_y / max_y) * (track_height - thumb_h)
+    if max_y <= 0.5 {
+        return false;
+    }
+    let page = f32::from(handle.bounds().size.height).max(240.0) * 0.85;
+    let cur = handle.offset();
+    let next_y = (f32::from(cur.y) + page * direction).clamp(-max_y, 0.0);
+    if (next_y - f32::from(cur.y)).abs() > 0.1 {
+        handle.set_offset(point(cur.x, px(next_y)));
+        true
     } else {
-        0.0
-    };
-    (max_y, thumb_h, thumb_y)
-}
-
-pub fn interactive_vertical_scrollbar(
-    track: &ScrollTrack,
-    fixed_height: Option<f32>,
-) -> AnyElement {
-    let handle = track.handle.clone();
-    let drag = track.drag_grab_y.clone();
-    let bar = canvas(
-        |_, _, _| (),
-        move |bounds, _, window, _cx| {
-            let track_h = f32::from(bounds.size.height);
-            if track_h <= 4.0 {
-                return;
-            }
-            let (max_y, thumb_h, thumb_y) = scrollbar_metrics(&handle, track_h);
-            if max_y <= 0.5 {
-                drag.set(None);
-                return;
-            }
-            let track_x =
-                bounds.origin.x + px(((f32::from(bounds.size.width) - 6.0) / 2.0).max(0.0));
-            let track_bounds =
-                Bounds::new(point(track_x, bounds.origin.y), size(px(6.), px(track_h)));
-            window.paint_quad(gpui::PaintQuad {
-                bounds: track_bounds,
-                corner_radii: Corners::all(px(3.)),
-                background: rgb(SOFT).into(),
-                border_widths: Edges::all(px(1.)),
-                border_color: rgb(SUBTLE_LINE).into(),
-                border_style: BorderStyle::Solid,
-            });
-            let thumb_color = if drag.get().is_some() { GOLD } else { MUTED };
-            let thumb_bounds = Bounds::new(
-                point(track_x, bounds.origin.y + px(thumb_y)),
-                size(px(6.), px(thumb_h)),
-            );
-            window.paint_quad(fill(thumb_bounds, rgb(thumb_color)).corner_radii(px(3.)));
-
-            let current_view = window.current_view();
-            let travel = (track_h - thumb_h).max(1.0);
-
-            let down_handle = handle.clone();
-            let down_drag = drag.clone();
-            window.on_mouse_event(move |event: &MouseDownEvent, phase, window, cx| {
-                if phase.bubble()
-                    && event.button == MouseButton::Left
-                    && bounds.contains(&event.position)
-                {
-                    let local_y = f32::from(event.position.y - bounds.origin.y);
-                    if local_y >= thumb_y && local_y <= thumb_y + thumb_h {
-                        down_drag.set(Some(local_y - thumb_y));
-                    } else {
-                        let next_thumb = (local_y - thumb_h / 2.0).clamp(0.0, travel);
-                        let next_scroll_y = (next_thumb / travel) * max_y;
-                        let cur = down_handle.offset();
-                        down_handle.set_offset(point(cur.x, px(-next_scroll_y)));
-                        down_drag.set(Some(thumb_h / 2.0));
-                        window.refresh();
-                    }
-                    cx.notify(current_view);
-                    cx.stop_propagation();
-                }
-            });
-
-            let move_handle = handle.clone();
-            let move_drag = drag.clone();
-            window.on_mouse_event(move |event: &MouseMoveEvent, phase, window, cx| {
-                if phase.bubble()
-                    && event.pressed_button == Some(MouseButton::Left)
-                    && let Some(grab) = move_drag.get()
-                {
-                    let local_y = f32::from(event.position.y - bounds.origin.y);
-                    let next_thumb = (local_y - grab).clamp(0.0, travel);
-                    let next_scroll_y = (next_thumb / travel) * max_y;
-                    let cur = move_handle.offset();
-                    move_handle.set_offset(point(cur.x, px(-next_scroll_y)));
-                    window.refresh();
-                    cx.notify(current_view);
-                }
-            });
-
-            let up_drag = drag.clone();
-            window.on_mouse_event(move |event: &MouseUpEvent, phase, _, cx| {
-                if phase.capture() && event.button == MouseButton::Left && up_drag.get().is_some() {
-                    up_drag.set(None);
-                    cx.notify(current_view);
-                }
-            });
-        },
-    )
-    .w(px(12.))
-    .flex_shrink_0()
-    .cursor_pointer();
-
-    match fixed_height {
-        Some(h) => bar.h(px(h)).into_any_element(),
-        None => bar.h_full().into_any_element(),
+        false
     }
 }
 
@@ -537,16 +392,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn scroll_track_handles_zero_and_clamped_offsets() {
-        let track = ScrollTrack::new();
-        assert!(!track.scroll_by(-50.0));
-        assert!(!track.scroll_page(-1.0));
-        track.reset();
-        assert_eq!(track.handle.offset(), point(px(0.), px(0.)));
-
-        let (max_y, thumb_h, thumb_y) = scrollbar_metrics(&track.handle, 300.0);
-        assert_eq!(max_y, 0.0);
-        assert_eq!(thumb_h, 300.0);
-        assert_eq!(thumb_y, 0.0);
+    fn scroll_handle_page_returns_false_without_overflow() {
+        let handle = gpui::ScrollHandle::new();
+        assert!(!scroll_handle_page(&handle, -1.0));
+        assert!(!scroll_handle_page(&handle, 1.0));
     }
 }

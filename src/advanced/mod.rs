@@ -547,7 +547,7 @@ impl DesktopRoot {
                     .child(column().gap_0().child(heading("All tools")).child(caption(
                         "Choose a chart view or open an advanced analysis workspace.",
                     )))
-                    .child(div().w(px(340.)).child(self.tool_search.clone())),
+                    .child(div().w(px(340.)).child(render_input(&self.tool_search))),
             )
             .when(any_modes, |col| {
                 col.child(

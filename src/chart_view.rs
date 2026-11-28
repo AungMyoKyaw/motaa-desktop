@@ -994,7 +994,7 @@ impl DesktopRoot {
                     .border_b_1()
                     .border_color(rgb(0xeae5dc))
                     .child(
-                        action_control("period", cx, move |view, cx| match level {
+                        action_control_in("period", cx, move |view, window, cx| match level {
                             0 => {
                                 view.dasha_major = Some(index);
                                 view.dasha_sub = None;
@@ -1002,7 +1002,7 @@ impl DesktopRoot {
                             1 => view.dasha_sub = Some(index),
                             _ => {
                                 if let Some(start) = start {
-                                    view.set_time(start, true, cx);
+                                    view.set_time(start, true, window, cx);
                                 }
                             }
                         })
@@ -1027,8 +1027,8 @@ impl DesktopRoot {
                     .when(selected == Some(index), |row| {
                         row.when_some(start.zip(end), |row, (start, end)| {
                             row.child(
-                                action_control("period-start", cx, move |view, cx| {
-                                    view.set_time(start, true, cx)
+                                action_control_in("period-start", cx, move |view, window, cx| {
+                                    view.set_time(start, true, window, cx)
                                 })
                                 .text_size(px(11.))
                                 .px_1()
@@ -1036,8 +1036,8 @@ impl DesktopRoot {
                                 .child("Start"),
                             )
                             .child(
-                                action_control("period-end", cx, move |view, cx| {
-                                    view.set_time(end, true, cx)
+                                action_control_in("period-end", cx, move |view, window, cx| {
+                                    view.set_time(end, true, window, cx)
                                 })
                                 .text_size(px(11.))
                                 .px_1()
@@ -1475,7 +1475,12 @@ impl DesktopRoot {
         ))
     }
 
-    pub(super) fn step_rahu_mansion(&mut self, step: i32, cx: &mut Context<Self>) {
+    pub(super) fn step_rahu_mansion(
+        &mut self,
+        step: i32,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         let mansion = self.rahu.manual_angle.map_or_else(
             || if step < 0 { 26 } else { 0 },
             |angle| (crate::tara::mansion(angle) as i32 + step).rem_euclid(27),
@@ -1483,7 +1488,7 @@ impl DesktopRoot {
         let angle = f64::from(mansion) * (360. / 27.) + 1.;
         self.rahu.manual_angle = Some(angle);
         self.rahu.manual_input.update(cx, |input, cx| {
-            input.set_value(format!("{angle:.9}"), cx);
+            input.set_value(format!("{angle:.9}"), window, cx);
         });
         self.set_status("", cx);
     }
@@ -1639,15 +1644,22 @@ impl DesktopRoot {
                     .unwrap_or("Choose a mansion");
                 view.child(
                     row()
-                        .child(button("Previous mansion", false, cx, |view, cx| {
-                            view.step_rahu_mansion(-1, cx)
-                        }))
+                        .child(button_in(
+                            "Previous mansion",
+                            false,
+                            cx,
+                            |view, window, cx| view.step_rahu_mansion(-1, window, cx),
+                        ))
                         .child(div().min_w(px(120.)).child(mansion))
-                        .child(button("Next mansion", false, cx, |view, cx| {
-                            view.step_rahu_mansion(1, cx)
+                        .child(button_in("Next mansion", false, cx, |view, window, cx| {
+                            view.step_rahu_mansion(1, window, cx)
                         }))
                         .child(div().flex_1())
-                        .child(div().w(px(130.)).child(self.rahu.manual_input.clone()))
+                        .child(
+                            div()
+                                .w(px(130.))
+                                .child(render_input(&self.rahu.manual_input)),
+                        )
                         .child(button("Apply longitude", true, cx, |view, cx| {
                             match view
                                 .rahu

@@ -302,12 +302,12 @@ impl DesktopRoot {
                                     .flex_1(),
                                 )
                                 .when_some(target, |entry, time| {
-                                    entry.child(button(
+                                    entry.child(button_in(
                                         "Go to event",
                                         false,
                                         cx,
-                                        move |view, cx| {
-                                            view.set_time(time, true, cx);
+                                        move |view, window, cx| {
+                                            view.set_time(time, true, window, cx);
                                             view.select_mode("Natal + transit", cx);
                                         },
                                     ))
@@ -544,7 +544,7 @@ impl DesktopRoot {
             .map(|(index, input)| {
                 let label = format!("Candidate {}", index + 1);
                 let candidate = (|| {
-                    let time = parse_time(input.read(cx).value())?;
+                    let time = parse_time(input.read(cx).value().as_ref())?;
                     let result = model::calculate_at(&profile, time)?;
                     let mut ephemeris = result
                         .reference_ephemeris

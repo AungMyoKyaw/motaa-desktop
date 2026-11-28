@@ -697,13 +697,17 @@ impl DesktopRoot {
             .child(heading("Satapati name wheel"))
             .child(
                 row()
-                    .child(div().w(px(230.)).child(self.name_wheel.reference.clone()))
+                    .child(
+                        div()
+                            .w(px(230.))
+                            .child(render_input(&self.name_wheel.reference)),
+                    )
                     .child(button("Find matching syllables", true, cx, |view, cx| {
-                        let query = view.name_wheel.reference.read(cx).value().trim();
+                        let query = view.name_wheel.reference.read(cx).value().trim().to_owned();
                         view.name_wheel.matches = name_wheel::syllables()
                             .iter()
                             .enumerate()
-                            .filter_map(|(index, text)| (text == query).then_some(index))
+                            .filter_map(|(index, text)| (*text == query).then_some(index))
                             .collect();
                         view.name_wheel.sector = view.name_wheel.matches.first().copied();
                         if view.name_wheel.sector.is_none() {
@@ -727,14 +731,19 @@ impl DesktopRoot {
                     }),
             )
             .when(active_sector.is_some(), |view| {
-                view.child(button("Show all sectors", false, cx, |view, cx| {
-                    view.name_wheel.sector = None;
-                    view.name_wheel.matches.clear();
-                    view.name_wheel
-                        .reference
-                        .update(cx, |input, cx| input.set_value(String::new(), cx));
-                    view.set_status("", cx);
-                }))
+                view.child(button_in(
+                    "Show all sectors",
+                    false,
+                    cx,
+                    |view, window, cx| {
+                        view.name_wheel.sector = None;
+                        view.name_wheel.matches.clear();
+                        view.name_wheel
+                            .reference
+                            .update(cx, |input, cx| input.set_value(String::new(), window, cx));
+                        view.set_status("", cx);
+                    },
+                ))
             })
             .when(!matches.is_empty(), |view| {
                 view.child(row().flex_wrap().children(matches.into_iter().map(|index| {
