@@ -1,0 +1,234 @@
+name: Mac App Store Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      marketing_version:
+        description: 'Optional marketing version override (e.g. 0.2.7). Leave blank to use Cargo.toml version.'
+        required: false
+        default: ''
+      build_number:
+        description: 'Optional build number override (integer). Leave blank to use GitHub run number.'
+        required: false
+        default: ''
+      upload_to_app_store_connect:
+        description: 'Validate and upload the signed .pkg to App Store Connect'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  appstore-release:
+    name: Build, Sign & Upload Mac App Store Package
+    runs-on: xcode-27
+    timeout-minutes: 60
+    env:
+      CARGO_TERM_COLOR: always
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Select Xcode & Snapshot Environment
+        run: |
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          sw_vers
+          uname -m
+          xcodebuild -version
+
+      - name: Set up Rust (Universal macOS Targets)
+        run: |
+          for i in 1 2 3; do
+            rustup update stable && break
+            echo "rustup update failed (attempt $i), retrying..."
+            sleep 5
+          done
+          rustup override set stable
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: mac-app-store-universal
+
+      - name: Ensure Metal Toolchain
+        run: xcrun --find metal || xcodebuild -downloadComponent MetalToolchain
+
+      - name: Resolve Version & Build Number
+        id: version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.marketing_version }}
+          INPUT_BUILD: ${{ github.event.inputs.build_number }}
+        run: |
+          CARGO_VERSION=$(cargo metadata --locked --no-deps --format-version 1 |
+            jq -er '.packages[] | select(.name == "motaa-desktop") | .version')
+
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
+          elif [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="$CARGO_VERSION"
+          fi
+
+          if [ -n "$INPUT_BUILD" ]; then
+            BUILD_NUMBER="$INPUT_BUILD"
+          else
+            BUILD_NUMBER="${GITHUB_RUN_NUMBER}"
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "Resolved Mac App Store release: v${VERSION} (build ${BUILD_NUMBER})"
+
+      - name: Build Universal Rust Binary & Run Tests
+        run: |
+          cargo test --locked --workspace
+          MACOSX_DEPLOYMENT_TARGET=13.0 cargo build --locked --release --target aarch64-apple-darwin --bin motaa-desktop
+          MACOSX_DEPLOYMENT_TARGET=13.0 cargo build --locked --release --target x86_64-apple-darwin --bin motaa-desktop
+          mkdir -p .build/universal
+          lipo -create             target/aarch64-apple-darwin/release/motaa-desktop             target/x86_64-apple-darwin/release/motaa-desktop             -output .build/universal/motaa-desktop
+          lipo -info .build/universal/motaa-desktop
+
+      - name: Assemble Sandboxed .xcarchive
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          BUILD_NUMBER: ${{ steps.version.outputs.build_number }}
+        run: |
+          ARCHIVE=".build/MOTAADesktop.xcarchive"
+          APP="$ARCHIVE/Products/Applications/MOTAA Desktop.app"
+          rm -rf "$ARCHIVE"
+          mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+
+          install -m 755 .build/universal/motaa-desktop "$APP/Contents/MacOS/motaa-desktop"
+          install -m 644 assets/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+
+          cat > "$APP/Contents/Info.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleIdentifier</key><string>com.aungmyokyaw.motaa-desktop</string>
+            <key>CFBundleDisplayName</key><string>MOTAA Desktop</string>
+            <key>CFBundleName</key><string>MOTAA Desktop</string>
+            <key>CFBundleExecutable</key><string>motaa-desktop</string>
+            <key>CFBundleIconFile</key><string>AppIcon</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>CFBundleShortVersionString</key><string>${VERSION}</string>
+            <key>CFBundleVersion</key><string>${BUILD_NUMBER}</string>
+            <key>LSApplicationCategoryType</key><string>public.app-category.reference</string>
+            <key>LSMinimumSystemVersion</key><string>13.0</string>
+            <key>ITSAppUsesNonExemptEncryption</key><false/>
+            <key>NSHighResolutionCapable</key><true/>
+          </dict>
+          </plist>
+          PLIST
+          plutil -lint "$APP/Contents/Info.plist"
+
+          codesign --force --sign - --entitlements packaging/macos/MOTAA-AppStore.entitlements "$APP"
+          echo "Verifying embedded App Store entitlements:"
+          codesign -d --entitlements :- "$APP"
+          codesign -d --entitlements :- "$APP" | grep -q 'com.apple.security.app-sandbox'
+
+          NOW_ISO=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          cat > "$ARCHIVE/Info.plist" <<ARCHIVE_PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>ApplicationProperties</key>
+            <dict>
+              <key>ApplicationPath</key><string>Applications/MOTAA Desktop.app</string>
+              <key>Architectures</key>
+              <array>
+                <string>arm64</string>
+                <string>x86_64</string>
+              </array>
+              <key>CFBundleIdentifier</key><string>com.aungmyokyaw.motaa-desktop</string>
+              <key>CFBundleShortVersionString</key><string>${VERSION}</string>
+              <key>CFBundleVersion</key><string>${BUILD_NUMBER}</string>
+              <key>SigningIdentity</key><string>-</string>
+              <key>Team</key><string>ZSQUH7GKC5</string>
+            </dict>
+            <key>ArchiveVersion</key><integer>2</integer>
+            <key>CreationDate</key><date>${NOW_ISO}</date>
+            <key>Name</key><string>MOTAA Desktop</string>
+            <key>SchemeName</key><string>MOTAA Desktop</string>
+          </dict>
+          </plist>
+          ARCHIVE_PLIST
+          plutil -lint "$ARCHIVE/Info.plist"
+
+      - name: Configure App Store Connect API Key
+        id: signing
+        env:
+          ASC_KEY_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 || secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID || secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID || secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+        run: |
+          if [ -z "$ASC_KEY_BASE64" ] || [ -z "$ASC_KEY_ID" ] || [ -z "$ASC_ISSUER_ID" ]; then
+            echo "::error::Missing App Store Connect API secrets (ASC_KEY_P8_BASE64, ASC_KEY_ID, ASC_ISSUER_ID)."
+            exit 1
+          fi
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          echo "$ASC_KEY_BASE64" | base64 --decode > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          echo "key_path=$KEY_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Export Signed Mac App Store Package (.pkg)
+        id: export
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID || secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID || secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+        run: |
+          rm -rf .build/export
+          xcodebuild -exportArchive             -archivePath .build/MOTAADesktop.xcarchive             -exportOptionsPlist packaging/macos/ExportOptions-AppStore.plist             -exportPath .build/export             -allowProvisioningUpdates             -authenticationKeyPath "${{ steps.signing.outputs.key_path }}"             -authenticationKeyID "$ASC_KEY_ID"             -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+          PKG_PATH=$(find .build/export -maxdepth 2 -name '*.pkg' | head -n 1)
+          if [ -z "$PKG_PATH" ]; then
+            echo "::error::Export completed but no .pkg file was found in .build/export"
+            ls -la .build/export
+            exit 1
+          fi
+
+          echo "pkg_path=$PKG_PATH" >> "$GITHUB_OUTPUT"
+          ls -lh "$PKG_PATH"
+          pkgutil --check-signature "$PKG_PATH"
+
+      - name: Upload Signed Mac App Store Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MOTAA-Desktop-AppStore-v${{ steps.version.outputs.version }}-b${{ steps.version.outputs.build_number }}
+          path: ${{ steps.export.outputs.pkg_path }}
+          retention-days: 30
+
+      - name: Validate & Upload Package to App Store Connect
+        if: ${{ github.event_name == 'push' || inputs.upload_to_app_store_connect }}
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID || secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID || secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+        run: |
+          PKG_PATH="${{ steps.export.outputs.pkg_path }}"
+          echo "Validating $PKG_PATH with App Store Connect..."
+          xcrun altool --validate-app             --type macos             --file "$PKG_PATH"             --apiKey "$ASC_KEY_ID"             --apiIssuer "$ASC_ISSUER_ID"
+
+          echo "Uploading $PKG_PATH to App Store Connect..."
+          xcrun altool --upload-app             --type macos             --file "$PKG_PATH"             --apiKey "$ASC_KEY_ID"             --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Cleanup Secrets
+        if: always()
+        run: |
+          rm -rf "$HOME/.appstoreconnect/private_keys"
+          rm -rf .build
