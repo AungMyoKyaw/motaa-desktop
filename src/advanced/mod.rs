@@ -365,7 +365,13 @@ impl DesktopRoot {
                     DesktopRoot::load_ephemeris_month,
                 ))
                 .when(self.ephemeris.progress, |view| {
-                    view.child(caption("Calculating selected month…"))
+                    use gpui::component::Sizable as _;
+                    view.child(
+                        row()
+                            .gap_2()
+                            .child(gpui::component::spinner::Spinner::new().xsmall())
+                            .child(caption("Calculating selected month…")),
+                    )
                 })
                 .when_some(self.ephemeris.month.as_ref(), |view, result| match result {
                     Ok(month) => view.child(

@@ -478,26 +478,25 @@ impl DesktopRoot {
                                         view.delete_confirmation = None;
                                     },
                                 ))
-                                .child(
-                                    action_control(
-                                        ("confirm-delete", id as usize),
-                                        cx,
-                                        move |view, cx| {
+                                .child({
+                                    use gpui::component::{
+                                        Sizable as _, button::ButtonVariants as _,
+                                    };
+                                    gpui::component::button::Button::new((
+                                        "confirm-delete",
+                                        id as usize,
+                                    ))
+                                    .danger()
+                                    .xsmall()
+                                    .label("Delete")
+                                    .on_click(cx.listener(
+                                        move |view, _, _, cx| {
                                             view.selected = None;
                                             view.delete_profile(id, cx);
+                                            cx.notify();
                                         },
-                                    )
-                                    .px(px(10.))
-                                    .h(px(26.))
-                                    .justify_center()
-                                    .rounded(px(RADIUS_CONTROL))
-                                    .text_size(px(12.))
-                                    .font_weight(gpui::FontWeight::MEDIUM)
-                                    .bg(rgb(ERROR))
-                                    .text_color(rgb(PAPER))
-                                    .hover(|s| s.opacity(0.9))
-                                    .child("Delete"),
-                                ),
+                                    ))
+                                }),
                         )
                 })
                 .when(!confirming, |menu| {
@@ -668,6 +667,7 @@ impl DesktopRoot {
             "town-backdrop",
             "town-dialog",
             580.,
+            None,
             None,
             "Myanmar Town Directory",
             "534-town offline directory",

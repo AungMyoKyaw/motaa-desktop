@@ -246,7 +246,13 @@ impl DesktopRoot {
                     ),
             );
         if self.transits.searching {
-            view = view.child(caption("Calculating transit events…"));
+            use gpui::component::Sizable as _;
+            view = view.child(
+                row()
+                    .gap_2()
+                    .child(gpui::component::spinner::Spinner::new().xsmall())
+                    .child(caption("Calculating transit events…")),
+            );
         }
         match self.transits.report.as_ref() {
             Some(Ok(report)) => {

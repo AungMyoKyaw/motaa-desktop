@@ -20,8 +20,8 @@ use serde::Deserialize;
 
 use crate::{
     DesktopRoot, GOLD, INK, LINE, MUTED, PAPER, RADIUS_CONTROL, RADIUS_FIELD, SELECTED, SOFT,
-    SUBTLE_LINE, TextInput, action_control, action_control_in, button, caption, column,
-    error_banner, field, modal_dialog, panel, parse_coordinate, render_input, row, section_label,
+    SUBTLE_LINE, TextInput, action_control, action_control_in, caption, column, error_banner,
+    field, modal_dialog, panel, parse_coordinate, render_input, row, section_label,
     subscribe_input, text_input,
 };
 
@@ -996,12 +996,20 @@ impl DesktopRoot {
                             }))
                             .child(render_input(&query_input)),
                     )
-                    .child(button(
-                        if loading { "Searching…" } else { "Search" },
-                        true,
-                        cx,
-                        move |view, cx| view.trigger_osm_search(reference, cx),
-                    )),
+                    .child({
+                        use gpui::component::{Sizable as _, button::ButtonVariants as _};
+                        gpui::component::button::Button::new(gpui::SharedString::from(format!(
+                            "{prefix}-osm-search-btn"
+                        )))
+                            .primary()
+                            .small()
+                            .loading(loading)
+                            .label(if loading { "Searching" } else { "Search" })
+                            .on_click(cx.listener(move |view, _, _, cx| {
+                                view.trigger_osm_search(reference, cx);
+                                cx.notify();
+                            }))
+                    }),
             )
             .when_some(error, |p, err| p.child(error_banner(err)))
             .when(!results.is_empty(), |p| {
@@ -1363,6 +1371,7 @@ impl DesktopRoot {
             "location-map-dialog",
             760.,
             Some(760.),
+            Some(&self.map_modal_scroll),
             title,
             format!("{pin_summary} · {tz_summary}"),
             "Done",
@@ -1401,6 +1410,7 @@ impl DesktopRoot {
             "timezone-backdrop",
             "timezone-dialog",
             580.,
+            None,
             None,
             title,
             tz_summary,

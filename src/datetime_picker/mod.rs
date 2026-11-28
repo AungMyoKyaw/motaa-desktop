@@ -413,13 +413,17 @@ impl DateTimePicker {
         });
 
         if let Some(toggle_unknown) = on_toggle_unknown {
-            header_actions = header_actions.child(small_action_button(
-                (prefix, "unknown-time"),
-                "Unknown birth time",
-                unknown_time,
-                cx,
-                move |view, _, cx| toggle_unknown(view, cx),
-            ));
+            use gpui::component::{Sizable as _, switch::Switch};
+            header_actions = header_actions.child(
+                Switch::new(SharedString::from(format!("{prefix}-unknown-time")))
+                    .small()
+                    .checked(unknown_time)
+                    .label("Unknown birth time")
+                    .on_change(cx.listener(move |view, _, _, cx| {
+                        toggle_unknown(view, cx);
+                        cx.notify();
+                    })),
+            );
         }
 
         let date_col = column().gap_1().child(caption("Date (YYYY-MM-DD)")).child(

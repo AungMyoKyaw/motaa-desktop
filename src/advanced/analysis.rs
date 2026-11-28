@@ -296,7 +296,13 @@ impl DesktopRoot {
                 DesktopRoot::load_strength_timeline,
             ));
         if self.strength.pending {
-            view = view.child(caption("Calculating annual samples…"));
+            use gpui::component::Sizable as _;
+            view = view.child(
+                row()
+                    .gap_2()
+                    .child(gpui::component::spinner::Spinner::new().xsmall())
+                    .child(caption("Calculating annual samples…")),
+            );
         }
         if let Some(result) = self.strength.report.as_ref() {
             view = view.child(match result {

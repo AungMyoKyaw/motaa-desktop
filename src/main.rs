@@ -257,6 +257,7 @@ struct DesktopRoot {
     palette_scroll: gpui::ScrollHandle,
     town_scroll: gpui::ScrollHandle,
     tz_scroll: gpui::ScrollHandle,
+    map_modal_scroll: gpui::ScrollHandle,
     palette_query: Entity<TextInput>,
     palette_index: usize,
     date: Entity<TextInput>,
@@ -558,17 +559,16 @@ pub(crate) fn icon_compact_button(
     cx: &mut Context<DesktopRoot>,
     action: impl Fn(&mut DesktopRoot, &mut Context<DesktopRoot>) + 'static,
 ) -> AnyElement {
-    pill_control(id, RADIUS_CONTROL, 12., cx, action)
-        .gap(px(6.))
-        .font_weight(gpui::FontWeight::MEDIUM)
-        .border_1()
-        .border_color(rgb(LINE))
-        .bg(rgb(PAPER))
-        .text_color(rgb(INK))
-        .shadow(pill_shadow())
-        .hover(|s| s.bg(rgb(SOFT)))
+    use gpui::component::Sizable as _;
+    gpui::component::button::Button::new(id)
+        .outline()
+        .xsmall()
         .child(ui_icon(icon_path, icon_size, MUTED))
         .child(label.into())
+        .on_click(cx.listener(move |view, _, _, cx| {
+            action(view, cx);
+            cx.notify();
+        }))
         .into_any_element()
 }
 
@@ -610,6 +610,7 @@ pub(crate) fn modal_dialog(
     dialog_id: &'static str,
     width: f32,
     max_height: Option<f32>,
+    scroll_handle: Option<&gpui::ScrollHandle>,
     title: impl Into<gpui::SharedString>,
     subtitle: impl Into<gpui::SharedString>,
     close_label: &'static str,
@@ -619,11 +620,29 @@ pub(crate) fn modal_dialog(
 ) -> AnyElement {
     let on_close = Rc::new(on_close);
     let on_escape = on_close.clone();
+    let header = row()
+        .justify_between()
+        .items_center()
+        .child(
+            column()
+                .gap_0()
+                .child(
+                    div()
+                        .text_size(px(16.))
+                        .font_weight(gpui::FontWeight::SEMIBOLD)
+                        .text_color(rgb(INK))
+                        .child(title.into()),
+                )
+                .child(caption(subtitle.into())),
+        )
+        .child(button(close_label, true, cx, move |root, cx| {
+            on_close(root, cx);
+            cx.notify();
+        }));
     let mut dialog = div()
         .id(dialog_id)
         .w(px(width))
         .max_w_full()
-        .when_some(max_height, |el, mh| el.max_h(px(mh)).overflow_y_scroll())
         .bg(rgb(PAPER))
         .rounded(px(12.))
         .border_1()
@@ -641,29 +660,35 @@ pub(crate) fn modal_dialog(
                 cx.stop_propagation();
                 cx.notify();
             }
-        }))
-        .child(
-            row()
-                .justify_between()
-                .items_center()
-                .child(
-                    column()
-                        .gap_0()
-                        .child(
-                            div()
-                                .text_size(px(16.))
-                                .font_weight(gpui::FontWeight::SEMIBOLD)
-                                .text_color(rgb(INK))
-                                .child(title.into()),
-                        )
-                        .child(caption(subtitle.into())),
-                )
-                .child(button(close_label, true, cx, move |root, cx| {
-                    on_close(root, cx);
-                    cx.notify();
-                })),
+        }));
+    if let (Some(mh), Some(handle)) = (max_height, scroll_handle) {
+        use gpui::component::scroll::ScrollableElement as _;
+        let scroll_inner = div()
+            .id((dialog_id, 1usize))
+            .w_full()
+            .max_h(px(mh - 40.))
+            .overflow_y_scroll()
+            .track_scroll(handle)
+            .on_scroll(cx.listener(|_, _, _, cx| cx.notify()))
+            .flex()
+            .flex_col()
+            .gap_3()
+            .child(header)
+            .child(body);
+        dialog = dialog.child(
+            div()
+                .relative()
+                .w_full()
+                .max_h(px(mh - 40.))
+                .child(scroll_inner)
+                .vertical_scrollbar(handle),
         );
-    dialog = dialog.child(body);
+    } else {
+        dialog = dialog
+            .when_some(max_height, |el, mh| el.max_h(px(mh)).overflow_y_scroll())
+            .child(header)
+            .child(body);
+    }
     div()
         .id(backdrop_id)
         .occlude()
@@ -744,71 +769,23 @@ fn segmented_pair(
     cx: &mut Context<DesktopRoot>,
     on_select: impl Fn(&mut DesktopRoot, bool, &mut Context<DesktopRoot>) + 'static,
 ) -> AnyElement {
-    let on_select = Rc::new(on_select);
-    let left_cb = on_select.clone();
-    let right_cb = on_select;
-    segmented_track()
+    use gpui::component::{
+        Sizable as _,
+        tab::{Tab, TabBar},
+    };
+    TabBar::new(id_prefix)
+        .segmented()
+        .xsmall()
         .w_full()
-        .child(
-            action_control((id_prefix, 0usize), cx, move |view, cx| {
-                left_cb(view, false, cx)
-            })
-            .flex_1()
-            .h(px(26.))
-            .justify_center()
-            .rounded(px(6.))
-            .text_size(px(12.))
-            .font_weight(if !second_active {
-                gpui::FontWeight::SEMIBOLD
-            } else {
-                gpui::FontWeight::MEDIUM
-            })
-            .bg(if !second_active {
-                rgb(PAPER).into()
-            } else {
-                gpui::transparent_black()
-            })
-            .text_color(rgb(if !second_active { INK } else { MUTED }))
-            .when(!second_active, |el| el.shadow(pill_shadow()))
-            .hover(|s| {
-                if !second_active {
-                    s.bg(rgb(PAPER))
-                } else {
-                    s.text_color(rgb(INK))
-                }
-            })
-            .child(labels.0),
-        )
-        .child(
-            action_control((id_prefix, 1usize), cx, move |view, cx| {
-                right_cb(view, true, cx)
-            })
-            .flex_1()
-            .h(px(26.))
-            .justify_center()
-            .rounded(px(6.))
-            .text_size(px(12.))
-            .font_weight(if second_active {
-                gpui::FontWeight::SEMIBOLD
-            } else {
-                gpui::FontWeight::MEDIUM
-            })
-            .bg(if second_active {
-                rgb(PAPER).into()
-            } else {
-                gpui::transparent_black()
-            })
-            .text_color(rgb(if second_active { GOLD } else { MUTED }))
-            .when(second_active, |el| el.shadow(pill_shadow()))
-            .hover(|s| {
-                if second_active {
-                    s.bg(rgb(PAPER))
-                } else {
-                    s.text_color(rgb(INK))
-                }
-            })
-            .child(labels.1),
-        )
+        .selected_index(usize::from(second_active))
+        .on_click(cx.listener(move |view, idx: &usize, _, cx| {
+            on_select(view, *idx == 1, cx);
+            cx.notify();
+        }))
+        .children([
+            Tab::new().label(labels.0).flex_1(),
+            Tab::new().label(labels.1).flex_1(),
+        ])
         .into_any_element()
 }
 
@@ -871,8 +848,10 @@ fn menu_item_danger(
         .into_any_element()
 }
 
-fn menu_divider() -> Div {
-    div().w_full().h(px(1.)).my_1().bg(rgb(SUBTLE_LINE))
+fn menu_divider() -> impl IntoElement {
+    gpui::component::separator::Separator::horizontal()
+        .my_1()
+        .color(gpui::Hsla::from(rgb(SUBTLE_LINE)))
 }
 
 fn action_control(
@@ -989,6 +968,7 @@ impl DesktopRoot {
             palette_scroll: gpui::ScrollHandle::new(),
             town_scroll: gpui::ScrollHandle::new(),
             tz_scroll: gpui::ScrollHandle::new(),
+            map_modal_scroll: gpui::ScrollHandle::new(),
             palette_query,
             palette_index: 0,
             date,
@@ -1556,28 +1536,20 @@ impl Render for DesktopRoot {
                     }),
             )
             .child(div().h(px(14.)))
-            .child(
-                action_control_in("sidebar-new-chart", cx, |view, window, cx| {
-                    view.open_draft(ChartRequest::default(), None, window, cx)
-                })
-                .w_full()
-                .h(px(32.))
-                .px_3()
-                .gap_2()
-                .justify_center()
-                .rounded(px(RADIUS_CONTROL))
-                .text_size(px(13.))
-                .font_weight(gpui::FontWeight::MEDIUM)
-                .border_1()
-                .border_color(rgb(GOLD))
-                .bg(rgb(GOLD))
-                .text_color(rgb(PAPER))
-                .shadow(pill_shadow())
-                .hover(|style| style.bg(rgb(ACTION_HOVER)))
-                .active(|style| style.bg(rgb(ACTION_PRESSED)))
-                .child(ui_icon("ui/plus", 14., PAPER))
-                .when(!collapsed, |btn| btn.child("New birth chart")),
-            )
+            .child({
+                use gpui::component::{Sizable as _, button::ButtonVariants as _};
+                gpui::component::button::Button::new("sidebar-new-chart")
+                    .primary()
+                    .small()
+                    .w_full()
+                    .child(ui_icon("ui/plus", 14., PAPER))
+                    .when(!collapsed, |btn| btn.child("New birth chart"))
+                    .when(collapsed, |btn| btn.tooltip("New birth chart"))
+                    .on_click(cx.listener(|view, _, window, cx| {
+                        view.open_draft(ChartRequest::default(), None, window, cx);
+                        cx.notify();
+                    }))
+            })
             .child(div().h(px(10.)))
             .children(Workspace::ALL.into_iter().enumerate().map(|(idx, entry)| {
                 let selected = entry == route;
@@ -1647,20 +1619,24 @@ impl Render for DesktopRoot {
                     .pt_2()
                     .border_t_1()
                     .border_color(rgb(SUBTLE_LINE))
-                    .child(
-                        action_control("sidebar-collapse-btn", cx, |view, _| {
-                            view.sidebar_collapsed = !view.sidebar_collapsed;
-                        })
-                        .w_full()
-                        .h(px(32.))
-                        .px_2()
-                        .rounded(px(RADIUS_CONTROL))
-                        .justify_center()
-                        .gap_2()
-                        .hover(|s| s.bg(rgb(SURFACE_HOVER)))
-                        .child(ui_icon("ui/panel-left", 14., MUTED))
-                        .when(!collapsed, |btn| btn.child(caption("Collapse"))),
-                    ),
+                    .child({
+                        use gpui::component::{Sizable as _, button::ButtonVariants as _};
+                        gpui::component::button::Button::new("sidebar-collapse-btn")
+                            .ghost()
+                            .small()
+                            .w_full()
+                            .tooltip(if collapsed {
+                                "Expand sidebar"
+                            } else {
+                                "Collapse sidebar"
+                            })
+                            .child(ui_icon("ui/panel-left", 14., MUTED))
+                            .when(!collapsed, |btn| btn.child(caption("Collapse")))
+                            .on_click(cx.listener(|view, _, _, cx| {
+                                view.sidebar_collapsed = !view.sidebar_collapsed;
+                                cx.notify();
+                            }))
+                    }),
             );
         let lightbox_open = self.lightbox.target.is_some();
         let viewport_w = f32::from(window.viewport_size().width);
@@ -1713,10 +1689,11 @@ impl Render for DesktopRoot {
                         scroll_handle_page(&view.town_scroll, dir)
                     } else if view.active_timezone_popup().is_some() {
                         scroll_handle_page(&view.tz_scroll, dir)
+                    } else if view.active_map_popup().is_some() {
+                        scroll_handle_page(&view.map_modal_scroll, dir)
                     } else if view.palette_open {
                         scroll_handle_page(&view.palette_scroll, dir)
                     } else if view.lightbox.target.is_none()
-                        && view.active_map_popup().is_none()
                         && view.active_datetime_popup().is_none()
                         && view.active_time_popup().is_none()
                     {
@@ -1955,43 +1932,32 @@ impl Render for DesktopRoot {
                                                     | Workspace::Advanced
                                             ),
                                         |bar| {
-                                            bar.child(
-                                                action_control(
-                                                    "header-inspector-toggle",
-                                                    cx,
-                                                    |view, _| {
-                                                        view.inspector_open = !view.inspector_open;
-                                                    },
-                                                )
-                                                .w(px(28.))
-                                                .h(px(26.))
-                                                .justify_center()
-                                                .rounded(px(RADIUS_CONTROL))
-                                                .border_1()
-                                                .border_color(rgb(if self.inspector_open {
-                                                    GOLD
-                                                } else {
-                                                    LINE
-                                                }))
-                                                .bg(rgb(if self.inspector_open {
-                                                    GOLD
-                                                } else {
-                                                    PAPER
-                                                }))
-                                                .shadow(pill_shadow())
-                                                .hover(|s| {
-                                                    s.bg(rgb(if self.inspector_open {
-                                                        ACTION_HOVER
-                                                    } else {
-                                                        SOFT
-                                                    }))
-                                                })
-                                                .child(ui_icon(
-                                                    "ui/panel-right",
-                                                    14.5,
-                                                    if self.inspector_open { PAPER } else { INK },
-                                                )),
+                                            use gpui::component::{
+                                                Sizable as _, button::ButtonVariants as _,
+                                            };
+                                            let btn = gpui::component::button::Button::new(
+                                                "header-inspector-toggle",
                                             )
+                                            .xsmall()
+                                            .tooltip(if self.inspector_open {
+                                                "Hide inspector"
+                                            } else {
+                                                "Show inspector"
+                                            })
+                                            .child(ui_icon(
+                                                "ui/panel-right",
+                                                14.5,
+                                                if self.inspector_open { PAPER } else { INK },
+                                            ))
+                                            .on_click(cx.listener(|view, _, _, cx| {
+                                                view.inspector_open = !view.inspector_open;
+                                                cx.notify();
+                                            }));
+                                            bar.child(if self.inspector_open {
+                                                btn.primary()
+                                            } else {
+                                                btn.outline()
+                                            })
                                         },
                                     )
                                     .when(route == Workspace::Profiles, |bar| {
@@ -2383,6 +2349,10 @@ fn main() {
                 focus: !smoke,
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
                 window_min_size: Some(size(px(1024.), px(680.))),
+                titlebar: Some(gpui::TitlebarOptions {
+                    title: Some("MOTAA Desktop".into()),
+                    ..gpui::component::TitleBar::title_bar_options()
+                }),
                 ..gpui::component::TitleBar::window_options()
             };
             let (window, root_entity) = gpui::open_window(window_options, cx, |window, cx| {

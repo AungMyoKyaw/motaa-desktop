@@ -35,7 +35,6 @@ pub const RADIUS_PANEL: f32 = 12.;
 pub enum Tone {
     Neutral,
     Gold,
-    Error,
 }
 
 impl Tone {
@@ -43,7 +42,6 @@ impl Tone {
         match self {
             Self::Neutral => (SOFT, MUTED, LINE),
             Self::Gold => (SELECTED, GOLD, GOLD),
-            Self::Error => (ERROR_BG, ERROR, 0xf5c2be),
         }
     }
 }
@@ -95,6 +93,7 @@ pub fn apply_gold_heritage_theme(cx: &mut gpui::App) {
         c.primary_foreground = rgb(WHITE).into();
         c.secondary = rgb(SOFT).into();
         c.secondary_hover = rgb(SURFACE_HOVER).into();
+        c.secondary_active = rgb(SELECTED).into();
         c.secondary_foreground = rgb(INK).into();
         c.accent = rgb(SELECTED).into();
         c.accent_foreground = rgb(INK).into();
@@ -110,7 +109,21 @@ pub fn apply_gold_heritage_theme(cx: &mut gpui::App) {
         c.title_bar = rgb(HEADER_BG).into();
         c.title_bar_border = rgb(SUBTLE_LINE).into();
         c.danger = rgb(ERROR).into();
+        c.danger_hover = rgb(0x912018).into();
+        c.danger_active = rgb(0x7a271a).into();
         c.danger_foreground = rgb(WHITE).into();
+        c.tab_bar = rgb(SOFT).into();
+        c.tab_bar_segmented = rgb(SOFT).into();
+        c.tab = gpui::transparent_black();
+        c.tab_foreground = rgb(MUTED).into();
+        c.tab_active = rgb(PAPER).into();
+        c.tab_active_foreground = rgb(GOLD).into();
+        c.list = rgb(PAPER).into();
+        c.list_hover = rgb(SOFT).into();
+        c.list_active = rgb(SELECTED).into();
+        c.list_active_border = rgb(GOLD).into();
+        c.list_even = rgb(SOFT).into();
+        c.list_head = rgb(SOFT).into();
         c.scrollbar = rgb(SOFT).into();
         c.scrollbar_thumb = rgb(MUTED).into();
         c.scrollbar_thumb_hover = rgb(GOLD).into();
@@ -281,20 +294,14 @@ pub fn scroll_handle_page(handle: &gpui::ScrollHandle, direction: f32) -> bool {
 }
 
 pub fn badge(label: impl Into<SharedString>, tone: Tone) -> Div {
+    use gpui::component::{Sizable as _, tag::Tag};
     let (bg, fg, border) = tone.colors();
-    div()
-        .flex()
-        .items_center()
-        .px_2()
-        .py(px(2.))
-        .rounded(px(RADIUS_FIELD))
-        .border_1()
-        .border_color(rgb(border))
-        .bg(rgb(bg))
-        .text_size(px(11.))
-        .font_weight(gpui::FontWeight::MEDIUM)
-        .text_color(rgb(fg))
-        .child(label.into())
+    div().flex_shrink_0().child(
+        Tag::custom(rgb(bg).into(), rgb(fg).into(), rgb(border).into())
+            .small()
+            .rounded(px(RADIUS_FIELD))
+            .child(label.into()),
+    )
 }
 
 pub fn chip(label: impl Into<SharedString>, active: bool) -> Div {
@@ -353,38 +360,22 @@ pub fn empty_state(
     detail: impl Into<SharedString>,
     action: Option<AnyElement>,
 ) -> Div {
-    let mut box_el = panel()
-        .items_center()
-        .justify_center()
-        .py_8()
-        .gap_2()
-        .child(
-            div()
-                .text_size(px(15.))
-                .font_weight(gpui::FontWeight::MEDIUM)
-                .text_color(rgb(INK))
-                .child(title.into()),
-        )
-        .child(caption(detail.into()));
+    use gpui::component::empty::{Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle};
+    let header = EmptyHeader::new()
+        .title(EmptyTitle::new().child(title.into()))
+        .description(EmptyDescription::new().child(detail.into()));
+    let mut empty = Empty::new().header(header);
     if let Some(action) = action {
-        box_el = box_el.child(div().pt_2().child(action));
+        empty = empty.content(EmptyContent::new().child(action));
     }
-    box_el
+    panel().py_4().child(empty)
 }
 
 pub fn error_banner(message: impl Into<SharedString>) -> Div {
-    let (bg, fg, border) = Tone::Error.colors();
-    row()
+    use gpui::component::{Sizable as _, alert::Alert};
+    div()
         .w_full()
-        .px_3()
-        .py_2()
-        .rounded(px(RADIUS_CONTROL))
-        .border_1()
-        .border_color(rgb(border))
-        .bg(rgb(bg))
-        .text_size(px(12.5))
-        .text_color(rgb(fg))
-        .child(message.into())
+        .child(Alert::error("error-banner", message.into()).small())
 }
 
 #[cfg(test)]
