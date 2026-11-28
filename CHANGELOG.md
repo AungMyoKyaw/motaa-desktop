@@ -2,6 +2,15 @@
 
 All notable changes to MOTAA Desktop are documented in this file.
 
+## [0.2.8] - 2026-11-28
+
+### Changed
+- **GPUI-Kit UI Migration**: Migrated the application shell, Gold Heritage theme, titlebar, scrollbars, text inputs, buttons, controls, and modal pickers to `gpui-kit 0.11.0`.
+- **Mac App Store Release Pipeline**: Added automated Universal macOS (`arm64` + `x86_64`) Mac App Store build, signing, validation, and App Store Connect upload workflow on `xcode-27`.
+
+### Fixed
+- **Windows Chrome & Time Picker**: Embedded the application icon into the Windows titlebar, added interactive scrollbars, and rewrote the time picker for smoother keyboard and mouse input.
+
 ## [0.2.7] - 2026-11-28
 
 ### Fixed

@@ -21,8 +21,8 @@ cargo build --locked --release --target x86_64-pc-windows-msvc --bin motaa-deskt
 
 .\packaging\windows\build-msix.ps1 `
   -ExePath .\target\x86_64-pc-windows-msvc\release\motaa-desktop.exe `
-  -Version 0.2.7 `
-  -OutputMsix .\dist\motaa-desktop-v0.2.7-windows-x64.msix
+  -Version 0.2.8 `
+  -OutputMsix .\dist\motaa-desktop-v0.2.8-windows-x64.msix
 
 .\packaging\windows\capture-store-screenshots.ps1 `
   -ExePath .\target\x86_64-pc-windows-msvc\release\motaa-desktop.exe `
