@@ -75,7 +75,7 @@ impl DesktopRoot {
                     .min_h(px(0.))
                     .overflow_y_scroll()
                     .track_scroll(&self.inspector_scroll.handle)
-                    .on_scroll_wheel(cx.listener(|_, _, _, cx| cx.notify()))
+                    .on_scroll(cx.listener(|_, _, _, cx| cx.notify()))
                     .p_4()
                     .flex()
                     .flex_col()

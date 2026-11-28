@@ -581,14 +581,6 @@ struct PrepaintState {
     selection: Option<PaintQuad>,
 }
 
-impl IntoElement for TextElement {
-    type Element = Self;
-
-    fn into_element(self) -> Self::Element {
-        self
-    }
-}
-
 impl Element for TextElement {
     type RequestLayoutState = ();
     type PrepaintState = PrepaintState;
@@ -732,8 +724,15 @@ impl Element for TextElement {
             window.paint_quad(selection)
         }
         let line = prepaint.line.take().unwrap();
-        line.paint(bounds.origin, window.line_height(), window, cx)
-            .unwrap();
+        line.paint(
+            bounds.origin,
+            window.line_height(),
+            gpui::TextAlign::Left,
+            None,
+            window,
+            cx,
+        )
+        .unwrap();
 
         if focus_handle.is_focused(window)
             && let Some(cursor) = prepaint.cursor.take()
@@ -818,13 +817,41 @@ pub fn bind_keys(cx: &mut App) {
         KeyBinding::new("shift-left", SelectLeft, Some("TextInput")),
         KeyBinding::new("shift-right", SelectRight, Some("TextInput")),
         KeyBinding::new(
-            &crate::primary_keybinding("a"),
+            if cfg!(target_os = "macos") {
+                "cmd-a"
+            } else {
+                "ctrl-a"
+            },
             SelectAll,
             Some("TextInput"),
         ),
-        KeyBinding::new(&crate::primary_keybinding("v"), Paste, Some("TextInput")),
-        KeyBinding::new(&crate::primary_keybinding("c"), Copy, Some("TextInput")),
-        KeyBinding::new(&crate::primary_keybinding("x"), Cut, Some("TextInput")),
+        KeyBinding::new(
+            if cfg!(target_os = "macos") {
+                "cmd-v"
+            } else {
+                "ctrl-v"
+            },
+            Paste,
+            Some("TextInput"),
+        ),
+        KeyBinding::new(
+            if cfg!(target_os = "macos") {
+                "cmd-c"
+            } else {
+                "ctrl-c"
+            },
+            Copy,
+            Some("TextInput"),
+        ),
+        KeyBinding::new(
+            if cfg!(target_os = "macos") {
+                "cmd-x"
+            } else {
+                "ctrl-x"
+            },
+            Cut,
+            Some("TextInput"),
+        ),
         KeyBinding::new("home", Home, Some("TextInput")),
         KeyBinding::new("end", End, Some("TextInput")),
         KeyBinding::new("shift-home", SelectToBeginningOfLine, Some("TextInput")),

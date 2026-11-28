@@ -1,3 +1,5 @@
+extern crate gpui_kit as gpui;
+
 mod about;
 mod advanced;
 mod ashtakavarga;
@@ -34,9 +36,8 @@ use std::{
 };
 
 use gpui::{
-    AnyElement, App, Application, Bounds, ClickEvent, Context, Div, Entity, FocusHandle, Image,
-    ImageFormat, KeyBinding, Window, WindowBounds, WindowOptions, actions, div, img, prelude::*,
-    px, rgb, size,
+    AnyElement, App, Bounds, ClickEvent, Context, Div, Entity, FocusHandle, Image, ImageFormat,
+    KeyBinding, Window, WindowBounds, WindowOptions, actions, div, img, prelude::*, px, rgb, size,
 };
 use input::TextInput;
 use jiff::civil::DateTime;
@@ -390,20 +391,25 @@ struct DesktopAssets;
 
 impl gpui::AssetSource for DesktopAssets {
     fn load(&self, path: &str) -> gpui::Result<Option<std::borrow::Cow<'static, [u8]>>> {
-        Ok(RAIL_ICONS
+        if let Some((_, bytes)) = RAIL_ICONS
             .iter()
             .chain(UI_ICONS.iter())
             .find(|(name, _)| *name == path)
-            .map(|(_, bytes)| std::borrow::Cow::Borrowed(*bytes)))
+        {
+            return Ok(Some(std::borrow::Cow::Borrowed(*bytes)));
+        }
+        gpui::assets::Assets.load(path)
     }
 
     fn list(&self, path: &str) -> gpui::Result<Vec<gpui::SharedString>> {
-        Ok(RAIL_ICONS
+        let mut items: Vec<gpui::SharedString> = RAIL_ICONS
             .iter()
             .chain(UI_ICONS.iter())
             .filter(|(name, _)| name.starts_with(path))
             .map(|(name, _)| (*name).into())
-            .collect())
+            .collect();
+        items.extend(gpui::assets::Assets.list(path)?);
+        Ok(items)
     }
 }
 
@@ -517,7 +523,7 @@ pub(crate) fn icon_compact_button(
 
 pub(crate) fn anchored_popover(
     id: impl Into<gpui::ElementId>,
-    anchor: gpui::Corner,
+    anchor: gpui::Anchor,
     width: f32,
     content: impl FnOnce(gpui::Stateful<Div>) -> gpui::Stateful<Div>,
 ) -> AnyElement {
@@ -610,7 +616,7 @@ pub(crate) fn modal_dialog(
     div()
         .id(backdrop_id)
         .occlude()
-        .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
+        .on_scroll(|_, _, cx| cx.stop_propagation())
         .absolute()
         .inset_0()
         .bg(gpui::rgba(BACKDROP))
@@ -1181,7 +1187,7 @@ impl DesktopRoot {
 
     fn mode_buttons_popover(&self, cx: &mut Context<Self>) -> AnyElement {
         let active = self.session.read(cx).mode;
-        anchored_popover("more-modes-popover", gpui::Corner::TopLeft, 216., |menu| {
+        anchored_popover("more-modes-popover", gpui::Anchor::TopLeft, 216., |menu| {
             menu.children(
                 MODES
                     .into_iter()
@@ -1418,7 +1424,7 @@ impl Render for DesktopRoot {
             .bg(rgb(RAIL))
             .px(px(if collapsed { 8. } else { 12. }))
             .pb_3()
-            .pt(px(if macos_chrome() { 56. } else { 16. }))
+            .pt(px(14.))
             .border_r_1()
             .border_color(rgb(SUBTLE_LINE))
             .child(
@@ -1576,6 +1582,7 @@ impl Render for DesktopRoot {
         div()
             .relative()
             .flex()
+            .flex_col()
             .size_full()
             .track_focus(&self.focus)
             .text_color(rgb(INK))
@@ -1695,50 +1702,73 @@ impl Render for DesktopRoot {
             .on_action(cx.listener(|view, _: &NewProfile, _, cx| {
                 view.open_draft(ChartRequest::default(), None, cx);
             }))
-            .on_action(cx.listener(|view, _: &TabNext, window, _| {
+            .on_action(cx.listener(|view, _: &TabNext, window, cx| {
                 if !view.palette_open && view.active_time_popup().is_none() {
-                    window.focus_next();
+                    window.focus_next(cx);
                 }
             }))
-            .on_action(cx.listener(|view, _: &TabPrevious, window, _| {
+            .on_action(cx.listener(|view, _: &TabPrevious, window, cx| {
                 if !view.palette_open && view.active_time_popup().is_none() {
-                    window.focus_prev();
+                    window.focus_prev(cx);
                 }
             }))
             .on_action(|_: &Quit, _, cx| cx.quit())
-            .child(sidebar)
             .child(
-                column()
-                    .gap_0()
+                gpui::component::TitleBar::new().child(
+                    row()
+                        .w_full()
+                        .pr_2()
+                        .justify_between()
+                        .items_center()
+                        .child(
+                            row()
+                                .gap_2()
+                                .items_center()
+                                .child(img(app_icon()).w(px(18.)).h(px(18.)).flex_shrink_0())
+                                .child(
+                                    div()
+                                        .text_size(px(12.5))
+                                        .font_weight(gpui::FontWeight::SEMIBOLD)
+                                        .text_color(rgb(INK))
+                                        .child("MOTAA Desktop"),
+                                ),
+                        )
+                        .child(caption(format!("{} · {}", route.label(), active_natal))),
+                ),
+            )
+            .child(
+                div()
                     .flex_1()
-                    .min_w(px(0.))
-                    .h_full()
+                    .min_h(px(0.))
+                    .w_full()
+                    .flex()
+                    .child(sidebar)
                     .child(
-                        row()
-                            .h(px(48.))
-                            .flex_shrink_0()
-                            .px_6()
-                            .gap_3()
-                            .border_b_1()
-                            .border_color(rgb(SUBTLE_LINE))
-                            .justify_between()
-                            .bg(rgb(HEADER_BG))
+                        column()
+                            .gap_0()
+                            .flex_1()
+                            .min_w(px(0.))
+                            .h_full()
                             .child(
                                 row()
-                                    .flex_1()
-                                    .min_w(px(0.))
-                                    .h_full()
-                                    .gap_2()
-                                    .overflow_hidden()
-                                    .window_control_area(gpui::WindowControlArea::Drag)
-                                    .on_mouse_down(gpui::MouseButton::Left, |event, window, _| {
-                                        if event.click_count == 1 {
-                                            window.start_window_move();
-                                        }
-                                    })
+                                    .h(px(48.))
+                                    .flex_shrink_0()
+                                    .px_6()
+                                    .gap_3()
+                                    .border_b_1()
+                                    .border_color(rgb(SUBTLE_LINE))
+                                    .justify_between()
+                                    .bg(rgb(HEADER_BG))
                                     .child(
-                                        div()
-                                            .text_size(px(14.))
+                                        row()
+                                            .flex_1()
+                                            .min_w(px(0.))
+                                            .h_full()
+                                            .gap_2()
+                                            .overflow_hidden()
+                                            .child(
+                                                div()
+                                                    .text_size(px(14.))
                                             .font_weight(gpui::FontWeight::SEMIBOLD)
                                             .text_color(rgb(INK))
                                             .child(route.label()),
@@ -1884,7 +1914,7 @@ impl Render for DesktopRoot {
                                     .min_h(px(0.))
                                     .overflow_y_scroll()
                                     .track_scroll(&self.workspace_scroll.handle)
-                                    .on_scroll_wheel(cx.listener(|_, _, _, cx| cx.notify()))
+                                    .on_scroll(cx.listener(|_, _, _, cx| cx.notify()))
                                     .flex_1()
                                     .min_w(px(0.))
                                     .px_6()
@@ -1920,6 +1950,7 @@ impl Render for DesktopRoot {
                                 .child(controls),
                         )
                     }),
+            ),
             )
             .when_some(self.lightbox.target, |root, target| {
                 root.child(self.chart_lightbox_overlay(target, window, cx))
@@ -2188,11 +2219,14 @@ fn main() {
     } else {
         profile_database_path().and_then(|path| motaa_store::open(&path))
     };
-    Application::new()
+    gpui::application()
         .with_assets(DesktopAssets)
         .run(move |cx: &mut App| {
+            gpui::init(cx);
+            apply_gold_heritage_theme(cx);
             cx.set_menus(vec![gpui::Menu {
                 name: "MOTAA Desktop".into(),
+                disabled: false,
                 items: vec![
                     gpui::MenuItem::action("About MOTAA Desktop", About),
                     gpui::MenuItem::separator(),
@@ -2200,23 +2234,26 @@ fn main() {
                 ],
             }]);
             input::bind_keys(cx);
+            let key = |suffix: &str| -> &'static str {
+                Box::leak(primary_keybinding(suffix).into_boxed_str())
+            };
             cx.bind_keys([
-                KeyBinding::new(&primary_keybinding("1"), Charts, None),
-                KeyBinding::new(&primary_keybinding("2"), Profiles, None),
-                KeyBinding::new(&primary_keybinding("3"), Calculations, None),
-                KeyBinding::new(&primary_keybinding("4"), TimeAnalysis, None),
-                KeyBinding::new(&primary_keybinding("5"), Advanced, None),
-                KeyBinding::new(&primary_keybinding("6"), About, None),
-                KeyBinding::new(&primary_keybinding("k"), TogglePalette, None),
-                KeyBinding::new(&primary_keybinding("b"), ToggleSidebar, None),
-                KeyBinding::new(&primary_keybinding("i"), ToggleInspector, None),
-                KeyBinding::new(&primary_keybinding("["), StepTimeBack, None),
-                KeyBinding::new(&primary_keybinding("]"), StepTimeForward, None),
-                KeyBinding::new(&primary_keybinding("shift-n"), JumpNow, None),
-                KeyBinding::new(&primary_keybinding("n"), NewProfile, None),
+                KeyBinding::new(key("1"), Charts, None),
+                KeyBinding::new(key("2"), Profiles, None),
+                KeyBinding::new(key("3"), Calculations, None),
+                KeyBinding::new(key("4"), TimeAnalysis, None),
+                KeyBinding::new(key("5"), Advanced, None),
+                KeyBinding::new(key("6"), About, None),
+                KeyBinding::new(key("k"), TogglePalette, None),
+                KeyBinding::new(key("b"), ToggleSidebar, None),
+                KeyBinding::new(key("i"), ToggleInspector, None),
+                KeyBinding::new(key("["), StepTimeBack, None),
+                KeyBinding::new(key("]"), StepTimeForward, None),
+                KeyBinding::new(key("shift-n"), JumpNow, None),
+                KeyBinding::new(key("n"), NewProfile, None),
                 KeyBinding::new("tab", TabNext, None),
                 KeyBinding::new("shift-tab", TabPrevious, None),
-                KeyBinding::new(&primary_keybinding("q"), Quit, None),
+                KeyBinding::new(key("q"), Quit, None),
             ]);
             let window_size = if store_screenshots.is_some() {
                 if macos_chrome() {
@@ -2228,35 +2265,26 @@ fn main() {
                 size(px(1280.), px(800.))
             };
             let bounds = Bounds::centered(None, window_size, cx);
-            let titlebar = Some(gpui::TitlebarOptions {
-                title: Some("MOTAA Desktop".into()),
-                appears_transparent: macos_chrome(),
-                traffic_light_position: macos_chrome().then(|| gpui::point(px(20.), px(19.))),
-            });
-            let window = cx
-                .open_window(
-                    WindowOptions {
-                        show: !smoke,
-                        focus: !smoke,
-                        window_bounds: Some(WindowBounds::Windowed(bounds)),
-                        window_min_size: Some(size(px(1024.), px(680.))),
-                        titlebar,
-                        ..Default::default()
-                    },
-                    |window, cx| {
-                        let root = cx.new(|cx| DesktopRoot::new(store, cx));
-                        window.focus(&root.read(cx).focus.clone());
-                        root
-                    },
-                )
-                .expect("open MOTAA Desktop");
+            let window_options = WindowOptions {
+                show: !smoke,
+                focus: !smoke,
+                window_bounds: Some(WindowBounds::Windowed(bounds)),
+                window_min_size: Some(size(px(1024.), px(680.))),
+                ..gpui::component::TitleBar::window_options()
+            };
+            let (window, root_entity) = gpui::open_window(window_options, cx, |window, cx| {
+                let root = cx.new(|cx| DesktopRoot::new(store, cx));
+                window.focus(&root.read(cx).focus.clone(), cx);
+                root
+            })
+            .expect("open MOTAA Desktop");
             if !smoke {
                 cx.activate(true);
             }
             cx.on_action(|_: &Quit, cx| cx.quit());
-            let about_window = window;
+            let about_root = root_entity.clone();
             cx.on_action(move |_: &About, cx| {
-                let _ = about_window.update(cx, |root, _, cx| {
+                about_root.update(cx, |root, cx| {
                     root.navigate(Workspace::About, cx);
                 });
             });
@@ -2265,6 +2293,7 @@ fn main() {
                 && !visual_capture
                 && let Some(mut rx) = mac_pinch::install()
             {
+                let pinch_root = root_entity.clone();
                 cx.spawn(async move |cx| {
                     loop {
                         let (delta, next_rx) = cx
@@ -2281,7 +2310,7 @@ fn main() {
                         if total.abs() <= 0.0001 {
                             continue;
                         }
-                        let _ = window.update(cx, |root, _, cx| {
+                        pinch_root.update(cx, |root, cx| {
                             if root.lightbox.target.is_some() {
                                 let factor = (1. + total as f32).clamp(0.5, 2.0);
                                 root.set_lightbox_zoom(root.lightbox.zoom * factor, cx);
@@ -2291,8 +2320,15 @@ fn main() {
                 })
                 .detach();
             }
-            harness::run(smoke, store_screenshots, visual_capture, window, cx);
-            cx.on_window_closed(|cx| {
+            harness::run(
+                smoke,
+                store_screenshots,
+                visual_capture,
+                window,
+                root_entity,
+                cx,
+            );
+            cx.on_window_closed(|cx, _| {
                 if cx.windows().is_empty() {
                     cx.quit();
                 }

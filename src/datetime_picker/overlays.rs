@@ -191,7 +191,7 @@ impl DesktopRoot {
             picker.time_snapshot = None;
             picker.modal_time_error = None;
         }
-        window.focus(&self.focus);
+        window.focus(&self.focus, cx);
     }
 
     pub(crate) fn cancel_time_popup(
@@ -243,7 +243,7 @@ impl DesktopRoot {
                 }
             }
         }
-        window.focus(&self.focus);
+        window.focus(&self.focus, cx);
     }
 
     pub(crate) fn time_picker_overlay(
@@ -840,7 +840,7 @@ impl DesktopRoot {
         div()
             .id("time-backdrop")
             .occlude()
-            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
+            .on_scroll(|_, _, cx| cx.stop_propagation())
             .absolute()
             .inset_0()
             .bg(rgba(BACKDROP_DARK))

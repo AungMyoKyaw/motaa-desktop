@@ -443,7 +443,7 @@ impl DesktopRoot {
         let title = format!("Delete {name}?");
         anchored_popover(
             ("profile-actions-popover", id as usize),
-            gpui::Corner::TopRight,
+            gpui::Anchor::TopRight,
             204.,
             |menu| {
                 menu.when(confirming, |menu| {
@@ -702,7 +702,7 @@ impl DesktopRoot {
                                 .h(px(400.))
                                 .overflow_y_scroll()
                                 .track_scroll(&self.town_scroll.handle)
-                                .on_scroll_wheel(cx.listener(|_, _, _, cx| cx.notify()))
+                                .on_scroll(cx.listener(|_, _, _, cx| cx.notify()))
                                 .child(column().gap_1().children(matching.into_iter().map(
                                     |(index, town)| {
                                         let coords = format!(

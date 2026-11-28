@@ -9,7 +9,7 @@ use std::{
 
 use gpui::{
     AnyElement, Bounds, Context, Div, Entity, Image, ImageFormat, MouseButton, MouseDownEvent,
-    MouseMoveEvent, MouseUpEvent, Pixels, Point, ScrollDelta, ScrollWheelEvent, canvas, div, img,
+    MouseMoveEvent, MouseUpEvent, Pixels, Point, ScrollDelta, ScrollEvent, canvas, div, img,
     prelude::*, px, rgb,
 };
 use jiff::{
@@ -1158,7 +1158,7 @@ impl DesktopRoot {
                     view.set_pin_from_map(reference, lat, lon, cx);
                 }),
             )
-            .on_scroll_wheel(cx.listener(move |view, event: &ScrollWheelEvent, _, cx| {
+            .on_scroll(cx.listener(move |view, event: &ScrollEvent, _, cx| {
                 let dy = match event.delta {
                     ScrollDelta::Lines(delta) => delta.y,
                     ScrollDelta::Pixels(delta) => f32::from(delta.y) / 40.,
@@ -1425,7 +1425,7 @@ impl DesktopRoot {
                                 .h(px(340.))
                                 .overflow_y_scroll()
                                 .track_scroll(&self.tz_scroll.handle)
-                                .on_scroll_wheel(cx.listener(|_, _, _, cx| cx.notify()))
+                                .on_scroll(cx.listener(|_, _, _, cx| cx.notify()))
                                 .child(column().gap_1().children(
                                     matches.into_iter().enumerate().map(|(idx, opt)| {
                                         let active = current_tz == opt.name;

@@ -55,8 +55,8 @@ impl DesktopRoot {
         cx: &mut Context<Self>,
     ) -> AnyElement {
         use gpui::{
-            MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent, ScrollDelta,
-            ScrollWheelEvent, point, rgba,
+            MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent, ScrollDelta, ScrollEvent,
+            point, rgba,
         };
 
         let viewport = window.viewport_size();
@@ -109,7 +109,7 @@ impl DesktopRoot {
         div()
             .id("chart-lightbox-backdrop")
             .occlude()
-            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
+            .on_scroll(|_, _, cx| cx.stop_propagation())
             .absolute()
             .inset_0()
             .bg(rgba(0x28251f99))
@@ -183,32 +183,30 @@ impl DesktopRoot {
                                     gpui::CursorStyle::Arrow
                                 },
                             )
-                            .on_scroll_wheel(cx.listener(
-                                move |root, event: &ScrollWheelEvent, window, cx| {
-                                    if event.modifiers.control || event.modifiers.platform {
-                                        let dy = match event.delta {
-                                            ScrollDelta::Lines(delta) => delta.y * 0.2,
-                                            ScrollDelta::Pixels(delta) => f32::from(delta.y) / 240.,
-                                        };
-                                        if dy.abs() > 0.001 {
-                                            let factor = (1. + dy).clamp(0.5, 2.0);
-                                            root.set_lightbox_zoom(root.lightbox.zoom * factor, cx);
-                                        }
-                                    } else {
-                                        let delta = event.delta.pixel_delta(window.line_height());
-                                        let current = root.lightbox.scroll.offset();
-                                        let clamped = point(
-                                            (current.x + delta.x).clamp(min_x, px(0.)),
-                                            (current.y + delta.y).clamp(min_y, px(0.)),
-                                        );
-                                        if clamped != current {
-                                            root.lightbox.scroll.set_offset(clamped);
-                                            cx.notify();
-                                        }
+                            .on_scroll(cx.listener(move |root, event: &ScrollEvent, window, cx| {
+                                if event.modifiers.control || event.modifiers.platform {
+                                    let dy = match event.delta {
+                                        ScrollDelta::Lines(delta) => delta.y * 0.2,
+                                        ScrollDelta::Pixels(delta) => f32::from(delta.y) / 240.,
+                                    };
+                                    if dy.abs() > 0.001 {
+                                        let factor = (1. + dy).clamp(0.5, 2.0);
+                                        root.set_lightbox_zoom(root.lightbox.zoom * factor, cx);
                                     }
-                                    cx.stop_propagation();
-                                },
-                            ))
+                                } else {
+                                    let delta = event.delta.pixel_delta(window.line_height());
+                                    let current = root.lightbox.scroll.offset();
+                                    let clamped = point(
+                                        (current.x + delta.x).clamp(min_x, px(0.)),
+                                        (current.y + delta.y).clamp(min_y, px(0.)),
+                                    );
+                                    if clamped != current {
+                                        root.lightbox.scroll.set_offset(clamped);
+                                        cx.notify();
+                                    }
+                                }
+                                cx.stop_propagation();
+                            }))
                             .on_mouse_down(
                                 MouseButton::Left,
                                 cx.listener(|root, event: &MouseDownEvent, _, cx| {
@@ -1325,7 +1323,7 @@ impl DesktopRoot {
                     .gap_0()
                     .w(px(if show_kp { 420. } else { 382. }))
                     .max_w_full()
-                    .flex_shrink()
+                    .flex_shrink_1()
                     .child(div().text_size(px(16.)).child("Planet positions"))
                     .child(caption(if self.session.read(cx).planet_transit {
                         "Transit positions"

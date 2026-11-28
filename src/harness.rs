@@ -1,6 +1,6 @@
 use std::{io::Write, path::PathBuf};
 
-use gpui::{App, Window, WindowHandle, px, size};
+use gpui::{AnyWindowHandle, App, Entity, Window, px, size};
 use motaa_engine::ChartRequest;
 
 use crate::{
@@ -8,16 +8,42 @@ use crate::{
     parse_time, primary_keybinding,
 };
 
+#[derive(Clone)]
+struct RootHandle(AnyWindowHandle, Entity<DesktopRoot>);
+
+impl RootHandle {
+    fn update<R>(
+        &self,
+        cx: &mut gpui::AsyncApp,
+        f: impl FnOnce(&mut DesktopRoot, &mut Window, &mut gpui::Context<DesktopRoot>) -> R,
+    ) -> gpui::Result<R> {
+        self.0.update(cx, |_, window, app| {
+            self.1.update(app, |root, cx| f(root, window, cx))
+        })
+    }
+
+    fn read_with<R>(
+        &self,
+        cx: &gpui::AsyncApp,
+        f: impl FnOnce(&DesktopRoot, &App) -> R,
+    ) -> gpui::Result<R> {
+        Ok(self.1.read_with(cx, f))
+    }
+}
+
 pub(crate) fn run(
     smoke: bool,
     store_screenshots: Option<PathBuf>,
     visual_capture: bool,
-    window: WindowHandle<DesktopRoot>,
+    native: AnyWindowHandle,
+    root_entity: Entity<DesktopRoot>,
     cx: &mut App,
 ) {
+    let window = RootHandle(native, root_entity);
     if smoke {
+        let window_for_smoke = window.clone();
         cx.spawn(async move |cx| {
-            let native: gpui::AnyWindowHandle = window.into();
+            let window = window_for_smoke;
             let draw = |cx: &mut gpui::AsyncApp| {
                 native
                     .update(cx, |_, window, app| {
@@ -28,21 +54,23 @@ pub(crate) fn run(
             };
             draw(cx);
             let steps = [
-                (Workspace::Profiles, primary_keybinding("2")),
-                (Workspace::Calculations, primary_keybinding("3")),
-                (Workspace::Time, primary_keybinding("4")),
-                (Workspace::Advanced, primary_keybinding("5")),
-                (Workspace::About, primary_keybinding("6")),
-                (Workspace::Charts, primary_keybinding("1")),
+                (Workspace::Profiles, "2"),
+                (Workspace::Calculations, "3"),
+                (Workspace::Time, "4"),
+                (Workspace::Advanced, "5"),
+                (Workspace::About, "6"),
+                (Workspace::Charts, "1"),
             ];
             cx.background_executor()
                 .timer(std::time::Duration::from_millis(300))
                 .await;
-            for (route, shortcut) in steps {
+            for (route, suffix) in steps {
                 native
                     .update(cx, |_, window, app| {
+                        let key_str: &'static str =
+                            Box::leak(primary_keybinding(suffix).into_boxed_str());
                         let keystroke =
-                            gpui::Keystroke::parse(&shortcut).expect("valid smoke shortcut");
+                            gpui::Keystroke::parse(key_str).expect("valid smoke shortcut");
                         assert!(window.dispatch_keystroke(keystroke, app));
                     })
                     .expect("dispatch native workspace shortcut");
@@ -82,7 +110,7 @@ pub(crate) fn run(
                 .expect("read root focus");
             native
                 .update(cx, |_, win, app| {
-                    win.focus(&root_focus);
+                    win.focus(&root_focus, app);
                     for shortcut in ["tab", "tab", "tab", "enter"] {
                         let key = gpui::Keystroke::parse(shortcut).expect("valid activation key");
                         assert!(win.dispatch_keystroke(key, app));
@@ -166,7 +194,12 @@ pub(crate) fn run(
             draw(cx);
             native
                 .update(cx, |_, win, app| {
-                    let key = gpui::Keystroke::parse(&primary_keybinding("2")).unwrap();
+                    let key = gpui::Keystroke::parse(if cfg!(target_os = "macos") {
+                        "cmd-2"
+                    } else {
+                        "ctrl-2"
+                    })
+                    .unwrap();
                     assert!(win.dispatch_keystroke(key, app));
                 })
                 .expect("open saved profiles while editing a draft");
@@ -179,7 +212,7 @@ pub(crate) fn run(
                 .expect("verify Profiles returns to the library");
             native
                 .update(cx, |_, win, app| {
-                    win.focus(&root_focus);
+                    win.focus(&root_focus, app);
                     let tab = gpui::Keystroke::parse("tab").unwrap();
                     // 7 sidebar controls + collapse + header (3) + search + export + import + resume, then row.
                     for _ in 0..16 {
@@ -192,11 +225,18 @@ pub(crate) fn run(
             draw(cx);
             native
                 .update(cx, |_, win, app| {
-                    win.focus(&root_focus);
-                    assert!(win.dispatch_keystroke(
-                        gpui::Keystroke::parse(&primary_keybinding("k")).unwrap(),
-                        app
-                    ));
+                    win.focus(&root_focus, app);
+                    assert!(
+                        win.dispatch_keystroke(
+                            gpui::Keystroke::parse(if cfg!(target_os = "macos") {
+                                "cmd-k"
+                            } else {
+                                "ctrl-k"
+                            })
+                            .unwrap(),
+                            app
+                        )
+                    );
                 })
                 .expect("open command palette");
             draw(cx);
@@ -209,14 +249,28 @@ pub(crate) fn run(
                 .expect("verify command palette");
             native
                 .update(cx, |_, win, app| {
-                    assert!(win.dispatch_keystroke(
-                        gpui::Keystroke::parse(&primary_keybinding("b")).unwrap(),
-                        app
-                    ));
-                    assert!(win.dispatch_keystroke(
-                        gpui::Keystroke::parse(&primary_keybinding("i")).unwrap(),
-                        app
-                    ));
+                    assert!(
+                        win.dispatch_keystroke(
+                            gpui::Keystroke::parse(if cfg!(target_os = "macos") {
+                                "cmd-b"
+                            } else {
+                                "ctrl-b"
+                            })
+                            .unwrap(),
+                            app
+                        )
+                    );
+                    assert!(
+                        win.dispatch_keystroke(
+                            gpui::Keystroke::parse(if cfg!(target_os = "macos") {
+                                "cmd-i"
+                            } else {
+                                "ctrl-i"
+                            })
+                            .unwrap(),
+                            app
+                        )
+                    );
                 })
                 .expect("toggle sidebar and inspector");
             draw(cx);
@@ -669,11 +723,13 @@ pub(crate) fn run(
                     .expect("close chart detail");
             }
             println!("Rendered compact Tricakka, comparison, and aspect details");
-            cx.update(|cx| cx.quit()).expect("quit smoke window");
+            cx.update(|cx| cx.quit());
         })
         .detach();
     } else if let Some(capture_dir) = store_screenshots {
+        let window_for_store = window.clone();
         cx.spawn(async move |cx| {
+            let window = window_for_store;
             let executor = cx.background_executor().clone();
             let wait = |ms| executor.timer(std::time::Duration::from_millis(ms));
             let wait_for_ack = |slug: &str| {
@@ -732,11 +788,13 @@ pub(crate) fn run(
                 emit(slug);
                 wait_for_ack(slug).await;
             }
-            cx.update(|cx| cx.quit()).expect("quit store screenshots");
+            cx.update(|cx| cx.quit());
         })
         .detach();
     } else if visual_capture {
+        let window_for_visual = window.clone();
         cx.spawn(async move |cx| {
+            let window = window_for_visual;
             let executor = cx.background_executor().clone();
             let wait = |ms| executor.timer(std::time::Duration::from_millis(ms));
             let emit = |name: &str| {
@@ -845,7 +903,7 @@ pub(crate) fn run(
                 emit(slug);
                 wait(700).await;
             }
-            cx.update(|cx| cx.quit()).expect("quit visual capture");
+            cx.update(|cx| cx.quit());
         })
         .detach();
     }

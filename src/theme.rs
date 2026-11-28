@@ -74,6 +74,53 @@ pub fn zoom_scroll_hint() -> &'static str {
     }
 }
 
+pub fn apply_gold_heritage_theme(cx: &mut gpui::App) {
+    use gpui::component::{Theme, ThemeMode};
+
+    Theme::change(ThemeMode::Light, None, cx);
+    Theme::update(cx, |theme| {
+        theme.font_family = "Helvetica Neue".into();
+        theme.mono_font_family = "Menlo".into();
+        theme.radius = px(RADIUS_CONTROL);
+        theme.radius_lg = px(RADIUS_PANEL);
+
+        let c = &mut theme.colors;
+        c.background = rgb(IVORY).into();
+        c.foreground = rgb(INK).into();
+        c.muted = rgb(SOFT).into();
+        c.muted_foreground = rgb(MUTED).into();
+        c.border = rgb(LINE).into();
+        c.input = rgb(LINE).into();
+        c.ring = rgb(GOLD).into();
+        c.primary = rgb(GOLD).into();
+        c.primary_hover = rgb(ACTION_HOVER).into();
+        c.primary_active = rgb(ACTION_PRESSED).into();
+        c.primary_foreground = rgb(WHITE).into();
+        c.secondary = rgb(SOFT).into();
+        c.secondary_hover = rgb(SURFACE_HOVER).into();
+        c.secondary_foreground = rgb(INK).into();
+        c.accent = rgb(SELECTED).into();
+        c.accent_foreground = rgb(INK).into();
+        c.popover = rgb(PAPER).into();
+        c.popover_foreground = rgb(INK).into();
+        c.sidebar = rgb(RAIL).into();
+        c.sidebar_border = rgb(SUBTLE_LINE).into();
+        c.sidebar_foreground = rgb(INK).into();
+        c.sidebar_accent = rgb(PAPER).into();
+        c.sidebar_accent_foreground = rgb(INK).into();
+        c.sidebar_primary = rgb(GOLD).into();
+        c.sidebar_primary_foreground = rgb(WHITE).into();
+        c.title_bar = rgb(HEADER_BG).into();
+        c.title_bar_border = rgb(SUBTLE_LINE).into();
+        c.danger = rgb(ERROR).into();
+        c.danger_foreground = rgb(WHITE).into();
+        c.scrollbar = rgb(SOFT).into();
+        c.scrollbar_thumb = rgb(MUTED).into();
+        c.scrollbar_thumb_hover = rgb(GOLD).into();
+        c.selection = rgba(SELECTION_BG).into();
+    });
+}
+
 pub fn row() -> Div {
     div().flex().items_center().gap_2()
 }
@@ -96,12 +143,14 @@ pub fn card_shadow() -> Vec<BoxShadow> {
             offset: point(px(0.), px(1.)),
             blur_radius: px(2.),
             spread_radius: px(0.),
+            inset: false,
         },
         BoxShadow {
             color: rgba(0x28251f08).into(),
             offset: point(px(0.), px(4.)),
             blur_radius: px(12.),
             spread_radius: px(-2.),
+            inset: false,
         },
     ]
 }
@@ -112,6 +161,7 @@ pub fn pill_shadow() -> Vec<BoxShadow> {
         offset: point(px(0.), px(1.)),
         blur_radius: px(2.),
         spread_radius: px(0.),
+        inset: false,
     }]
 }
 
@@ -122,12 +172,14 @@ pub fn popover_shadow() -> Vec<BoxShadow> {
             offset: point(px(0.), px(2.)),
             blur_radius: px(6.),
             spread_radius: px(0.),
+            inset: false,
         },
         BoxShadow {
             color: rgba(0x28251f1c).into(),
             offset: point(px(0.), px(12.)),
             blur_radius: px(28.),
             spread_radius: px(-4.),
+            inset: false,
         },
     ]
 }
@@ -139,12 +191,14 @@ pub fn plate_shadow() -> Vec<BoxShadow> {
             offset: point(px(0.), px(2.)),
             blur_radius: px(4.),
             spread_radius: px(0.),
+            inset: false,
         },
         BoxShadow {
             color: rgba(0x28251f10).into(),
             offset: point(px(0.), px(10.)),
             blur_radius: px(24.),
             spread_radius: px(-4.),
+            inset: false,
         },
     ]
 }
@@ -239,7 +293,7 @@ impl ScrollTrack {
     }
 
     pub fn scroll_by(&self, delta_y: f32) -> bool {
-        let max_y = f32::from(self.handle.max_offset().height).max(0.0);
+        let max_y = f32::from(self.handle.max_offset().y).max(0.0);
         if max_y <= 0.5 {
             return false;
         }
@@ -260,7 +314,7 @@ impl ScrollTrack {
 }
 
 fn scrollbar_metrics(handle: &gpui::ScrollHandle, track_height: f32) -> (f32, f32, f32) {
-    let max_y = f32::from(handle.max_offset().height).max(0.0);
+    let max_y = f32::from(handle.max_offset().y).max(0.0);
     let viewport_h = f32::from(handle.bounds().size.height).max(track_height);
     let scroll_y = (-f32::from(handle.offset().y)).clamp(0.0, max_y);
     let thumb_h = ((viewport_h / (viewport_h + max_y)) * track_height).clamp(28.0, track_height);

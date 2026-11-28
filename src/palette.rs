@@ -31,14 +31,14 @@ impl DesktopRoot {
         self.palette_query
             .update(cx, |input, cx| input.set_value(String::new(), cx));
         let focus = self.palette_query.read(cx).focus_handle(cx);
-        window.focus(&focus);
+        window.focus(&focus, cx);
         cx.notify();
     }
 
     pub(super) fn close_palette(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         self.palette_open = false;
         self.palette_index = 0;
-        window.focus(&self.focus);
+        window.focus(&self.focus, cx);
         cx.notify();
     }
 
@@ -206,7 +206,7 @@ impl DesktopRoot {
         div()
             .id("command-palette-backdrop")
             .occlude()
-            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
+            .on_scroll(|_, _, cx| cx.stop_propagation())
             .absolute()
             .inset_0()
             .bg(rgba(BACKDROP_LIGHT))
@@ -283,7 +283,7 @@ impl DesktopRoot {
                                     .max_h(px(380.))
                                     .overflow_y_scroll()
                                     .track_scroll(&self.palette_scroll.handle)
-                                    .on_scroll_wheel(cx.listener(|_, _, _, cx| cx.notify()))
+                                    .on_scroll(cx.listener(|_, _, _, cx| cx.notify()))
                                     .p_2()
                                     .when(entries.is_empty(), |list| {
                                         list.child(div().py_6().flex().justify_center().child(

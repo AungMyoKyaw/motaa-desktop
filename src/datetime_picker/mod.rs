@@ -419,7 +419,7 @@ impl DateTimePicker {
                 picker.open = false;
                 picker.sync_modal_inputs(current, cx);
                 let focus = picker.time_focus.clone();
-                window.focus(&focus);
+                window.focus(&focus, cx);
             }
             cx.notify();
         };
