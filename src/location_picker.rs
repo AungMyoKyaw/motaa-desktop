@@ -1424,7 +1424,7 @@ impl DesktopRoot {
                                 .min_w(px(0.))
                                 .h(px(340.))
                                 .overflow_y_scroll()
-                                .track_scroll(&self.tz_scroll)
+                                .track_scroll(&self.tz_scroll.handle)
                                 .on_scroll_wheel(cx.listener(|_, _, _, cx| cx.notify()))
                                 .child(column().gap_1().children(
                                     matches.into_iter().enumerate().map(|(idx, opt)| {
@@ -1460,7 +1460,10 @@ impl DesktopRoot {
                                     }),
                                 )),
                         )
-                        .child(crate::vertical_scrollbar(&self.tz_scroll, 340.)),
+                        .child(crate::interactive_vertical_scrollbar(
+                            &self.tz_scroll,
+                            Some(340.),
+                        )),
                 )
             })
     }

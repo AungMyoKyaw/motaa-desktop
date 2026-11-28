@@ -28,13 +28,62 @@ pub(super) fn parse_time_only(text: &str) -> Result<jiff::civil::Time, String> {
     if trimmed.is_empty() {
         return Ok(jiff::civil::Time::constant(0, 0, 0, 0));
     }
-    if let Ok(time) = jiff::civil::Time::strptime("%H:%M:%S", trimmed) {
-        return Ok(time);
+    let lower = trimmed.to_ascii_lowercase();
+    let (body, meridiem) = if let Some(rest) = lower.strip_suffix("am") {
+        (rest.trim(), Some(false))
+    } else if let Some(rest) = lower.strip_suffix("pm") {
+        (rest.trim(), Some(true))
+    } else {
+        (lower.as_str(), None)
+    };
+
+    let parts: Vec<&str> = body.split(':').collect();
+    if !(2..=3).contains(&parts.len()) {
+        return Err("Enter time as HH:MM:SS.".into());
     }
-    if let Ok(time) = jiff::civil::Time::strptime("%H:%M", trimmed) {
-        return Ok(time);
+    let raw_hour: u8 = parts[0]
+        .trim()
+        .parse()
+        .map_err(|_| "Enter time as HH:MM:SS.".to_owned())?;
+    let minute: u8 = parts[1]
+        .trim()
+        .parse()
+        .map_err(|_| "Enter time as HH:MM:SS.".to_owned())?;
+    let second: u8 = if parts.len() == 3 {
+        parts[2]
+            .trim()
+            .parse()
+            .map_err(|_| "Enter time as HH:MM:SS.".to_owned())?
+    } else {
+        0
+    };
+
+    let hour = match meridiem {
+        Some(is_pm) => {
+            if !(1..=12).contains(&raw_hour) {
+                return Err("12-hour time requires an hour from 1 to 12.".into());
+            }
+            match (raw_hour, is_pm) {
+                (12, false) => 0,
+                (12, true) => 12,
+                (h, true) => h + 12,
+                (h, false) => h,
+            }
+        }
+        None => raw_hour,
+    };
+
+    jiff::civil::Time::new(hour as i8, minute as i8, second as i8, 0)
+        .map_err(|_| "Enter time as HH:MM:SS.".to_owned())
+}
+
+pub(super) fn parse_time_part(text: &str, max: u8) -> Option<i8> {
+    let trimmed = text.trim();
+    if trimmed.is_empty() || !trimmed.bytes().all(|b| b.is_ascii_digit()) {
+        return None;
     }
-    Err("Enter time as HH:MM:SS.".into())
+    let val: u8 = trimmed.parse().ok()?;
+    (val <= max).then_some(val as i8)
 }
 
 pub fn days_in_month(year: i32, month: u32) -> u32 {
@@ -61,17 +110,6 @@ pub fn parse_flexible_datetime(text: &str, allow_date_only: bool) -> Result<Date
         return Ok(date.at(0, 0, 0, 0));
     }
     Err("Enter a valid date and time as YYYY-MM-DD HH:MM:SS.".into())
-}
-
-pub(super) fn time_scroll_offset_for(val: i8, count: i8) -> f32 {
-    const ITEM_H: f32 = 30.0;
-    const GAP: f32 = 2.0;
-    const STRIDE: f32 = ITEM_H + GAP;
-    const VIEWPORT_H: f32 = 210.0;
-    let total_h = (f32::from(count) * STRIDE) - GAP;
-    let max_offset = (total_h - VIEWPORT_H).max(0.0);
-    let centered = (f32::from(val) * STRIDE) - ((VIEWPORT_H - ITEM_H) / 2.0);
-    centered.clamp(0.0, max_offset)
 }
 
 pub(super) fn time_of_day_label(hour: i8) -> &'static str {
@@ -118,46 +156,6 @@ pub(super) fn step_time_segment(dt: DateTime, seg: TimeSegment, delta: i8) -> Da
     jiff::civil::Time::new(h, m, s, 0)
         .map(|t| DateTime::from_parts(dt.date(), t))
         .unwrap_or(dt)
-}
-
-pub(super) fn apply_time_digit(
-    dt: DateTime,
-    seg: TimeSegment,
-    buf: Option<u8>,
-    digit: u8,
-) -> (DateTime, Option<u8>, TimeSegment) {
-    let max_val: u8 = match seg {
-        TimeSegment::Hour => 23,
-        TimeSegment::Minute | TimeSegment::Second => 59,
-    };
-    let next_seg = match seg {
-        TimeSegment::Hour => TimeSegment::Minute,
-        TimeSegment::Minute => TimeSegment::Second,
-        TimeSegment::Second => TimeSegment::Second,
-    };
-    let set_seg = |val: u8| -> DateTime {
-        let v = val as i8;
-        let (h, m, s) = match seg {
-            TimeSegment::Hour => (v, dt.minute(), dt.second()),
-            TimeSegment::Minute => (dt.hour(), v, dt.second()),
-            TimeSegment::Second => (dt.hour(), dt.minute(), v),
-        };
-        jiff::civil::Time::new(h, m, s, 0)
-            .map(|t| DateTime::from_parts(dt.date(), t))
-            .unwrap_or(dt)
-    };
-    if let Some(first) = buf {
-        let candidate = first * 10 + digit;
-        if candidate <= max_val {
-            return (set_seg(candidate), None, next_seg);
-        }
-    }
-    let updated = set_seg(digit);
-    if digit * 10 <= max_val {
-        (updated, Some(digit), seg)
-    } else {
-        (updated, None, next_seg)
-    }
 }
 
 #[cfg(test)]
@@ -208,11 +206,27 @@ mod tests {
     }
 
     #[test]
-    fn time_scroll_offset_centers_and_clamps() {
-        assert_eq!(time_scroll_offset_for(0, 24), 0.0);
-        assert_eq!(time_scroll_offset_for(12, 24), (12.0 * 32.0) - 90.0);
-        let max_24 = (24.0 * 32.0 - 2.0) - 210.0;
-        assert_eq!(time_scroll_offset_for(23, 24), max_24);
+    fn flexible_time_parser_supports_24h_12h_and_seconds() {
+        assert_eq!(
+            parse_time_only("9:05").unwrap(),
+            jiff::civil::Time::constant(9, 5, 0, 0)
+        );
+        assert_eq!(
+            parse_time_only("2:30 pm").unwrap(),
+            jiff::civil::Time::constant(14, 30, 0, 0)
+        );
+        assert_eq!(
+            parse_time_only("12:00 am").unwrap(),
+            jiff::civil::Time::constant(0, 0, 0, 0)
+        );
+        assert_eq!(
+            parse_time_only("12:15:30 PM").unwrap(),
+            jiff::civil::Time::constant(12, 15, 30, 0)
+        );
+        assert!(parse_time_only("25:00").is_err());
+        assert_eq!(parse_time_part(" 09 ", 23), Some(9));
+        assert_eq!(parse_time_part("24", 23), None);
+        assert_eq!(parse_time_part("", 59), None);
     }
 
     #[test]
@@ -233,18 +247,6 @@ mod tests {
             (step_m.hour(), step_m.minute(), step_m.second()),
             (0, 3, 30)
         );
-    }
-
-    #[test]
-    fn time_digit_entry_advances_and_validates() {
-        let base = DateTime::constant(2000, 1, 1, 0, 0, 0, 0);
-        let (d1, buf1, seg1) = apply_time_digit(base, TimeSegment::Hour, None, 1);
-        assert_eq!((d1.hour(), buf1, seg1), (1, Some(1), TimeSegment::Hour));
-        let (d2, buf2, seg2) = apply_time_digit(d1, seg1, buf1, 9);
-        assert_eq!((d2.hour(), buf2, seg2), (19, None, TimeSegment::Minute));
-
-        let (d3, buf3, seg3) = apply_time_digit(d2, seg2, buf2, 7);
-        assert_eq!((d3.minute(), buf3, seg3), (7, None, TimeSegment::Second));
     }
 
     #[test]

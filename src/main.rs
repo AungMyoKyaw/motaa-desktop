@@ -251,8 +251,11 @@ struct DesktopRoot {
     sidebar_collapsed: bool,
     inspector_open: bool,
     palette_open: bool,
-    town_scroll: gpui::ScrollHandle,
-    tz_scroll: gpui::ScrollHandle,
+    workspace_scroll: ScrollTrack,
+    inspector_scroll: ScrollTrack,
+    palette_scroll: ScrollTrack,
+    town_scroll: ScrollTrack,
+    tz_scroll: ScrollTrack,
     palette_query: Entity<TextInput>,
     palette_index: usize,
     date: Entity<TextInput>,
@@ -888,8 +891,11 @@ impl DesktopRoot {
             sidebar_collapsed: false,
             inspector_open: false,
             palette_open: false,
-            town_scroll: gpui::ScrollHandle::new(),
-            tz_scroll: gpui::ScrollHandle::new(),
+            workspace_scroll: ScrollTrack::new(),
+            inspector_scroll: ScrollTrack::new(),
+            palette_scroll: ScrollTrack::new(),
+            town_scroll: ScrollTrack::new(),
+            tz_scroll: ScrollTrack::new(),
             palette_query,
             palette_index: 0,
             date,
@@ -991,6 +997,7 @@ impl DesktopRoot {
 
     fn navigate(&mut self, route: Workspace, cx: &mut Context<Self>) {
         let was_editing_profile = std::mem::take(&mut self.show_profile_editor);
+        self.workspace_scroll.reset();
         self.delete_confirmation = None;
         self.lightbox.target = None;
         self.update(cx, |session| {
@@ -1004,13 +1011,21 @@ impl DesktopRoot {
     fn resume_profile_draft(&mut self, cx: &mut Context<Self>) {
         self.navigate(Workspace::Profiles, cx);
         self.show_profile_editor = true;
+        self.workspace_scroll.reset();
     }
 
     fn sync_datetime_pickers(&mut self, cx: &mut Context<Self>) {
         if let Some(draft) = &mut self.draft {
             draft.picker.sync_from_inputs(cx);
         }
-        self.time_picker.sync_from_inputs(cx);
+        if let Some(dt) = self.time_picker.sync_from_inputs(cx)
+            && self.time_picker.time_open
+        {
+            self.update(cx, |session| {
+                session.time = dt;
+                session.status.clear();
+            });
+        }
         for picker in &mut self.candidate_pickers {
             picker.sync_from_inputs(cx);
         }
@@ -1579,7 +1594,31 @@ impl Render for DesktopRoot {
                 }),
             )
             .on_key_down(cx.listener(|view, event: &gpui::KeyDownEvent, _, cx| {
-                if event.keystroke.key.as_str() == "escape"
+                let key = event.keystroke.key.as_str();
+                if matches!(key, "pageup" | "pagedown") {
+                    let dir = if key == "pageup" { 1.0 } else { -1.0 };
+                    let scrolled = if view.active_town_popup().is_some() {
+                        view.town_scroll.scroll_page(dir)
+                    } else if view.active_timezone_popup().is_some() {
+                        view.tz_scroll.scroll_page(dir)
+                    } else if view.palette_open {
+                        view.palette_scroll.scroll_page(dir)
+                    } else if view.lightbox.target.is_none()
+                        && view.active_map_popup().is_none()
+                        && view.active_datetime_popup().is_none()
+                        && view.active_time_popup().is_none()
+                    {
+                        view.workspace_scroll.scroll_page(dir)
+                    } else {
+                        false
+                    };
+                    if scrolled {
+                        cx.stop_propagation();
+                        cx.notify();
+                    }
+                    return;
+                }
+                if key == "escape"
                     && view.lightbox.target.is_none()
                     && (view.selected.is_some() || view.show_modes)
                 {
@@ -1841,13 +1880,18 @@ impl Render for DesktopRoot {
                                             ("workspace-content", route as usize)
                                         },
                                     )
+                                    .h_full()
+                                    .min_h(px(0.))
                                     .overflow_y_scroll()
+                                    .track_scroll(&self.workspace_scroll.handle)
+                                    .on_scroll_wheel(cx.listener(|_, _, _, cx| cx.notify()))
                                     .flex_1()
                                     .min_w(px(0.))
                                     .px_6()
                                     .py_4()
                                     .child(content),
                             )
+                            .child(interactive_vertical_scrollbar(&self.workspace_scroll, None))
                             .when(show_inspector, |body| {
                                 body.child(self.right_inspector(cx))
                             }),

@@ -634,7 +634,7 @@ impl DesktopRoot {
             } else {
                 let input = text_input("", "Town name in Myanmar script", cx);
                 cx.observe(&input, |_, _, cx| cx.notify()).detach();
-                self.town_scroll.set_offset(gpui::point(px(0.), px(0.)));
+                self.town_scroll.reset();
                 Some(input)
             };
         }
@@ -701,7 +701,7 @@ impl DesktopRoot {
                                 .min_w(px(0.))
                                 .h(px(400.))
                                 .overflow_y_scroll()
-                                .track_scroll(&self.town_scroll)
+                                .track_scroll(&self.town_scroll.handle)
                                 .on_scroll_wheel(cx.listener(|_, _, _, cx| cx.notify()))
                                 .child(column().gap_1().children(matching.into_iter().map(
                                     |(index, town)| {
@@ -737,7 +737,10 @@ impl DesktopRoot {
                                     },
                                 ))),
                         )
-                        .child(crate::vertical_scrollbar(&self.town_scroll, 400.)),
+                        .child(crate::interactive_vertical_scrollbar(
+                            &self.town_scroll,
+                            Some(400.),
+                        )),
                 )
             })
     }

@@ -13,7 +13,7 @@ use crate::{
 };
 
 pub use parse::{MONTH_NAMES, MONTH_SHORT, days_in_month, parse_flexible_datetime};
-use parse::{WEEKDAYS, parse_time_only, time_scroll_offset_for};
+use parse::{WEEKDAYS, parse_time_only, parse_time_part};
 
 pub type PickerSelector = fn(&mut DesktopRoot) -> Option<&mut DateTimePicker>;
 pub type PickerChangeCallback = fn(&mut DesktopRoot, DateTime, &mut Context<DesktopRoot>);
@@ -37,15 +37,19 @@ pub struct DateTimePicker {
     pub time_open: bool,
     pub time_focus: gpui::FocusHandle,
     pub time_segment: TimeSegment,
-    pub time_digit_buf: Option<u8>,
+    pub time_dropdown: Option<TimeSegment>,
     pub time_snapshot: Option<DateTime>,
-    pub hour_scroll: gpui::ScrollHandle,
-    pub minute_scroll: gpui::ScrollHandle,
-    pub second_scroll: gpui::ScrollHandle,
+    pub hour_input: Entity<TextInput>,
+    pub minute_input: Entity<TextInput>,
+    pub second_input: Entity<TextInput>,
     last_datetime_text: String,
     last_date_text: String,
     last_time_text: String,
+    last_hour_text: String,
+    last_minute_text: String,
+    last_second_text: String,
     parts_error: Option<String>,
+    pub modal_time_error: Option<String>,
 }
 
 impl DateTimePicker {
@@ -57,11 +61,24 @@ impl DateTimePicker {
     ) -> Self {
         let formatted = format_time(initial);
         let (date_text, time_text) = Self::format_date_time(initial);
+        let hour_text = format!("{:02}", initial.hour());
+        let minute_text = format!("{:02}", initial.minute());
+        let second_text = format!("{:02}", initial.second());
         let datetime = text_input(&formatted, "YYYY-MM-DD HH:MM:SS", cx);
         let date_input = text_input(&date_text, "YYYY-MM-DD", cx);
         let time_input = text_input(&time_text, "HH:MM:SS", cx);
+        let hour_input = text_input(&hour_text, "HH", cx);
+        let minute_input = text_input(&minute_text, "MM", cx);
+        let second_input = text_input(&second_text, "SS", cx);
 
-        for input in [&datetime, &date_input, &time_input] {
+        for input in [
+            &datetime,
+            &date_input,
+            &time_input,
+            &hour_input,
+            &minute_input,
+            &second_input,
+        ] {
             cx.observe(input, |root, _, cx| {
                 root.sync_datetime_pickers(cx);
                 cx.notify();
@@ -80,31 +97,43 @@ impl DateTimePicker {
             time_open: false,
             time_focus: cx.focus_handle(),
             time_segment: TimeSegment::Hour,
-            time_digit_buf: None,
+            time_dropdown: None,
             time_snapshot: None,
-            hour_scroll: gpui::ScrollHandle::new(),
-            minute_scroll: gpui::ScrollHandle::new(),
-            second_scroll: gpui::ScrollHandle::new(),
+            hour_input,
+            minute_input,
+            second_input,
             last_datetime_text: formatted,
             last_date_text: date_text,
             last_time_text: time_text,
+            last_hour_text: hour_text,
+            last_minute_text: minute_text,
+            last_second_text: second_text,
             parts_error: None,
+            modal_time_error: None,
         }
     }
 
-    pub fn sync_time_scrolls(&self, dt: DateTime) {
-        self.hour_scroll.set_offset(gpui::point(
-            px(0.),
-            px(-time_scroll_offset_for(dt.hour(), 24)),
-        ));
-        self.minute_scroll.set_offset(gpui::point(
-            px(0.),
-            px(-time_scroll_offset_for(dt.minute(), 60)),
-        ));
-        self.second_scroll.set_offset(gpui::point(
-            px(0.),
-            px(-time_scroll_offset_for(dt.second(), 60)),
-        ));
+    pub fn sync_modal_inputs(&mut self, dt: DateTime, cx: &mut Context<DesktopRoot>) {
+        let h_str = format!("{:02}", dt.hour());
+        let m_str = format!("{:02}", dt.minute());
+        let s_str = format!("{:02}", dt.second());
+        self.last_hour_text = h_str.clone();
+        self.last_minute_text = m_str.clone();
+        self.last_second_text = s_str.clone();
+        self.modal_time_error = None;
+
+        if self.hour_input.read(cx).value() != h_str {
+            self.hour_input
+                .update(cx, |input, cx| input.set_value(h_str, cx));
+        }
+        if self.minute_input.read(cx).value() != m_str {
+            self.minute_input
+                .update(cx, |input, cx| input.set_value(m_str, cx));
+        }
+        if self.second_input.read(cx).value() != s_str {
+            self.second_input
+                .update(cx, |input, cx| input.set_value(s_str, cx));
+        }
     }
 
     fn format_date_time(dt: DateTime) -> (String, String) {
@@ -159,7 +188,56 @@ impl DateTimePicker {
         self.sync_date_time_inputs(&date_text, &time_text, cx);
     }
 
-    pub fn sync_from_inputs(&mut self, cx: &mut Context<DesktopRoot>) {
+    pub fn sync_from_inputs(&mut self, cx: &mut Context<DesktopRoot>) -> Option<DateTime> {
+        if self.time_open {
+            let h_text = self.hour_input.read(cx).value().to_owned();
+            let m_text = self.minute_input.read(cx).value().to_owned();
+            let s_text = self.second_input.read(cx).value().to_owned();
+            if h_text != self.last_hour_text
+                || m_text != self.last_minute_text
+                || s_text != self.last_second_text
+            {
+                self.last_hour_text = h_text.clone();
+                self.last_minute_text = m_text.clone();
+                self.last_second_text = s_text.clone();
+                if h_text.trim().is_empty() || m_text.trim().is_empty() || s_text.trim().is_empty()
+                {
+                    self.modal_time_error = None;
+                    return None;
+                }
+                match (
+                    parse_time_part(&h_text, 23),
+                    parse_time_part(&m_text, 59),
+                    parse_time_part(&s_text, 59),
+                ) {
+                    (Some(h), Some(m), Some(s)) => {
+                        let cur = self.current_datetime(cx);
+                        if let Ok(t) = jiff::civil::Time::new(h, m, s, 0) {
+                            let dt = DateTime::from_parts(cur.date(), t);
+                            self.modal_time_error = None;
+                            self.parts_error = None;
+                            let formatted = format_time(dt);
+                            let (date_text, time_text) = Self::format_date_time(dt);
+                            self.last_datetime_text = formatted.clone();
+                            self.last_date_text = date_text.clone();
+                            self.last_time_text = time_text.clone();
+                            if self.datetime.read(cx).value() != formatted {
+                                self.datetime
+                                    .update(cx, |input, cx| input.set_value(formatted, cx));
+                            }
+                            self.sync_date_time_inputs(&date_text, &time_text, cx);
+                            return Some(dt);
+                        }
+                    }
+                    _ => {
+                        self.modal_time_error =
+                            Some("Hours must be 00–23, minutes and seconds 00–59.".into());
+                        return None;
+                    }
+                }
+            }
+        }
+
         let dt_text = self.datetime.read(cx).value().to_owned();
         if dt_text != self.last_datetime_text {
             self.last_datetime_text = dt_text.clone();
@@ -174,13 +252,13 @@ impl DateTimePicker {
             } else {
                 self.parts_error = None;
             }
-            return;
+            return None;
         }
 
         let date_text = self.date_input.read(cx).value().to_owned();
         let time_text = self.time_input.read(cx).value().to_owned();
         if date_text == self.last_date_text && time_text == self.last_time_text {
-            return;
+            return None;
         }
         self.last_date_text = date_text.clone();
         self.last_time_text = time_text.clone();
@@ -208,6 +286,7 @@ impl DateTimePicker {
                 self.parts_error = Some(error);
             }
         }
+        None
     }
 
     pub fn validate(&self) -> Result<(), String> {
@@ -335,10 +414,10 @@ impl DateTimePicker {
                 let current = picker.current_datetime(cx);
                 picker.time_snapshot = Some(current);
                 picker.time_segment = TimeSegment::Hour;
-                picker.time_digit_buf = None;
+                picker.time_dropdown = Some(TimeSegment::Hour);
                 picker.time_open = true;
                 picker.open = false;
-                picker.sync_time_scrolls(current);
+                picker.sync_modal_inputs(current, cx);
                 let focus = picker.time_focus.clone();
                 window.focus(&focus);
             }

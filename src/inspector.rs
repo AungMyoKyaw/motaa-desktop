@@ -59,171 +59,184 @@ impl DesktopRoot {
         };
 
         div()
-            .id("right-inspector")
             .w(px(268.))
             .flex_shrink_0()
             .h_full()
+            .flex()
             .bg(rgb(HEADER_BG))
             .border_l_1()
             .border_color(rgb(SUBTLE_LINE))
-            .overflow_y_scroll()
-            .p_4()
-            .flex()
-            .flex_col()
-            .gap_4()
             .child(
-                column()
-                    .gap_2()
-                    .pb_4()
-                    .border_b_1()
-                    .border_color(rgb(SUBTLE_LINE))
-                    .child(
-                        row()
-                            .justify_between()
-                            .child(section_label("BIRTH PROFILE"))
-                            .child(ghost_button(
-                                "inspector-privacy",
-                                if self.show_birth { "Hide" } else { "Show" },
-                                cx,
-                                |view, _| view.show_birth = !view.show_birth,
-                            )),
-                    )
-                    .child(
-                        div()
-                            .text_size(px(15.5))
-                            .font_weight(gpui::FontWeight::SEMIBOLD)
-                            .text_color(rgb(INK))
-                            .child(natal.name.clone()),
-                    )
-                    .child(
-                        div()
-                            .font_family("Menlo")
-                            .text_size(px(11.5))
-                            .text_color(rgb(MUTED))
-                            .child(format!("{birth_label} · {timezone}")),
-                    )
-                    .child(caption(place_label))
-                    .child(div().pt_1().child(self.profile_edit_save_buttons(cx))),
-            )
-            .child(
-                column()
-                    .gap(px(10.))
-                    .pb_4()
-                    .border_b_1()
-                    .border_color(rgb(SUBTLE_LINE))
-                    .child(
-                        row()
-                            .justify_between()
-                            .child(section_label("CALCULATION"))
-                            .child(ghost_button(
-                                "inspector-setup",
-                                "Setup ›",
-                                cx,
-                                |view, cx| {
-                                    view.navigate(Workspace::Calculations, cx);
-                                },
-                            )),
-                    )
-                    .child(
-                        row()
-                            .flex_wrap()
-                            .gap_1()
-                            .child(chip(ayanamsha, false))
-                            .child(chip(format!("{houses} houses"), false)),
-                    )
+                div()
+                    .id("right-inspector")
+                    .flex_1()
+                    .min_w(px(0.))
+                    .h_full()
+                    .min_h(px(0.))
+                    .overflow_y_scroll()
+                    .track_scroll(&self.inspector_scroll.handle)
+                    .on_scroll_wheel(cx.listener(|_, _, _, cx| cx.notify()))
+                    .p_4()
+                    .flex()
+                    .flex_col()
+                    .gap_4()
                     .child(
                         column()
-                            .gap_1()
-                            .child(caption("Zodiac"))
-                            .child(segmented_pair(
-                                "insp-zodiac",
-                                ("Sidereal", "Tropical"),
-                                settings.tropical,
-                                cx,
-                                |view, is_tropical, cx| {
-                                    view.update(cx, |s| {
-                                        s.settings.tropical = is_tropical;
-                                        s.settings_draft.tropical = is_tropical;
-                                    });
-                                },
-                            )),
+                            .gap_2()
+                            .pb_4()
+                            .border_b_1()
+                            .border_color(rgb(SUBTLE_LINE))
+                            .child(
+                                row()
+                                    .justify_between()
+                                    .child(section_label("BIRTH PROFILE"))
+                                    .child(ghost_button(
+                                        "inspector-privacy",
+                                        if self.show_birth { "Hide" } else { "Show" },
+                                        cx,
+                                        |view, _| view.show_birth = !view.show_birth,
+                                    )),
+                            )
+                            .child(
+                                div()
+                                    .text_size(px(15.5))
+                                    .font_weight(gpui::FontWeight::SEMIBOLD)
+                                    .text_color(rgb(INK))
+                                    .child(natal.name.clone()),
+                            )
+                            .child(
+                                div()
+                                    .font_family("Menlo")
+                                    .text_size(px(11.5))
+                                    .text_color(rgb(MUTED))
+                                    .child(format!("{birth_label} · {timezone}")),
+                            )
+                            .child(caption(place_label))
+                            .child(div().pt_1().child(self.profile_edit_save_buttons(cx))),
                     )
-                    .child(column().gap_1().child(caption("Lunar node (Rahu)")).child(
-                        segmented_pair(
-                            "insp-node",
-                            ("True", "Mean"),
-                            settings.mean_node,
-                            cx,
-                            |view, is_mean, cx| {
-                                view.update(cx, |s| {
-                                    s.settings.mean_node = is_mean;
-                                    s.settings_draft.mean_node = is_mean;
-                                });
-                            },
-                        ),
-                    )),
-            )
-            .when(
-                workspace == Workspace::Charts
-                    && !matches!(mode, "Natal + transit" | "Dasha periods"),
-                |insp| {
-                    insp.child(
+                    .child(
                         column()
                             .gap(px(10.))
-                            .pb_3()
-                            .child(section_label("EPOCH OVERLAYS"))
-                            .child(column().gap_1().child(caption("Planets")).child(
+                            .pb_4()
+                            .border_b_1()
+                            .border_color(rgb(SUBTLE_LINE))
+                            .child(
+                                row()
+                                    .justify_between()
+                                    .child(section_label("CALCULATION"))
+                                    .child(ghost_button(
+                                        "inspector-setup",
+                                        "Setup ›",
+                                        cx,
+                                        |view, cx| {
+                                            view.navigate(Workspace::Calculations, cx);
+                                        },
+                                    )),
+                            )
+                            .child(
+                                row()
+                                    .flex_wrap()
+                                    .gap_1()
+                                    .child(chip(ayanamsha, false))
+                                    .child(chip(format!("{houses} houses"), false)),
+                            )
+                            .child(
+                                column()
+                                    .gap_1()
+                                    .child(caption("Zodiac"))
+                                    .child(segmented_pair(
+                                        "insp-zodiac",
+                                        ("Sidereal", "Tropical"),
+                                        settings.tropical,
+                                        cx,
+                                        |view, is_tropical, cx| {
+                                            view.update(cx, |s| {
+                                                s.settings.tropical = is_tropical;
+                                                s.settings_draft.tropical = is_tropical;
+                                            });
+                                        },
+                                    )),
+                            )
+                            .child(column().gap_1().child(caption("Lunar node (Rahu)")).child(
                                 segmented_pair(
-                                    "insp-planets-epoch",
-                                    ("Natal", "Transit"),
-                                    planet_transit,
+                                    "insp-node",
+                                    ("True", "Mean"),
+                                    settings.mean_node,
                                     cx,
-                                    |view, is_transit, cx| {
-                                        view.update(cx, |s| s.planet_transit = is_transit);
+                                    |view, is_mean, cx| {
+                                        view.update(cx, |s| {
+                                            s.settings.mean_node = is_mean;
+                                            s.settings_draft.mean_node = is_mean;
+                                        });
                                     },
                                 ),
-                            ))
-                            .child(column().gap_1().child(caption("Ascendant")).child(
-                                segmented_pair(
-                                    "insp-asc-epoch",
-                                    ("Natal", "Transit"),
-                                    ascendant_transit,
-                                    cx,
-                                    |view, is_transit, cx| {
-                                        view.update(cx, |s| s.ascendant_transit = is_transit);
-                                    },
-                                ),
-                            ))
-                            .when(
-                                matches!(
-                                    mode,
-                                    "Rasi"
-                                        | "Tricakka"
-                                        | "Traditional aspects"
-                                        | "LatLon"
-                                        | "Rasi aspects"
-                                ),
-                                |col| {
-                                    col.child(
-                                        row()
-                                            .pt_1()
-                                            .justify_between()
-                                            .child(caption("MUNP overlay"))
-                                            .child(compact_button(
-                                                "insp-munp-toggle",
-                                                if self.show_munp { "On" } else { "Off" },
-                                                self.show_munp,
-                                                cx,
-                                                |view, _| {
-                                                    view.show_munp = !view.show_munp;
-                                                },
-                                            )),
-                                    )
-                                },
-                            ),
+                            )),
                     )
-                },
+                    .when(
+                        workspace == Workspace::Charts
+                            && !matches!(mode, "Natal + transit" | "Dasha periods"),
+                        |insp| {
+                            insp.child(
+                                column()
+                                    .gap(px(10.))
+                                    .pb_3()
+                                    .child(section_label("EPOCH OVERLAYS"))
+                                    .child(column().gap_1().child(caption("Planets")).child(
+                                        segmented_pair(
+                                            "insp-planets-epoch",
+                                            ("Natal", "Transit"),
+                                            planet_transit,
+                                            cx,
+                                            |view, is_transit, cx| {
+                                                view.update(cx, |s| s.planet_transit = is_transit);
+                                            },
+                                        ),
+                                    ))
+                                    .child(column().gap_1().child(caption("Ascendant")).child(
+                                        segmented_pair(
+                                            "insp-asc-epoch",
+                                            ("Natal", "Transit"),
+                                            ascendant_transit,
+                                            cx,
+                                            |view, is_transit, cx| {
+                                                view.update(cx, |s| {
+                                                    s.ascendant_transit = is_transit
+                                                });
+                                            },
+                                        ),
+                                    ))
+                                    .when(
+                                        matches!(
+                                            mode,
+                                            "Rasi"
+                                                | "Tricakka"
+                                                | "Traditional aspects"
+                                                | "LatLon"
+                                                | "Rasi aspects"
+                                        ),
+                                        |col| {
+                                            col.child(
+                                                row()
+                                                    .pt_1()
+                                                    .justify_between()
+                                                    .child(caption("MUNP overlay"))
+                                                    .child(compact_button(
+                                                        "insp-munp-toggle",
+                                                        if self.show_munp { "On" } else { "Off" },
+                                                        self.show_munp,
+                                                        cx,
+                                                        |view, _| {
+                                                            view.show_munp = !view.show_munp;
+                                                        },
+                                                    )),
+                                            )
+                                        },
+                                    ),
+                            )
+                        },
+                    ),
             )
+            .child(interactive_vertical_scrollbar(&self.inspector_scroll, None))
             .into_any_element()
     }
 }

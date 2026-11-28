@@ -27,6 +27,7 @@ impl DesktopRoot {
     pub(super) fn open_palette(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         self.palette_open = true;
         self.palette_index = 0;
+        self.palette_scroll.reset();
         self.palette_query
             .update(cx, |input, cx| input.set_value(String::new(), cx));
         let focus = self.palette_query.read(cx).focus_handle(cx);
@@ -270,57 +271,77 @@ impl DesktopRoot {
                             .child(self.palette_query.clone()),
                     )
                     .child(
-                        div()
-                            .id("command-palette-results")
+                        row()
+                            .w_full()
                             .max_h(px(380.))
-                            .overflow_y_scroll()
-                            .p_2()
-                            .when(entries.is_empty(), |list| {
-                                list.child(div().py_6().flex().justify_center().child(caption(
-                                    "No matching modes, tools, profiles, or actions.",
-                                )))
-                            })
-                            .children(entries.into_iter().enumerate().map(|(index, entry)| {
-                                let is_selected = index == selected_idx;
-                                let entry_for_click = entry.clone();
+                            .items_start()
+                            .child(
                                 div()
-                                    .id(("palette-item", index))
-                                    .flex()
-                                    .items_center()
-                                    .justify_between()
-                                    .gap_3()
-                                    .px_3()
-                                    .py_2()
-                                    .rounded(px(RADIUS_CONTROL))
-                                    .cursor_pointer()
-                                    .bg(rgb(if is_selected { SELECTED } else { PAPER }))
-                                    .hover(|s| s.bg(rgb(SURFACE_HOVER)))
-                                    .on_click(cx.listener(move |root, _, window, cx| {
-                                        root.execute_palette_entry(
-                                            entry_for_click.clone(),
-                                            window,
-                                            cx,
-                                        );
-                                    }))
-                                    .child(
-                                        row()
-                                            .gap_2()
-                                            .min_w(px(0.))
-                                            .child(badge(entry.category, Tone::Neutral))
-                                            .child(
-                                                div()
-                                                    .text_size(px(13.5))
-                                                    .font_weight(if is_selected {
-                                                        gpui::FontWeight::MEDIUM
-                                                    } else {
-                                                        gpui::FontWeight::NORMAL
-                                                    })
-                                                    .text_color(rgb(INK))
-                                                    .child(entry.label),
+                                    .id("command-palette-results")
+                                    .flex_1()
+                                    .min_w(px(0.))
+                                    .max_h(px(380.))
+                                    .overflow_y_scroll()
+                                    .track_scroll(&self.palette_scroll.handle)
+                                    .on_scroll_wheel(cx.listener(|_, _, _, cx| cx.notify()))
+                                    .p_2()
+                                    .when(entries.is_empty(), |list| {
+                                        list.child(div().py_6().flex().justify_center().child(
+                                            caption(
+                                                "No matching modes, tools, profiles, or actions.",
                                             ),
-                                    )
-                                    .child(caption(entry.hint))
-                            })),
+                                        ))
+                                    })
+                                    .children(entries.into_iter().enumerate().map(
+                                        |(index, entry)| {
+                                            let is_selected = index == selected_idx;
+                                            let entry_for_click = entry.clone();
+                                            div()
+                                                .id(("palette-item", index))
+                                                .flex()
+                                                .items_center()
+                                                .justify_between()
+                                                .gap_3()
+                                                .px_3()
+                                                .py_2()
+                                                .rounded(px(RADIUS_CONTROL))
+                                                .cursor_pointer()
+                                                .bg(rgb(if is_selected { SELECTED } else { PAPER }))
+                                                .hover(|s| s.bg(rgb(SURFACE_HOVER)))
+                                                .on_click(cx.listener(
+                                                    move |root, _, window, cx| {
+                                                        root.execute_palette_entry(
+                                                            entry_for_click.clone(),
+                                                            window,
+                                                            cx,
+                                                        );
+                                                    },
+                                                ))
+                                                .child(
+                                                    row()
+                                                        .gap_2()
+                                                        .min_w(px(0.))
+                                                        .child(badge(entry.category, Tone::Neutral))
+                                                        .child(
+                                                            div()
+                                                                .text_size(px(13.5))
+                                                                .font_weight(if is_selected {
+                                                                    gpui::FontWeight::MEDIUM
+                                                                } else {
+                                                                    gpui::FontWeight::NORMAL
+                                                                })
+                                                                .text_color(rgb(INK))
+                                                                .child(entry.label),
+                                                        ),
+                                                )
+                                                .child(caption(entry.hint))
+                                        },
+                                    )),
+                            )
+                            .child(interactive_vertical_scrollbar(
+                                &self.palette_scroll,
+                                Some(380.),
+                            )),
                     )
                     .child(
                         row()

@@ -82,6 +82,11 @@ win_tight.resize((44, 44), Image.Resampling.LANCZOS).save(
 win_tight.resize((50, 50), Image.Resampling.LANCZOS).save(
     "packaging/windows/assets/StoreLogo.png", format="PNG"
 )
+win_tight.save(
+    "assets/app-icon.ico",
+    format="ICO",
+    sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (256, 256)],
+)
 
 def paste_centered(canvas_size: tuple[int, int], icon_size: int, bg_rgba: tuple[int, int, int, int]) -> Image.Image:
     canvas = Image.new("RGBA", canvas_size, bg_rgba)
